@@ -96,7 +96,8 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
             valorAtacado: item.valorAtacado as number | null,
             valorVarejo: item.valorVarejo as number | null,
             cor: item.cor as string | undefined,
-            imei: item.imei as string | undefined
+            imei: item.imei as string | undefined,
+            codigoBarras: item.codigoBarras as string | undefined
           }))
           setProdutos(produtosFormatados)
         }

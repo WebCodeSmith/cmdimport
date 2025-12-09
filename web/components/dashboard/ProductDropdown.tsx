@@ -26,8 +26,33 @@ export default function ProductDropdown({
   }
 
   const handleSelect = (productId: string) => {
-    onSelect(productId)
-    setShowDropdown(false)
+    const produtoSelecionado = produtos.find(p => p.id === productId)
+    if (!produtoSelecionado) return
+
+    // Buscar todos os produtos com o mesmo nome
+    const produtosComMesmoNome = produtos.filter(
+      p => p.quantidade > 0 && p.nome.trim().toLowerCase() === produtoSelecionado.nome.trim().toLowerCase()
+    )
+
+    // Se houver múltiplos produtos com o mesmo nome, abrir modal de seleção
+    if (produtosComMesmoNome.length > 1) {
+      // Converter para ProdutoComEstoque (os produtos já têm cor, imei, etc. quando vêm do estoque)
+      const produtosParaModal = produtosComMesmoNome.map(p => ({
+        ...p,
+        cor: (p as any).cor,
+        imei: (p as any).imei,
+        codigoBarras: (p as any).codigoBarras
+      })) as ProdutoComEstoque[]
+      
+      setProdutosEncontrados(produtosParaModal)
+      setCodigoEscaneado(produtoSelecionado.nome)
+      setShowProductSelectionModal(true)
+      setShowDropdown(false)
+    } else {
+      // Se houver apenas um, selecionar diretamente
+      onSelect(productId)
+      setShowDropdown(false)
+    }
   }
 
   const mostrarNotificacaoErro = (codigo: string) => {
@@ -239,36 +264,79 @@ export default function ProductDropdown({
         </button>
       </div>
       
-      {showDropdown && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
-          {produtos
-            .filter((produto) => produto.quantidade > 0) // Filtrar produtos com estoque zerado
-            .map((produto) => (
-              <button
-                key={produto.id}
-                type="button"
-                onClick={() => handleSelect(produto.id)}
-                className="w-full px-4 py-3 text-left transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-              >
-                <div className="font-medium text-gray-900">
-                  {produto.nome}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {(() => {
-                    let detalhes = `Qtd: ${produto.quantidade}`
-                    if (produto.imei) {
-                      detalhes += ` | IMEI: ${produto.imei}`
+      {showDropdown && (() => {
+        // Filtrar produtos com estoque e agrupar por nome
+        const produtosComEstoque = produtos.filter((produto) => produto.quantidade > 0)
+        
+        // Agrupar por nome (normalizado para comparação)
+        const produtosPorNome = new Map<string, typeof produtosComEstoque>()
+        produtosComEstoque.forEach(produto => {
+          const nomeNormalizado = produto.nome.trim().toLowerCase()
+          if (!produtosPorNome.has(nomeNormalizado)) {
+            produtosPorNome.set(nomeNormalizado, [])
+          }
+          produtosPorNome.get(nomeNormalizado)!.push(produto)
+        })
+
+        // Criar lista de nomes únicos para exibir no dropdown
+        const nomesUnicos = Array.from(produtosPorNome.keys())
+
+        return (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+            {nomesUnicos.map((nomeNormalizado) => {
+              const produtosComMesmoNome = produtosPorNome.get(nomeNormalizado)!
+              const primeiroProduto = produtosComMesmoNome[0]
+              const totalQuantidade = produtosComMesmoNome.reduce((sum, p) => sum + p.quantidade, 0)
+              const temMultiplos = produtosComMesmoNome.length > 1
+
+              return (
+                <button
+                  key={nomeNormalizado}
+                  type="button"
+                  onClick={() => {
+                    // Se houver múltiplos produtos com o mesmo nome, abrir modal
+                    if (temMultiplos) {
+                      setProdutosEncontrados(produtosComMesmoNome)
+                      setCodigoEscaneado(primeiroProduto.nome)
+                      setShowProductSelectionModal(true)
+                      setShowDropdown(false)
+                    } else {
+                      // Se houver apenas um, selecionar diretamente
+                      handleSelect(primeiroProduto.id)
                     }
-                    if (produto.cor) {
-                      detalhes += ` | Cor: ${produto.cor}`
-                    }
-                    return detalhes
-                  })()}
-                </div>
-              </button>
-            ))}
-        </div>
-      )}
+                  }}
+                  className="w-full px-4 py-3 text-left transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                >
+                  <div className="font-medium text-gray-900">
+                    {primeiroProduto.nome}
+                    {temMultiplos && (
+                      <span className="ml-2 text-xs font-normal text-blue-600">
+                        ({produtosComMesmoNome.length} variações)
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {(() => {
+                      let detalhes = `Qtd total: ${totalQuantidade}`
+                      if (temMultiplos) {
+                        detalhes += ` | ${produtosComMesmoNome.length} produtos diferentes`
+                      } else {
+                        if (primeiroProduto.imei) {
+                          detalhes += ` | IMEI: ${primeiroProduto.imei}`
+                        }
+                        if (primeiroProduto.cor) {
+                          detalhes += ` | Cor: ${primeiroProduto.cor}`
+                        }
+                      }
+                      return detalhes
+                    })()}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {/* Interface de busca manual */}
       {mostrarBuscaManual && (
@@ -335,10 +403,10 @@ export default function ProductDropdown({
 
             <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800">
-                <strong>Código escaneado:</strong> {codigoEscaneado}
+                <strong>Produto:</strong> {codigoEscaneado}
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                Foram encontrados {produtosEncontrados.length} produtos com este código. Selecione o produto desejado:
+                Foram encontrados {produtosEncontrados.length} produtos com este nome. Selecione o produto desejado (diferentes IMEIs ou códigos de barras):
               </p>
             </div>
 
