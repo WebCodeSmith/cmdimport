@@ -34,7 +34,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
     usarPrecoPersonalizado: false
   }])
 
-  const [tipoCliente, setTipoCliente] = useState<'lojista' | 'consumidor'>('lojista')
+  const [tipoCliente, setTipoCliente] = useState<'lojista' | 'consumidor' | 'revendaEspecial'>('lojista')
   const [loading, setLoading] = useState(false)
   const [mostrarFormasMistas, setMostrarFormasMistas] = useState(false)
   const [fotoPreview, setFotoPreview] = useState<string | null>(null)
@@ -111,7 +111,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
 
 
   // Atualizar preço quando o tipo de cliente mudar
-  const handleTipoClienteChange = (tipo: 'lojista' | 'consumidor') => {
+  const handleTipoClienteChange = (tipo: 'lojista' | 'consumidor' | 'revendaEspecial') => {
     setTipoCliente(tipo)
     
     if (formData.produto) {
@@ -272,7 +272,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
         {/* Seleção de Tipo de Cliente */}
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
           <h4 className="text-lg font-semibold text-gray-900 mb-4">Tipo de Cliente</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               type="button"
               onClick={() => handleTipoClienteChange('lojista')}
@@ -317,6 +317,30 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 <div>
                   <div className="font-semibold">🛍️ Consumidor</div>
                   <div className="text-sm opacity-75">Preço de varejo</div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTipoClienteChange('revendaEspecial')}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                tipoCliente === 'revendaEspecial'
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`w-4 h-4 rounded-full border-2 ${
+                  tipoCliente === 'revendaEspecial' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
+                }`}>
+                  {tipoCliente === 'revendaEspecial' && (
+                    <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                  )}
+                </div>
+                <div>
+                  <div className="font-semibold">➕ Revenda Especial</div>
+                  <div className="text-sm opacity-75">Preço especial</div>
                 </div>
               </div>
             </button>
@@ -413,7 +437,15 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                       const produtoSelecionado = produtos.find(p => p.id === produtoId)
                       if (produtoSelecionado) {
                         // Usar preço específico se disponível, senão usar preço base
-                        let preco = tipoCliente === 'lojista' ? produtoSelecionado.valorAtacado : produtoSelecionado.valorVarejo
+                        let preco: number | null = null
+                        if (tipoCliente === 'lojista') {
+                          preco = produtoSelecionado.valorAtacado ?? null
+                        } else if (tipoCliente === 'consumidor') {
+                          preco = produtoSelecionado.valorVarejo ?? null
+                        } else if (tipoCliente === 'revendaEspecial') {
+                          // Revenda Especial usa preço de atacado (ou pode ser ajustado para outro campo)
+                          preco = produtoSelecionado.valorAtacado ?? null
+                        }
                         if (!preco) {
                           preco = produtoSelecionado.preco // Usar preço base como fallback
                         }
