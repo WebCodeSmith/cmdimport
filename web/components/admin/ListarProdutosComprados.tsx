@@ -27,8 +27,18 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
 
   // Função para atualizar produto no estado local
   const atualizarProdutoLocal = useCallback((produtoAtualizado: ProdutoComprado) => {
-    setProdutos(prevProdutos => 
-      prevProdutos.map(produto => 
+    setProdutos(prevProdutos => {
+      // Verificar se o produto ficou zerado e se o filtro está ativo
+      const quantidadeAtualizada = produtoAtualizado.quantidade || 0
+      const deveOcultar = ocultarEstoqueZerado && quantidadeAtualizada === 0
+      
+      if (deveOcultar) {
+        // Remover produto da lista se estiver zerado e o filtro estiver ativo
+        return prevProdutos.filter(produto => produto.id !== produtoAtualizado.id)
+      }
+      
+      // Atualizar produto normalmente
+      return prevProdutos.map(produto => 
         produto.id === produtoAtualizado.id 
           ? {
               ...produtoAtualizado,
@@ -40,8 +50,18 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
             }
           : produto
       )
-    )
-  }, [])
+    })
+    
+    // Atualizar contadores se o produto foi removido
+    if (ocultarEstoqueZerado && (produtoAtualizado.quantidade || 0) === 0) {
+      setTotalProdutos(prev => Math.max(0, prev - 1))
+      // Recalcular total de páginas
+      setTotalPaginas(prev => {
+        const novoTotal = Math.max(0, totalProdutos - 1)
+        return Math.max(1, Math.ceil(novoTotal / itensPorPagina))
+      })
+    }
+  }, [ocultarEstoqueZerado, totalProdutos, itensPorPagina])
 
   // Expor função via callback quando componente montar
   useEffect(() => {
