@@ -381,11 +381,9 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
             .filter((produto) => {
               // Se o checkbox estiver marcado, filtrar produtos com estoque zerado
               if (ocultarEstoqueZerado) {
-                // Verificar se o estoque está zerado (quantidade = 0 ou soma do estoque = 0)
-                const estoqueTotal = produto.estoque 
-                  ? produto.estoque.reduce((total, item) => total + (item.ativo ? item.quantidade : 0), 0)
-                  : produto.quantidade || 0
-                return estoqueTotal > 0
+                // Usar a mesma lógica da exibição: produto.quantidade
+                // produto.quantidade já representa o estoque disponível total
+                return (produto.quantidade || 0) > 0
               }
               return true // Mostrar todos se o checkbox não estiver marcado
             })
