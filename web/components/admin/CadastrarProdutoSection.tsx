@@ -201,13 +201,27 @@ export default function CadastrarProdutoSection() {
       }
       
       // IMEI e Código de Barras baseado no tipo de identificação
-      if (tipoIdentificacao === 'imei' || tipoIdentificacao === 'ambos') {
+      if (tipoIdentificacao === 'imei') {
+        // Modo IMEI: IMEI é obrigatório
+        if (!formData.imei.trim()) {
+          showToast('O IMEI é obrigatório quando o tipo de identificação é IMEI', 'error')
+          setLoading(false)
+          return
+        }
+        dadosEnvio.imei = formData.imei.trim()
+      } else if (tipoIdentificacao === 'codigoBarras') {
+        // Modo Código de Barras: Código de Barras é obrigatório
+        if (!formData.codigoBarras.trim()) {
+          showToast('O Código de Barras é obrigatório quando o tipo de identificação é Código de Barras', 'error')
+          setLoading(false)
+          return
+        }
+        dadosEnvio.codigoBarras = formData.codigoBarras.trim()
+      } else if (tipoIdentificacao === 'ambos') {
+        // Modo Ambos: pelo menos um deve ser preenchido (já validado acima)
         if (formData.imei.trim()) {
           dadosEnvio.imei = formData.imei.trim()
         }
-      }
-      
-      if (tipoIdentificacao === 'codigoBarras' || tipoIdentificacao === 'ambos') {
         if (formData.codigoBarras.trim()) {
           dadosEnvio.codigoBarras = formData.codigoBarras.trim()
         }
