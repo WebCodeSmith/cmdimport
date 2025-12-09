@@ -222,25 +222,20 @@ export default function ProductDropdown({
       
       {showDropdown && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
-          {produtos.map((produto) => {
-            const isZerado = produto.quantidade === 0
-            return (
+          {produtos
+            .filter((produto) => produto.quantidade > 0) // Filtrar produtos com estoque zerado
+            .map((produto) => (
               <button
                 key={produto.id}
                 type="button"
-                onClick={() => !isZerado && handleSelect(produto.id)}
-                disabled={isZerado}
-                className={`w-full px-4 py-3 text-left transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl ${
-                  isZerado 
-                    ? 'opacity-50 cursor-not-allowed bg-gray-100' 
-                    : 'hover:bg-gray-50 focus:bg-gray-50 focus:outline-none'
-                }`}
+                onClick={() => handleSelect(produto.id)}
+                className="w-full px-4 py-3 text-left transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
               >
-                <div className={`font-medium ${isZerado ? 'text-gray-400' : 'text-gray-900'}`}>
+                <div className="font-medium text-gray-900">
                   {produto.nome}
                 </div>
-                <div className={`text-sm ${isZerado ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {isZerado ? 'ZERADO NO ESTOQUE' : (() => {
+                <div className="text-sm text-gray-600">
+                  {(() => {
                     let detalhes = `Qtd: ${produto.quantidade}`
                     if (produto.imei) {
                       detalhes += ` | IMEI: ${produto.imei}`
@@ -252,8 +247,7 @@ export default function ProductDropdown({
                   })()}
                 </div>
               </button>
-            )
-          })}
+            ))}
         </div>
       )}
 
