@@ -115,12 +115,35 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
   const handleTipoClienteChange = (tipo: 'lojista' | 'consumidor' | 'revendaEspecial') => {
     setTipoCliente(tipo)
     
-    if (formData.produto) {
-      const produtoSelecionado = produtos.find(p => p.id === formData.produto)
-      if (produtoSelecionado) {
-        // Preço será calculado automaticamente baseado no tipo de cliente
-      }
-    }
+    // Atualizar preços de todos os produtos já selecionados
+    setProdutosVenda(prevProdutos => {
+      return prevProdutos.map(produtoVenda => {
+        if (!produtoVenda.produto) return produtoVenda
+        
+        const produtoSelecionado = produtos.find(p => p.id === produtoVenda.produto)
+        if (!produtoSelecionado) return produtoVenda
+        
+        // Calcular novo preço baseado no tipo de cliente
+        let novoPreco: number | null = null
+        if (tipo === 'lojista') {
+          novoPreco = produtoSelecionado.valorAtacado ?? null
+        } else if (tipo === 'consumidor') {
+          novoPreco = produtoSelecionado.valorVarejo ?? null
+        } else if (tipo === 'revendaEspecial') {
+          novoPreco = produtoSelecionado.valorRevendaEspecial ?? null
+        }
+        
+        // Se não tiver precificação, usar preço base (custo)
+        if (!novoPreco) {
+          novoPreco = produtoSelecionado.preco
+        }
+        
+        return {
+          ...produtoVenda,
+          preco: novoPreco
+        }
+      })
+    })
   }
 
   const handleFotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -434,6 +457,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                   <ProductDropdown
                     produtos={produtos}
                     selectedProduct={produto.produto}
+                    tipoCliente={tipoCliente}
                     onSelect={(produtoId) => {
                       const produtoSelecionado = produtos.find(p => p.id === produtoId)
                       if (produtoSelecionado) {

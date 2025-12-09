@@ -20,6 +20,7 @@ export interface ProductDropdownProps {
   onSelect: (productId: string) => void
   placeholder?: string
   usuarioId?: number
+  tipoCliente?: 'lojista' | 'consumidor' | 'revendaEspecial'
 }
 
 export interface ListarProdutosCompradosProps {

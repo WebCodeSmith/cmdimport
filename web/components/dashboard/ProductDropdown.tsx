@@ -10,8 +10,25 @@ export default function ProductDropdown({
   selectedProduct, 
   onSelect, 
   placeholder = "Selecione um produto",
-  usuarioId
+  usuarioId,
+  tipoCliente = 'lojista'
 }: ProductDropdownProps) {
+  
+  // Função para calcular o preço baseado no tipo de cliente
+  const calcularPreco = (produto: ProdutoComEstoque): number => {
+    let preco: number | null = null
+    
+    if (tipoCliente === 'lojista') {
+      preco = produto.valorAtacado ?? null
+    } else if (tipoCliente === 'consumidor') {
+      preco = produto.valorVarejo ?? null
+    } else if (tipoCliente === 'revendaEspecial') {
+      preco = produto.valorRevendaEspecial ?? null
+    }
+    
+    // Se não tiver precificação, usar preço base (custo)
+    return preco ?? produto.preco
+  }
   const [showDropdown, setShowDropdown] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [buscaManual, setBuscaManual] = useState('')
@@ -435,7 +452,7 @@ export default function ProductDropdown({
                     </div>
                     <div className="text-right ml-4">
                       <p className="font-semibold text-indigo-600">
-                        R$ {produto.preco.toLocaleString('pt-BR', { 
+                        R$ {calcularPreco(produto).toLocaleString('pt-BR', { 
                           minimumFractionDigits: 2, 
                           maximumFractionDigits: 2 
                         })}
