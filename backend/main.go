@@ -32,7 +32,7 @@ func main() {
 	router := gin.Default()
 
 	// Configurar rotas
-	routes.SetupRoutes(router, db)
+	routes.SetupRoutes(router, db, cfg)
 
 	// Iniciar servidor
 	port := os.Getenv("PORT")

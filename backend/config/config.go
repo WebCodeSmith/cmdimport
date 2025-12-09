@@ -14,6 +14,7 @@ type Config struct {
 	DatabaseURL string
 	JWTSecret   string
 	Port        string
+	AllowOrigins []string
 }
 
 func Load() *Config {
@@ -26,10 +27,15 @@ func Load() *Config {
 	// Normalizar URL do banco (suporta mysql:// e DSN, lida com @ na senha)
 	databaseURL = normalizeDatabaseURL(databaseURL)
 
+	// Carregar AllowOrigins do .env (separado por vírgulas)
+	allowOriginsStr := getEnv("ALLOW_ORIGINS", "")
+	allowOrigins := parseAllowOrigins(allowOriginsStr)
+
 	return &Config{
 		DatabaseURL: databaseURL,
 		JWTSecret:   getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
 		Port:        getEnv("PORT", "8080"),
+		AllowOrigins: allowOrigins,
 	}
 }
 
@@ -110,5 +116,24 @@ func getEnv(key, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// parseAllowOrigins converte string separada por vírgulas em slice de strings
+func parseAllowOrigins(originsStr string) []string {
+	if originsStr == "" {
+		return []string{}
+	}
+	
+	origins := strings.Split(originsStr, ",")
+	result := make([]string, 0, len(origins))
+	
+	for _, origin := range origins {
+		origin = strings.TrimSpace(origin)
+		if origin != "" {
+			result = append(result, origin)
+		}
+	}
+	
+	return result
 }
 
