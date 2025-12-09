@@ -229,8 +229,25 @@ export default function EstoqueUsuarios() {
 
       if (response.success) {
         showToast(`Estoque deletado com sucesso! ${produtoNome} - ${usuarioNome}`, 'success')
-        // Recarregar dados
-        carregarEstoqueUsuarios()
+        
+        // Atualizar estado local sem recarregar a página
+        setEstoqueUsuarios(prev => {
+          return prev.map(usuario => {
+            const produtosAtualizados = usuario.produtos.filter(produto => produto.id !== estoqueId)
+            
+            // Se o usuário não tem mais produtos, pode remover ou manter vazio
+            if (produtosAtualizados.length === 0 && !mostrarEstoquesZerados) {
+              return null // Será filtrado depois
+            }
+            
+            return {
+              ...usuario,
+              produtos: produtosAtualizados,
+              totalProdutos: produtosAtualizados.length,
+              totalQuantidade: produtosAtualizados.reduce((total, produto) => total + produto.quantidade, 0)
+            }
+          }).filter(usuario => usuario !== null) as EstoqueUsuario[]
+        })
       } else {
         showToast('Erro ao deletar estoque: ' + response.message, 'error')
       }
