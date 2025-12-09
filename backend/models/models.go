@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // Usuario representa um usuário do sistema
@@ -15,7 +13,6 @@ type Usuario struct {
 	IsAdmin        bool           `gorm:"default:false;column:isAdmin" json:"isAdmin"`
 	CreatedAt      time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt      time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
-	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 	HistoricoVendas []HistoricoVenda `gorm:"foreignKey:UsuarioID" json:"-"`
 	Estoque        []Estoque      `gorm:"foreignKey:UsuarioID" json:"-"`
 }
@@ -46,7 +43,6 @@ type ProdutoComprado struct {
 	ValorParcelado10x *float64       `gorm:"type:decimal(10,2)" json:"valorParcelado10x"`
 	CreatedAt         time.Time      `json:"createdAt"`
 	UpdatedAt         time.Time      `json:"updatedAt"`
-	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 	Estoque           []Estoque      `gorm:"foreignKey:ProdutoCompradoID" json:"estoque,omitempty"`
 }
 
@@ -67,7 +63,6 @@ type Estoque struct {
 	AtendenteNome    *string        `gorm:"column:atendenteNome" json:"atendenteNome"`
 	CreatedAt        time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt        time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
-	DeletedAt        gorm.DeletedAt  `gorm:"index" json:"-"`
 	HistoricoVendas  []HistoricoVenda `gorm:"foreignKey:EstoqueID" json:"-"`
 }
 

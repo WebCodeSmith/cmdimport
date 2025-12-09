@@ -38,7 +38,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	var usuario models.Usuario
-	if err := h.DB.Where("email = ?", req.Email).First(&usuario).Error; err != nil {
+	if err := h.DB.Unscoped().Where("email = ?", req.Email).First(&usuario).Error; err != nil {
 		// Sempre retornar a mesma mensagem para não vazar informações
 		// (não revelar se o email existe ou não)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
