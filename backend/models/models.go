@@ -29,20 +29,20 @@ type ProdutoComprado struct {
 	Descricao         *string        `json:"descricao"`
 	Cor               *string        `json:"cor"`
 	IMEI              *string        `gorm:"type:varchar(255);uniqueIndex" json:"imei"`
-	CodigoBarras      *string        `json:"codigoBarras"`
+	CodigoBarras      *string        `gorm:"column:codigoBarras" json:"codigoBarras"`
 	CustoDolar        float64        `gorm:"type:decimal(10,2);not null;column:custoDolar" json:"custoDolar"`
 	TaxaDolar         float64        `gorm:"type:decimal(10,4);not null;column:taxaDolar" json:"taxaDolar"`
 	Preco             float64        `gorm:"type:decimal(10,2);not null;column:preco" json:"preco"`
 	Quantidade        int            `gorm:"default:0" json:"quantidade"`
-	QuantidadeBackup  int            `gorm:"default:0" json:"quantidadeBackup"`
+	QuantidadeBackup  int            `gorm:"default:0;column:quantidadeBackup" json:"quantidadeBackup"`
 	Fornecedor        *string        `json:"fornecedor"`
-	DataCompra        time.Time      `gorm:"type:datetime" json:"dataCompra"`
-	ValorCusto        *float64       `gorm:"type:decimal(10,2)" json:"valorCusto"`
-	ValorAtacado      *float64       `gorm:"type:decimal(10,2)" json:"valorAtacado"`
-	ValorVarejo       *float64       `gorm:"type:decimal(10,2)" json:"valorVarejo"`
-	ValorParcelado10x *float64       `gorm:"type:decimal(10,2)" json:"valorParcelado10x"`
-	CreatedAt         time.Time      `json:"createdAt"`
-	UpdatedAt         time.Time      `json:"updatedAt"`
+	DataCompra        time.Time      `gorm:"type:datetime;column:dataCompra" json:"dataCompra"`
+	ValorCusto        *float64       `gorm:"type:decimal(10,2);column:valorCusto" json:"valorCusto"`
+	ValorAtacado      *float64       `gorm:"type:decimal(10,2);column:valorAtacado" json:"valorAtacado"`
+	ValorVarejo       *float64       `gorm:"type:decimal(10,2);column:valorVarejo" json:"valorVarejo"`
+	ValorParcelado10x *float64       `gorm:"type:decimal(10,2);column:valorParcelado10x" json:"valorParcelado10x"`
+	CreatedAt         time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt         time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	Estoque           []Estoque      `gorm:"foreignKey:ProdutoCompradoID" json:"estoque,omitempty"`
 }
 
