@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  historicoVendas   HistoricoVenda[]
+  estoque          Estoque[]
+}
+
+model Estoque {
+  id          Int      @id @default(autoincrement())
+  quantidade  Int      @default(0)
+  ativo       Boolean  @default(true)
+  atendenteNome String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relacionamentos
+  produtoCompradoId Int
+  produtoComprado   ProdutoComprado @relation(fields: [produtoCompradoId], references: [id])
+  usuarioId   Int?
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+  historicoVendas   HistoricoVenda[]
+}
+
+
+model ProdutoComprado {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  descricao   String?
+  cor         String?
+  imei        String?  @unique
+  codigoBarras String?
+  custoDolar  Decimal  @db.Decimal(10, 2)
+  taxaDolar   Decimal  @db.Decimal(10, 4)
+  preco       Decimal  @db.Decimal(10, 2)
+  quantidade  Int      @default(0)
+  quantidadeBackup Int @default(0) // Quantidade original que não é alterada por distribuições
+  fornecedor  String?
+  dataCompra  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Campos de precificação
+  valorCusto        Decimal? @db.Decimal(10, 2)
+  valorAtacado      Decimal? @db.Decimal(10, 2)
+  valorVarejo       Decimal? @db.Decimal(10, 2)
+  valorParcelado10x Decimal? @db.Decimal(10, 2)
+  
+  // Relacionamento com estoque
+  estoque     Estoque[]
+}
+
+model HistoricoVenda {
+  id          Int      @id @default(autoincrement())
+  vendaId     String?   // ID para agrupar produtos da mesma venda
+  clienteNome String
+  telefone    String
+  endereco    String
+  produtoNome String
+  quantidade  Int
+  precoUnitario Decimal @db.Decimal(10, 2)
+  valorTotal  Decimal  @db.Decimal(10, 2)
+  observacoes String?
+  vendedorNome String
+  vendedorEmail String
+  createdAt   DateTime @default(now())
+  
+  // Formas de pagamento
+  formaPagamento String
+  valorPix       Decimal? @db.Decimal(10, 2)
+  valorCartao    Decimal? @db.Decimal(10, 2)
+  valorDinheiro  Decimal? @db.Decimal(10, 2)
+  
+  // Foto do produto
+  fotoProduto    String? // Caminho para a foto do produto
+  
+  // Relacionamentos
+  estoqueId   Int
+  estoque     Estoque  @relation(fields: [estoqueId], references: [id])
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+}
