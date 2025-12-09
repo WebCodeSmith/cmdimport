@@ -176,8 +176,27 @@ func (h *ProductHandler) Cadastrar(c *gin.Context) {
 		return
 	}
 
-	// Validação para modo "ambos"
-	if req.TipoIdentificacao == "ambos" {
+	// Validação baseada no tipo de identificação
+	if req.TipoIdentificacao == "imei" {
+		// Modo IMEI: IMEI é obrigatório
+		if req.IMEI == nil || *req.IMEI == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "O IMEI é obrigatório quando o tipo de identificação é IMEI",
+			})
+			return
+		}
+	} else if req.TipoIdentificacao == "codigoBarras" {
+		// Modo Código de Barras: Código de Barras é obrigatório
+		if req.CodigoBarras == nil || *req.CodigoBarras == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "O Código de Barras é obrigatório quando o tipo de identificação é Código de Barras",
+			})
+			return
+		}
+	} else if req.TipoIdentificacao == "ambos" {
+		// Modo Ambos: pelo menos um deve ser preenchido
 		if (req.IMEI == nil || *req.IMEI == "") && (req.CodigoBarras == nil || *req.CodigoBarras == "") {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
