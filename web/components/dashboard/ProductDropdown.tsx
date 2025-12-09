@@ -89,13 +89,22 @@ export default function ProductDropdown({
     const produtosEncontrados = await buscarProdutoPorCodigo(code)
     
     if (produtosEncontrados && produtosEncontrados.length > 0) {
-      // Se encontrou apenas um produto, selecionar automaticamente
-      if (produtosEncontrados.length === 1) {
-        onSelect(produtosEncontrados[0].id.toString())
+      // Filtrar apenas produtos com estoque > 0
+      const produtosComEstoque = produtosEncontrados.filter(p => p.quantidade > 0)
+      
+      if (produtosComEstoque.length === 0) {
+        mostrarNotificacaoErro(code)
+        setShowScanner(false)
+        return
+      }
+      
+      // Se encontrou apenas um produto com estoque, selecionar automaticamente
+      if (produtosComEstoque.length === 1) {
+        onSelect(produtosComEstoque[0].id.toString())
         setShowScanner(false)
       } else {
-        // Se encontrou múltiplos produtos, mostrar modal de seleção
-        setProdutosEncontrados(produtosEncontrados)
+        // Se encontrou múltiplos produtos com estoque, mostrar modal de seleção
+        setProdutosEncontrados(produtosComEstoque)
         setCodigoEscaneado(code)
         setShowProductSelectionModal(true)
         setShowScanner(false)
@@ -125,14 +134,24 @@ export default function ProductDropdown({
     const produtosEncontrados = await buscarProdutoPorCodigo(buscaManual.trim())
     
     if (produtosEncontrados && produtosEncontrados.length > 0) {
-      // Se encontrou apenas um produto, selecionar automaticamente
-      if (produtosEncontrados.length === 1) {
-        onSelect(produtosEncontrados[0].id.toString())
+      // Filtrar apenas produtos com estoque > 0
+      const produtosComEstoque = produtosEncontrados.filter(p => p.quantidade > 0)
+      
+      if (produtosComEstoque.length === 0) {
+        mostrarNotificacaoErro(buscaManual.trim())
+        setBuscaManual('')
+        setMostrarBuscaManual(false)
+        return
+      }
+      
+      // Se encontrou apenas um produto com estoque, selecionar automaticamente
+      if (produtosComEstoque.length === 1) {
+        onSelect(produtosComEstoque[0].id.toString())
         setBuscaManual('')
         setMostrarBuscaManual(false)
       } else {
-        // Se encontrou múltiplos produtos, mostrar modal de seleção
-        setProdutosEncontrados(produtosEncontrados)
+        // Se encontrou múltiplos produtos com estoque, mostrar modal de seleção
+        setProdutosEncontrados(produtosComEstoque)
         setCodigoEscaneado(buscaManual.trim())
         setShowProductSelectionModal(true)
         setBuscaManual('')
