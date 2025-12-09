@@ -1,9 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNumberFormatter } from '@/hooks/useNumberFormatter'
 import { useToastContext } from '@/contexts/ToastContext'
 import { ProdutoFormData } from '@/types/produto'
+
+interface ProdutoSugestao {
+  id: number
+  nome: string
+  cor?: string
+}
 
 export default function CadastrarProdutoSection() {
   const [formData, setFormData] = useState<ProdutoFormData>({
@@ -20,6 +26,14 @@ export default function CadastrarProdutoSection() {
   const [tipoIdentificacao, setTipoIdentificacao] = useState<'imei' | 'codigoBarras' | 'ambos'>('ambos')
   const { showToast } = useToastContext()
   
+  // Estados para autocomplete
+  const [sugestoes, setSugestoes] = useState<ProdutoSugestao[]>([])
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
+  const [buscando, setBuscando] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
   // Hooks para formatação de números
   const custoFormatter = useNumberFormatter()
   const taxaFormatter = useNumberFormatter()
@@ -30,6 +44,96 @@ export default function CadastrarProdutoSection() {
     const taxa = taxaFormatter.getNumericValue()
     return (custo * taxa).toFixed(2).replace('.', ',')
   }
+
+  // Buscar produtos para autocomplete
+  const buscarProdutos = useCallback(async (termo: string) => {
+    if (termo.length < 2) {
+      setSugestoes([])
+      setMostrarSugestoes(false)
+      return
+    }
+
+    try {
+      setBuscando(true)
+      const { productApi } = await import('@/lib/api')
+      const response = await productApi.listar({
+        pagina: 1,
+        limite: 10,
+        busca: termo
+      })
+
+      if (response.success && response.data) {
+        // Extrair apenas nomes únicos de produtos
+        const nomesUnicos = new Map<string, ProdutoSugestao>()
+        response.data.forEach((produto: any) => {
+          if (!nomesUnicos.has(produto.nome)) {
+            nomesUnicos.set(produto.nome, {
+              id: produto.id,
+              nome: produto.nome,
+              cor: produto.cor
+            })
+          }
+        })
+        setSugestoes(Array.from(nomesUnicos.values()))
+        setMostrarSugestoes(true)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error)
+    } finally {
+      setBuscando(false)
+    }
+  }, [])
+
+  // Debounce na busca
+  const handleNomeChange = (valor: string) => {
+    setFormData({...formData, nome: valor})
+    
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+    
+    debounceTimeoutRef.current = setTimeout(() => {
+      buscarProdutos(valor)
+    }, 300)
+  }
+
+  // Selecionar sugestão
+  const selecionarSugestao = (produto: ProdutoSugestao) => {
+    setFormData({...formData, nome: produto.nome})
+    setSugestoes([])
+    setMostrarSugestoes(false)
+    if (inputRef.current) {
+      inputRef.current.blur()
+    }
+  }
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setMostrarSugestoes(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Cleanup do debounce
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [])
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +173,8 @@ export default function CadastrarProdutoSection() {
           taxaDolar: '',
           quantidade: ''
         })
+        setSugestoes([])
+        setMostrarSugestoes(false)
         custoFormatter.reset()
         taxaFormatter.reset()
       } else {
@@ -91,18 +197,56 @@ export default function CadastrarProdutoSection() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Nome do Produto *
             </label>
-            <input
-              type="text"
-              required
-              value={formData.nome}
-              onChange={(e) => setFormData({...formData, nome: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
-              placeholder="Ex: iPhone 15 Pro"
-            />
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                required
+                value={formData.nome}
+                onChange={(e) => handleNomeChange(e.target.value)}
+                onFocus={() => {
+                  if (sugestoes.length > 0) {
+                    setMostrarSugestoes(true)
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
+                placeholder="Ex: iPhone 15 Pro ou Redmi"
+              />
+              {buscando && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <svg className="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              )}
+              
+              {/* Dropdown de sugestões */}
+              {mostrarSugestoes && sugestoes.length > 0 && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto"
+                >
+                  {sugestoes.map((produto) => (
+                    <button
+                      key={produto.id}
+                      type="button"
+                      onClick={() => selecionarSugestao(produto)}
+                      className="w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="font-medium text-gray-900">{produto.nome}</div>
+                      {produto.cor && (
+                        <div className="text-sm text-gray-500">Cor: {produto.cor}</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

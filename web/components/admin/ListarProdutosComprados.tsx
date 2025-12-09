@@ -6,7 +6,7 @@ import { formatDate, formatCurrency } from '@/lib/formatters'
 import { ProdutoComprado } from '@/types/produto'
 import { ListarProdutosCompradosProps } from '@/types/components'
 
-export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarProduto, onDistribuirProduto }: ListarProdutosCompradosProps) {
+export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarProduto, onDistribuirProduto, onProdutoAtualizado }: ListarProdutosCompradosProps) {
   const [produtos, setProdutos] = useState<ProdutoComprado[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingSilencioso, setLoadingSilencioso] = useState(false)
@@ -23,6 +23,29 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
   
   const itensPorPagina = 10
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Função para atualizar produto no estado local
+  const atualizarProdutoLocal = useCallback((produtoAtualizado: ProdutoComprado) => {
+    setProdutos(prevProdutos => 
+      prevProdutos.map(produto => 
+        produto.id === produtoAtualizado.id 
+          ? {
+              ...produtoAtualizado,
+              custoDolar: typeof produtoAtualizado.custoDolar === 'string' ? parseFloat(produtoAtualizado.custoDolar) : (produtoAtualizado.custoDolar || 0),
+              taxaDolar: typeof produtoAtualizado.taxaDolar === 'string' ? parseFloat(produtoAtualizado.taxaDolar) : (produtoAtualizado.taxaDolar || 0),
+              preco: typeof produtoAtualizado.preco === 'string' ? parseFloat(produtoAtualizado.preco) : (produtoAtualizado.preco || 0),
+            }
+          : produto
+      )
+    )
+  }, [])
+
+  // Expor função via callback quando componente montar
+  useEffect(() => {
+    if (onProdutoAtualizado) {
+      onProdutoAtualizado(atualizarProdutoLocal)
+    }
+  }, [onProdutoAtualizado, atualizarProdutoLocal])
 
   // Função para aplicar debounce no filtro de busca
   const aplicarDebounce = useCallback((novaBusca: string) => {

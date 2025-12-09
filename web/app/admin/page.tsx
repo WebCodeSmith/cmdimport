@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCurrencyFormatter } from '@/hooks/useCurrencyFormatter'
@@ -72,6 +72,7 @@ export default function AdminPage() {
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
   const [salvandoDistribuicao, setSalvandoDistribuicao] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const atualizarProdutoRef = useRef<((produto: ProdutoComprado) => void) | null>(null)
   
   // Estados para o formulário de edição
   const [formularioEdicao, setFormularioEdicao] = useState({
@@ -282,8 +283,27 @@ export default function AdminPage() {
       if (response.success) {
         showToast('Produto atualizado com sucesso!', 'success')
         fecharSidebarEdicao()
-        // Forçar atualização do componente de listagem
-        setRefreshKey(prev => prev + 1)
+        
+        // Buscar produto atualizado do backend
+        try {
+          const produtoAtualizadoResponse = await productApi.buscarPorID(produtoSelecionado.id)
+          if (produtoAtualizadoResponse.success && produtoAtualizadoResponse.data) {
+            // Atualizar produto no estado local sem recarregar a página
+            if (atualizarProdutoRef.current) {
+              atualizarProdutoRef.current(produtoAtualizadoResponse.data)
+            } else {
+              // Fallback: recarregar se a função não estiver disponível
+              setRefreshKey(prev => prev + 1)
+            }
+          } else {
+            // Fallback: recarregar se não conseguir buscar o produto atualizado
+            setRefreshKey(prev => prev + 1)
+          }
+        } catch (error) {
+          console.error('Erro ao buscar produto atualizado:', error)
+          // Fallback: recarregar em caso de erro
+          setRefreshKey(prev => prev + 1)
+        }
       } else {
         console.error('Erro ao salvar edição:', response.message)
         showToast(response.message || 'Erro ao salvar as alterações', 'error')
@@ -445,7 +465,7 @@ export default function AdminPage() {
         <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-300 ${modalPrecificacao || sidebarEdicao || modalDistribuicao ? 'mr-80' : ''}`}>
           {activeTab === 'historico' && <HistoricoVendas />}
           {activeTab === 'cadastrar' && <CadastrarProdutoSection />}
-          {activeTab === 'listar' && <ListarProdutosComprados key={refreshKey} onAbrirPrecificacao={abrirModalPrecificacao} onEditarProduto={abrirSidebarEdicao} onDistribuirProduto={abrirModalDistribuicao} />}
+          {activeTab === 'listar' && <ListarProdutosComprados onAbrirPrecificacao={abrirModalPrecificacao} onEditarProduto={abrirSidebarEdicao} onDistribuirProduto={abrirModalDistribuicao} onProdutoAtualizado={(atualizarFuncao) => { atualizarProdutoRef.current = atualizarFuncao }} />}
           {activeTab === 'estoque' && <EstoqueUsuarios />}
         </div>
 

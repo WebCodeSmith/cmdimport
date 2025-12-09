@@ -26,6 +26,7 @@ export interface ListarProdutosCompradosProps {
   onAbrirPrecificacao: (produto: ProdutoComprado) => void
   onEditarProduto: (produto: ProdutoComprado) => void
   onDistribuirProduto: (produto: ProdutoComprado) => void
+  onProdutoAtualizado?: (atualizarFuncao: (produto: ProdutoComprado) => void) => void
 }
 
 export interface BarcodeScannerProps {
