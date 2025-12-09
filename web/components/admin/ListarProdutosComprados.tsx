@@ -60,7 +60,14 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       })
 
       if (response.success && response.data) {
-        setProdutos(response.data)
+        // Garantir que os valores numéricos sejam convertidos corretamente
+        const produtosFormatados = response.data.map((produto: any) => ({
+          ...produto,
+          custoDolar: typeof produto.custoDolar === 'string' ? parseFloat(produto.custoDolar) : (produto.custoDolar || 0),
+          taxaDolar: typeof produto.taxaDolar === 'string' ? parseFloat(produto.taxaDolar) : (produto.taxaDolar || 0),
+          preco: typeof produto.preco === 'string' ? parseFloat(produto.preco) : (produto.preco || 0),
+        }))
+        setProdutos(produtosFormatados)
         setTotalPaginas(response.paginacao?.totalPaginas || 1)
         setTotalProdutos(response.paginacao?.total || 0)
         setError('') // Limpar erro se sucesso
@@ -343,11 +350,15 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Custo</p>
-                  <p className="text-sm font-semibold text-gray-900">$ {produto.custoDolar.toFixed(2)}</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    $ {typeof produto.custoDolar === 'number' ? produto.custoDolar.toFixed(2) : (Number(produto.custoDolar) || 0).toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Taxa</p>
-                  <p className="text-sm font-semibold text-gray-900">R$ {produto.taxaDolar.toFixed(4)}</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    R$ {typeof produto.taxaDolar === 'number' ? produto.taxaDolar.toFixed(4) : (Number(produto.taxaDolar) || 0).toFixed(4)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Quantidade</p>
