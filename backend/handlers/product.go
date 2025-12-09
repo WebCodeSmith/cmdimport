@@ -124,6 +124,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 			"createdAt":         produto.CreatedAt.Format(time.RFC3339),
 			"valorAtacado":       produto.ValorAtacado,
 			"valorVarejo":        produto.ValorVarejo,
+			"valorRevendaEspecial": produto.ValorRevendaEspecial,
 			"valorParcelado10x":  produto.ValorParcelado10x,
 			"estoque":           estoqueFormatado,
 		}

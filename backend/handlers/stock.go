@@ -82,6 +82,11 @@ func (h *StockHandler) Listar(c *gin.Context) {
 		} else {
 			itemMap["valorVarejo"] = nil
 		}
+		if item.ProdutoComprado.ValorRevendaEspecial != nil {
+			itemMap["valorRevendaEspecial"] = *item.ProdutoComprado.ValorRevendaEspecial
+		} else {
+			itemMap["valorRevendaEspecial"] = nil
+		}
 		if item.Usuario != nil {
 			itemMap["usuario"] = map[string]interface{}{
 				"id":    item.Usuario.ID,
@@ -295,6 +300,9 @@ func (h *StockHandler) ListarEstoqueUsuarios(c *gin.Context) {
 			}
 			if item.ProdutoComprado.ValorVarejo != nil {
 				produtoMap["valorVarejo"] = *item.ProdutoComprado.ValorVarejo
+			}
+			if item.ProdutoComprado.ValorRevendaEspecial != nil {
+				produtoMap["valorRevendaEspecial"] = *item.ProdutoComprado.ValorRevendaEspecial
 			}
 			if item.ProdutoComprado.Cor != nil {
 				produtoMap["cor"] = *item.ProdutoComprado.Cor
