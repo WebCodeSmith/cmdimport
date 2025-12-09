@@ -1,6 +1,26 @@
 // Cliente API para comunicação com o backend Go
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+// Detectar URL da API baseado no ambiente
+const getApiUrl = () => {
+  // Se tiver variável de ambiente, usar ela
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+  
+  // Se estiver no cliente (browser), verificar a URL atual
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    // Se não for localhost, assumir que está em produção e usar URL relativa
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return '/api'
+    }
+  }
+  
+  // Padrão para desenvolvimento local
+  return 'http://localhost:8080/api'
+}
+
+const API_URL = getApiUrl()
 
 interface ApiResponse<T> {
   success: boolean
@@ -260,7 +280,6 @@ export const uploadApi = {
     const formData = new FormData()
     formData.append('foto', file)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
     const response = await fetch(`${API_URL}/upload/foto`, {
       method: 'POST',
       body: formData,
