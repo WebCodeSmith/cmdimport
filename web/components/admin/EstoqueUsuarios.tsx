@@ -230,23 +230,19 @@ export default function EstoqueUsuarios() {
       if (response.success) {
         showToast(`Estoque deletado com sucesso! ${produtoNome} - ${usuarioNome}`, 'success')
         
-        // Atualizar estado local sem recarregar a página
+        // Atualizar estado local sem recarregar a página - apenas remover o item
         setEstoqueUsuarios(prev => {
           return prev.map(usuario => {
             const produtosAtualizados = usuario.produtos.filter(produto => produto.id !== estoqueId)
             
-            // Se o usuário não tem mais produtos, pode remover ou manter vazio
-            if (produtosAtualizados.length === 0 && !mostrarEstoquesZerados) {
-              return null // Será filtrado depois
-            }
-            
+            // Se o usuário não tem mais produtos após deletar, manter o usuário mas com lista vazia
             return {
               ...usuario,
               produtos: produtosAtualizados,
               totalProdutos: produtosAtualizados.length,
               totalQuantidade: produtosAtualizados.reduce((total, produto) => total + produto.quantidade, 0)
             }
-          }).filter(usuario => usuario !== null) as EstoqueUsuario[]
+          })
         })
       } else {
         showToast('Erro ao deletar estoque: ' + response.message, 'error')
