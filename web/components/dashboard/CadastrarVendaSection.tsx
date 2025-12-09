@@ -211,6 +211,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
         valorPix: formData.valorPix ? parseFloat(formData.valorPix.replace(/[^\d,]/g, '').replace(',', '.')) : undefined,
         valorCartao: formData.valorCartao ? parseFloat(formData.valorCartao.replace(/[^\d,]/g, '').replace(',', '.')) : undefined,
         valorDinheiro: formData.valorDinheiro ? parseFloat(formData.valorDinheiro.replace(/[^\d,]/g, '').replace(',', '.')) : undefined,
+        tipoCliente: tipoCliente,
         usuarioId
       }
 

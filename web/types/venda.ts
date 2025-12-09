@@ -37,6 +37,7 @@ export interface HistoricoVenda {
   valorPix?: number | null
   valorCartao?: number | null
   valorDinheiro?: number | null
+  tipoCliente?: string | null
   produtos: {
     id: number
     produtoNome: string
@@ -49,5 +50,32 @@ export interface HistoricoVenda {
     } | null
   }[]
   valorTotal: number
+}
+
+export interface ProdutoItem {
+  id: number
+  produtoId: number | null
+  produtoNome: string
+  quantidade: number
+  precoUnitario: number
+}
+
+export interface VendaExport {
+  vendaId?: string
+  id?: string | number
+  clienteNome?: string
+  telefone?: string
+  endereco?: string
+  produtos?: ProdutoItem[]
+  valorTotal?: number | string
+  formaPagamento?: string
+  valorPix?: number | string | null
+  valorCartao?: number | string | null
+  valorDinheiro?: number | string | null
+  vendedorNome?: string
+  vendedorEmail?: string
+  createdAt?: string
+  observacoes?: string
+  tipoCliente?: string | null
 }
 

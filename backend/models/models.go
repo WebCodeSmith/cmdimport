@@ -90,6 +90,7 @@ type HistoricoVenda struct {
 	ValorCartao      *float64      `gorm:"type:decimal(10,2);column:valorCartao" json:"valorCartao"`
 	ValorDinheiro    *float64      `gorm:"type:decimal(10,2);column:valorDinheiro" json:"valorDinheiro"`
 	FotoProduto      *string        `gorm:"column:fotoProduto" json:"fotoProduto"`
+	TipoCliente      *string        `gorm:"column:tipoCliente" json:"tipoCliente"`
 	EstoqueID        int            `gorm:"not null;column:estoqueId" json:"estoqueId"`
 	Estoque          Estoque        `gorm:"foreignKey:EstoqueID" json:"-"`
 	UsuarioID        int            `gorm:"not null;column:usuarioId" json:"usuarioId"`

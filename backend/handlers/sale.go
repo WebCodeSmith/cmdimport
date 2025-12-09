@@ -34,6 +34,7 @@ type CreateSaleRequest struct {
 	ValorCartao     *float64                 `json:"valorCartao"`
 	ValorDinheiro   *float64                 `json:"valorDinheiro"`
 	FotoProduto     *string                  `json:"fotoProduto"`
+	TipoCliente     *string                  `json:"tipoCliente"`
 }
 
 type SaleProductRequest struct {
@@ -179,6 +180,7 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 			ValorCartao:    req.ValorCartao,
 			ValorDinheiro:  req.ValorDinheiro,
 			FotoProduto:    req.FotoProduto,
+			TipoCliente:    req.TipoCliente,
 			EstoqueID:      produtoEstoque.Estoque.ID,
 			UsuarioID:      req.UsuarioID,
 		}
@@ -338,6 +340,7 @@ func (h *SaleHandler) Historico(c *gin.Context) {
 				"valorPix":       venda.ValorPix,
 				"valorCartao":    venda.ValorCartao,
 				"valorDinheiro":  venda.ValorDinheiro,
+				"tipoCliente":    venda.TipoCliente,
 				"produtos":       []map[string]interface{}{},
 				"valorTotal":     valorTotal,
 			}
@@ -534,6 +537,7 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 				"valorPix":       venda.ValorPix,
 				"valorCartao":    venda.ValorCartao,
 				"valorDinheiro":  venda.ValorDinheiro,
+				"tipoCliente":    venda.TipoCliente,
 				"produtos":       []map[string]interface{}{},
 				"valorTotal":     valorTotal,
 			}

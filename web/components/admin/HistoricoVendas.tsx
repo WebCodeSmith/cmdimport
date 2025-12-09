@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
-import { HistoricoVenda } from '@/types/venda'
+import { HistoricoVenda, ProdutoItem, VendaExport } from '@/types/venda'
 import * as XLSX from 'xlsx'
 import { formatDate, formatPhone, formatCurrency, formatNumber } from '@/lib/formatters'
 
@@ -93,53 +93,47 @@ export default function HistoricoVendas() {
   const exportarHistorico = async () => {
     try {
       setExportando(true)
-      const params = new URLSearchParams({
-        pagina: '1',
-        limite: '999999',
-        ordenacao: ordenacao
-      })
-
+      
+      // Buscar todas as vendas fazendo requisições paginadas
       const { saleApi } = await import('@/lib/api')
-      const response = await saleApi.historicoAdmin({
-        pagina: paginaAtual,
-        limite: itensPorPagina,
-        ordenacao,
-        cliente: filtroCliente || undefined,
-        imeiCodigo: filtroImeiCodigo || undefined,
-        dataInicio: filtroDataInicio || undefined,
-        dataFim: filtroDataFim || undefined,
-      })
-
-      if (!response.success || !response.data) {
-        throw new Error(response.message || 'Erro ao carregar histórico')
+      const todasVendas: any[] = []
+      let pagina = 1
+      const limitePorLote = 100 // Buscar 100 vendas por vez
+      let temMaisVendas = true
+      
+      // Buscar todas as vendas em lotes
+      while (temMaisVendas) {
+        const response = await saleApi.historicoAdmin({
+          pagina,
+          limite: limitePorLote,
+          ordenacao,
+          cliente: filtroCliente || undefined,
+          imeiCodigo: filtroImeiCodigo || undefined,
+          dataInicio: filtroDataInicio || undefined,
+          dataFim: filtroDataFim || undefined,
+        })
+        
+        if (!response.success) {
+          throw new Error(response.message || 'Erro ao buscar vendas')
+        }
+        
+        if (response.data && response.data.length > 0) {
+          todasVendas.push(...response.data)
+          
+          // Verificar se há mais vendas
+          const totalPaginas = response.paginacao?.totalPaginas || 1
+          temMaisVendas = pagina < totalPaginas
+          pagina++
+        } else {
+          temMaisVendas = false
+        }
+      }
+      
+      if (todasVendas.length === 0) {
+        throw new Error('Nenhuma venda encontrada para exportar')
       }
 
-      type ProdutoItem = { 
-        id: number
-        produtoId: number | null
-        produtoNome: string
-        quantidade: number
-        precoUnitario: number
-      }
-      type VendaExport = {
-        vendaId?: string
-        id?: string | number
-        clienteNome?: string
-        telefone?: string
-        endereco?: string
-        produtos?: ProdutoItem[]
-        valorTotal?: number | string
-        formaPagamento?: string
-        valorPix?: number | string | null
-        valorCartao?: number | string | null
-        valorDinheiro?: number | string | null
-        vendedorNome?: string
-        vendedorEmail?: string
-        createdAt?: string
-        observacoes?: string
-      }
-
-      const vendasExport = (response.data as any[]) as Array<VendaExport>
+      const vendasExport = todasVendas as Array<VendaExport>
 
       // Criar uma linha para cada produto vendido (igual à exportação de produtos comprados)
       const linhas: Array<Record<string, string | number>> = []
@@ -155,6 +149,7 @@ export default function HistoricoVendas() {
             'Cliente': venda.clienteNome || '',
             'Telefone': venda.telefone || '',
             'Endereço': venda.endereco || '',
+            'Tipo de Cliente': venda.tipoCliente === 'lojista' ? '🏢 Lojista' : venda.tipoCliente === 'consumidor' ? '🛍️ Consumidor' : '',
             'Produto': '',
             'Quantidade': 0,
               'Preço Unitário': '',
@@ -176,6 +171,7 @@ export default function HistoricoVendas() {
               'Cliente': venda.clienteNome || '',
               'Telefone': venda.telefone || '',
               'Endereço': venda.endereco || '',
+              'Tipo de Cliente': venda.tipoCliente === 'lojista' ? '🏢 Lojista' : venda.tipoCliente === 'consumidor' ? '🛍️ Consumidor' : '',
               'Produto': produto.produtoNome || '',
               'Quantidade': produto.quantidade || 0,
               'Preço Unitário': Number(produto.precoUnitario || 0).toFixed(2).replace('.', ','),
@@ -575,47 +571,103 @@ export default function HistoricoVendas() {
       )}
 
       {/* Paginação */}
-      {totalPaginas > 1 && (
-        <div className="mt-8 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, totalVendas)} de {totalVendas} vendas
-          </div>
+      {totalPaginas > 1 && (() => {
+        // Calcular quais páginas mostrar (máximo 7 páginas visíveis)
+        const getPaginasParaMostrar = () => {
+          const maxPaginasVisiveis = 7
+          const paginas: (number | string)[] = []
           
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setPaginaAtual(paginaAtual - 1)}
-              disabled={paginaAtual === 1}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Anterior
-            </button>
+          if (totalPaginas <= maxPaginasVisiveis) {
+            // Se há poucas páginas, mostrar todas
+            for (let i = 1; i <= totalPaginas; i++) {
+              paginas.push(i)
+            }
+          } else {
+            // Sempre mostrar primeira página
+            paginas.push(1)
             
-            <div className="flex space-x-1">
-              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
-                <button
-                  key={pagina}
-                  onClick={() => setPaginaAtual(pagina)}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                    pagina === paginaAtual
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {pagina}
-                </button>
-              ))}
+            if (paginaAtual <= 4) {
+              // Páginas iniciais: 1, 2, 3, 4, 5, ..., última
+              for (let i = 2; i <= 5; i++) {
+                paginas.push(i)
+              }
+              paginas.push('...')
+              paginas.push(totalPaginas)
+            } else if (paginaAtual >= totalPaginas - 3) {
+              // Páginas finais: 1, ..., penúltimas, última
+              paginas.push('...')
+              for (let i = totalPaginas - 4; i <= totalPaginas; i++) {
+                paginas.push(i)
+              }
+            } else {
+              // Páginas do meio: 1, ..., anterior, atual, próxima, ..., última
+              paginas.push('...')
+              for (let i = paginaAtual - 1; i <= paginaAtual + 1; i++) {
+                paginas.push(i)
+              }
+              paginas.push('...')
+              paginas.push(totalPaginas)
+            }
+          }
+          
+          return paginas
+        }
+        
+        const paginasParaMostrar = getPaginasParaMostrar()
+        
+        return (
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-700">
+              Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, totalVendas)} de {totalVendas} vendas
             </div>
             
-            <button
-              onClick={() => setPaginaAtual(paginaAtual + 1)}
-              disabled={paginaAtual === totalPaginas}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Próxima
-            </button>
+            <div className="flex items-center space-x-2 flex-wrap justify-center">
+              <button
+                onClick={() => setPaginaAtual(paginaAtual - 1)}
+                disabled={paginaAtual === 1}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Anterior
+              </button>
+              
+              <div className="flex space-x-1 flex-wrap justify-center">
+                {paginasParaMostrar.map((pagina, index) => {
+                  if (pagina === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-2 py-2 text-sm text-gray-500">
+                        ...
+                      </span>
+                    )
+                  }
+                  
+                  const numPagina = pagina as number
+                  return (
+                    <button
+                      key={numPagina}
+                      onClick={() => setPaginaAtual(numPagina)}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        numPagina === paginaAtual
+                          ? 'bg-indigo-600 text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {numPagina}
+                    </button>
+                  )
+                })}
+              </div>
+              
+              <button
+                onClick={() => setPaginaAtual(paginaAtual + 1)}
+                disabled={paginaAtual === totalPaginas}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Próxima
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
         </>
       )}
 

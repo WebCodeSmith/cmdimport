@@ -95,6 +95,9 @@ model HistoricoVenda {
   // Foto do produto
   fotoProduto    String? // Caminho para a foto do produto
   
+  // Tipo de cliente
+  tipoCliente    String? // "lojista" ou "consumidor"
+  
   // Relacionamentos
   estoqueId   Int
   estoque     Estoque  @relation(fields: [estoqueId], references: [id])
