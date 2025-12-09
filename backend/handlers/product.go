@@ -513,6 +513,7 @@ func (h *ProductHandler) AtualizarPrecificacao(c *gin.Context) {
 		ValorCusto       *float64 `json:"valorCusto"`
 		ValorAtacado     *float64 `json:"valorAtacado"`
 		ValorVarejo      *float64 `json:"valorVarejo"`
+		ValorRevendaEspecial *float64 `json:"valorRevendaEspecial"`
 		ValorParcelado10x *float64 `json:"valorParcelado10x"`
 	}
 
@@ -543,6 +544,9 @@ func (h *ProductHandler) AtualizarPrecificacao(c *gin.Context) {
 	}
 	if req.ValorVarejo != nil {
 		updates["valorVarejo"] = *req.ValorVarejo
+	}
+	if req.ValorRevendaEspecial != nil {
+		updates["valorRevendaEspecial"] = *req.ValorRevendaEspecial
 	}
 	if req.ValorParcelado10x != nil {
 		updates["valorParcelado10x"] = *req.ValorParcelado10x

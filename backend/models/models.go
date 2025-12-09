@@ -40,6 +40,7 @@ type ProdutoComprado struct {
 	ValorCusto        *float64       `gorm:"type:decimal(10,2);column:valorCusto" json:"valorCusto"`
 	ValorAtacado      *float64       `gorm:"type:decimal(10,2);column:valorAtacado" json:"valorAtacado"`
 	ValorVarejo       *float64       `gorm:"type:decimal(10,2);column:valorVarejo" json:"valorVarejo"`
+	ValorRevendaEspecial *float64    `gorm:"type:decimal(10,2);column:valorRevendaEspecial" json:"valorRevendaEspecial"`
 	ValorParcelado10x *float64       `gorm:"type:decimal(10,2);column:valorParcelado10x" json:"valorParcelado10x"`
 	CreatedAt         time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt         time.Time      `gorm:"column:updatedAt" json:"updatedAt"`

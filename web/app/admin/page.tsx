@@ -27,6 +27,7 @@ interface ProdutoComprado {
   createdAt: string
   valorAtacado?: number
   valorVarejo?: number
+  valorRevendaEspecial?: number
   valorParcelado10x?: number
   estoque: Array<{
     id: number
@@ -98,6 +99,7 @@ export default function AdminPage() {
   // Hooks para formatação de moeda
   const valorAtacado = useCurrencyFormatter()
   const valorVarejo = useCurrencyFormatter()
+  const valorRevendaEspecial = useCurrencyFormatter()
   const valorParcelado10x = useCurrencyFormatter()
 
   useEffect(() => {
@@ -148,6 +150,15 @@ export default function AdminPage() {
       valorVarejo.setValue('')
     }
     
+    if (produto.valorRevendaEspecial) {
+      valorRevendaEspecial.setValue(new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(produto.valorRevendaEspecial))
+    } else {
+      valorRevendaEspecial.setValue('')
+    }
+    
     if (produto.valorParcelado10x) {
       valorParcelado10x.setValue(new Intl.NumberFormat('pt-BR', {
         minimumFractionDigits: 2,
@@ -165,6 +176,7 @@ export default function AdminPage() {
     setProdutoSelecionado(null)
     valorAtacado.setValue('')
     valorVarejo.setValue('')
+    valorRevendaEspecial.setValue('')
     valorParcelado10x.setValue('')
   }
 
@@ -176,6 +188,7 @@ export default function AdminPage() {
       const response = await productApi.atualizarPrecificacao(produtoSelecionado.id, {
         valorAtacado: valorAtacado.getNumericValue(),
         valorVarejo: valorVarejo.getNumericValue(),
+        valorRevendaEspecial: valorRevendaEspecial.getNumericValue(),
         valorParcelado10x: valorParcelado10x.getNumericValue()
       })
 
@@ -555,6 +568,19 @@ export default function AdminPage() {
                       type="text"
                       value={valorVarejo.value}
                       onChange={(e) => valorVarejo.handleChange(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium transition-all duration-200 hover:border-gray-300"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      ➕ Valor para Revenda Especial
+                    </label>
+                    <input
+                      type="text"
+                      value={valorRevendaEspecial.value}
+                      onChange={(e) => valorRevendaEspecial.handleChange(e.target.value)}
                       placeholder="0,00"
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium transition-all duration-200 hover:border-gray-300"
                     />

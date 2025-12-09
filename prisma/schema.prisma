@@ -65,6 +65,7 @@ model ProdutoComprado {
   valorCusto        Decimal? @db.Decimal(10, 2)
   valorAtacado      Decimal? @db.Decimal(10, 2)
   valorVarejo       Decimal? @db.Decimal(10, 2)
+  valorRevendaEspecial Decimal? @db.Decimal(10, 2)
   valorParcelado10x Decimal? @db.Decimal(10, 2)
   
   // Relacionamento com estoque
@@ -96,7 +97,7 @@ model HistoricoVenda {
   fotoProduto    String? // Caminho para a foto do produto
   
   // Tipo de cliente
-  tipoCliente    String? // "lojista" ou "consumidor"
+  tipoCliente    String? // "lojista", "consumidor" ou "revendaEspecial"
   
   // Relacionamentos
   estoqueId   Int

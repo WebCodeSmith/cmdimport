@@ -90,6 +90,15 @@ export default function HistoricoVendas() {
     setPaginaAtual(1)
   }
 
+  const getTipoClienteNome = (tipo: string | null | undefined): string => {
+    const tipos: Record<string, string> = {
+      'lojista': '🏢 Lojista',
+      'consumidor': '🛍️ Consumidor',
+      'revendaEspecial': '➕ Revenda Especial'
+    }
+    return tipo ? tipos[tipo] || '' : ''
+  }
+
   const exportarHistorico = async () => {
     try {
       setExportando(true)
@@ -149,12 +158,12 @@ export default function HistoricoVendas() {
             'Cliente': venda.clienteNome || '',
             'Telefone': venda.telefone || '',
             'Endereço': venda.endereco || '',
-            'Tipo de Cliente': venda.tipoCliente === 'lojista' ? '🏢 Lojista' : venda.tipoCliente === 'consumidor' ? '🛍️ Consumidor' : venda.tipoCliente === 'revendaEspecial' ? '➕ Revenda Especial' : '',
+            'Tipo de Cliente': getTipoClienteNome(venda.tipoCliente),
             'Produto': '',
             'Quantidade': 0,
-              'Preço Unitário': '',
-              'Subtotal': '',
-              'Forma de Pagamento': venda.formaPagamento || '',
+            'Preço Unitário': '',
+            'Subtotal': '',
+            'Forma de Pagamento': venda.formaPagamento || '',
             'Valor Pix': venda.valorPix != null ? Number(venda.valorPix).toFixed(2).replace('.', ',') : '',
             'Valor Cartão': venda.valorCartao != null ? Number(venda.valorCartao).toFixed(2).replace('.', ',') : '',
             'Valor Dinheiro': venda.valorDinheiro != null ? Number(venda.valorDinheiro).toFixed(2).replace('.', ',') : '',
@@ -171,7 +180,7 @@ export default function HistoricoVendas() {
               'Cliente': venda.clienteNome || '',
               'Telefone': venda.telefone || '',
               'Endereço': venda.endereco || '',
-              'Tipo de Cliente': venda.tipoCliente === 'lojista' ? '🏢 Lojista' : venda.tipoCliente === 'consumidor' ? '🛍️ Consumidor' : venda.tipoCliente === 'revendaEspecial' ? '➕ Revenda Especial' : '',
+              'Tipo de Cliente': getTipoClienteNome(venda.tipoCliente),
               'Produto': produto.produtoNome || '',
               'Quantidade': produto.quantidade || 0,
               'Preço Unitário': Number(produto.precoUnitario || 0).toFixed(2).replace('.', ','),

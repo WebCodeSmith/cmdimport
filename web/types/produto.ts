@@ -5,6 +5,7 @@ export interface Produto {
   quantidade: number
   valorAtacado?: number | null
   valorVarejo?: number | null
+  valorRevendaEspecial?: number | null
 }
 
 export interface ProdutoComprado {
@@ -24,6 +25,7 @@ export interface ProdutoComprado {
   createdAt: string
   valorAtacado?: number
   valorVarejo?: number
+  valorRevendaEspecial?: number
   valorParcelado10x?: number
   estoque: Array<{
     id: number

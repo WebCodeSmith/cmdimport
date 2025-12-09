@@ -95,6 +95,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
             quantidade: item.quantidade as number, // Incluir quantidade
             valorAtacado: item.valorAtacado as number | null,
             valorVarejo: item.valorVarejo as number | null,
+            valorRevendaEspecial: item.valorRevendaEspecial as number | null,
             cor: item.cor as string | undefined,
             imei: item.imei as string | undefined,
             codigoBarras: item.codigoBarras as string | undefined
@@ -443,8 +444,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                         } else if (tipoCliente === 'consumidor') {
                           preco = produtoSelecionado.valorVarejo ?? null
                         } else if (tipoCliente === 'revendaEspecial') {
-                          // Revenda Especial usa preço de atacado (ou pode ser ajustado para outro campo)
-                          preco = produtoSelecionado.valorAtacado ?? null
+                          preco = produtoSelecionado.valorRevendaEspecial ?? null
                         }
                         if (!preco) {
                           preco = produtoSelecionado.preco // Usar preço base como fallback
