@@ -178,23 +178,49 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
     try {
       setLoadingSilencioso(true)
       
-      // Buscar todos os produtos (sem paginação)
-      const params = new URLSearchParams({
-        limite: '999999', // Buscar todos
-        ordenacao: 'data'
-      })
-      
+      // Buscar todos os produtos fazendo requisições paginadas
       const { productApi } = await import('@/lib/api')
-      const response = await productApi.listar({
-        pagina: paginaAtual,
-        limite: itensPorPagina,
-        busca: filtroBusca || undefined,
-        dataInicio: filtroDataInicio || undefined,
-        dataFim: filtroDataFim || undefined,
-      })
+      const todosProdutos: ProdutoComprado[] = []
+      let pagina = 1
+      const limitePorLote = 100 // Buscar 100 produtos por vez
+      let temMaisProdutos = true
       
-      if (!response.success) {
-        throw new Error(response.message || 'Erro ao buscar produtos')
+      // Buscar todos os produtos em lotes
+      while (temMaisProdutos) {
+        const response = await productApi.listar({
+          pagina,
+          limite: limitePorLote,
+          busca: filtroBusca || undefined,
+          dataInicio: filtroDataInicio || undefined,
+          dataFim: filtroDataFim || undefined,
+          ocultarEstoqueZerado: ocultarEstoqueZerado || undefined,
+        })
+        
+        if (!response.success) {
+          throw new Error(response.message || 'Erro ao buscar produtos')
+        }
+        
+        if (response.data && response.data.length > 0) {
+          // Formatar produtos e adicionar à lista
+          const produtosFormatados = response.data.map((produto: any) => ({
+            ...produto,
+            custoDolar: typeof produto.custoDolar === 'string' ? parseFloat(produto.custoDolar) : (produto.custoDolar || 0),
+            taxaDolar: typeof produto.taxaDolar === 'string' ? parseFloat(produto.taxaDolar) : (produto.taxaDolar || 0),
+            preco: typeof produto.preco === 'string' ? parseFloat(produto.preco) : (produto.preco || 0),
+          }))
+          todosProdutos.push(...produtosFormatados)
+          
+          // Verificar se há mais produtos
+          const totalPaginas = response.paginacao?.totalPaginas || 1
+          temMaisProdutos = pagina < totalPaginas
+          pagina++
+        } else {
+          temMaisProdutos = false
+        }
+      }
+      
+      if (todosProdutos.length === 0) {
+        throw new Error('Nenhum produto encontrado para exportar')
       }
 
       // Função para formatar números com vírgula (formato brasileiro) - apenas número, sem R$
@@ -205,7 +231,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       }
 
       // Preparar dados para Excel - uma linha por produto comprado
-      const dadosExcel = (response.data as ProdutoComprado[]).map((produto: ProdutoComprado) => ({
+      const dadosExcel = todosProdutos.map((produto: ProdutoComprado) => ({
         'ID': produto.id,
         'Nome': produto.nome,
         'Descrição': produto.descricao || '',
