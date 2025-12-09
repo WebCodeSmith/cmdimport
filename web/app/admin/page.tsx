@@ -195,8 +195,26 @@ export default function AdminPage() {
       if (response.success) {
         showToast('Precificação atualizada com sucesso!', 'success')
         fecharModalPrecificacao()
-        // Forçar atualização do componente de listagem
-        setRefreshKey(prev => prev + 1)
+        
+        // Buscar produto atualizado e atualizar estado local
+        try {
+          const produtoAtualizadoResponse = await productApi.buscarPorID(produtoSelecionado.id)
+          if (produtoAtualizadoResponse.success && produtoAtualizadoResponse.data) {
+            if (atualizarProdutoRef.current) {
+              atualizarProdutoRef.current(produtoAtualizadoResponse.data)
+            } else {
+              // Fallback: recarregar se a função não estiver disponível
+              setRefreshKey(prev => prev + 1)
+            }
+          } else {
+            // Fallback: recarregar se não conseguir buscar o produto atualizado
+            setRefreshKey(prev => prev + 1)
+          }
+        } catch (error) {
+          console.error('Erro ao buscar produto atualizado:', error)
+          // Fallback: recarregar em caso de erro
+          setRefreshKey(prev => prev + 1)
+        }
       } else {
         console.error('Erro ao salvar precificação:', response.message)
         showToast(response.message || 'Erro ao salvar precificação', 'error')
