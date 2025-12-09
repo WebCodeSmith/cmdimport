@@ -152,16 +152,68 @@ export default function CadastrarProdutoSection() {
       }
     }
     
+    // Validar campos obrigatórios
+    const custoDolar = custoFormatter.getNumericValue()
+    const taxaDolar = taxaFormatter.getNumericValue()
+    const quantidade = parseInt(formData.quantidade) || 0
+    
+    if (!formData.nome.trim()) {
+      showToast('O nome do produto é obrigatório', 'error')
+      return
+    }
+    
+    if (custoDolar <= 0) {
+      showToast('O custo em dólar deve ser maior que zero', 'error')
+      return
+    }
+    
+    if (taxaDolar <= 0) {
+      showToast('A taxa do dólar deve ser maior que zero', 'error')
+      return
+    }
+    
+    if (quantidade <= 0) {
+      showToast('A quantidade deve ser maior que zero', 'error')
+      return
+    }
+    
     setLoading(true)
     
     try {
       const { productApi } = await import('@/lib/api')
-      const response = await productApi.cadastrar({
-        ...formData,
-        custoDolar: custoFormatter.getNumericValue(),
-        taxaDolar: taxaFormatter.getNumericValue(),
+      
+      // Preparar dados para envio
+      const dadosEnvio: any = {
+        nome: formData.nome.trim(),
+        custoDolar,
+        taxaDolar,
+        quantidade,
         tipoIdentificacao
-      })
+      }
+      
+      // Adicionar campos opcionais apenas se preenchidos
+      if (formData.descricao.trim()) {
+        dadosEnvio.descricao = formData.descricao.trim()
+      }
+      
+      if (formData.cor.trim()) {
+        dadosEnvio.cor = formData.cor.trim()
+      }
+      
+      // IMEI e Código de Barras baseado no tipo de identificação
+      if (tipoIdentificacao === 'imei' || tipoIdentificacao === 'ambos') {
+        if (formData.imei.trim()) {
+          dadosEnvio.imei = formData.imei.trim()
+        }
+      }
+      
+      if (tipoIdentificacao === 'codigoBarras' || tipoIdentificacao === 'ambos') {
+        if (formData.codigoBarras.trim()) {
+          dadosEnvio.codigoBarras = formData.codigoBarras.trim()
+        }
+      }
+      
+      const response = await productApi.cadastrar(dadosEnvio)
 
       if (response.success && response.data) {
         showToast(
