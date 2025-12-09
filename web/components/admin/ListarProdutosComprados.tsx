@@ -34,6 +34,8 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               custoDolar: typeof produtoAtualizado.custoDolar === 'string' ? parseFloat(produtoAtualizado.custoDolar) : (produtoAtualizado.custoDolar || 0),
               taxaDolar: typeof produtoAtualizado.taxaDolar === 'string' ? parseFloat(produtoAtualizado.taxaDolar) : (produtoAtualizado.taxaDolar || 0),
               preco: typeof produtoAtualizado.preco === 'string' ? parseFloat(produtoAtualizado.preco) : (produtoAtualizado.preco || 0),
+              // Preservar estoque do produto original se não existir no produto atualizado
+              estoque: produtoAtualizado.estoque || produto.estoque || [],
             }
           : produto
       )

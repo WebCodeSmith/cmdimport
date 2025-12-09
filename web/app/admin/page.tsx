@@ -503,7 +503,7 @@ export default function AdminPage() {
               <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">{produtoSelecionado.nome}</h4>
                 <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>Estoque: {produtoSelecionado.estoque.reduce((total, item) => total + item.quantidade, 0)} unidades</span>
+                  <span>Estoque: {(produtoSelecionado.estoque || []).reduce((total, item) => total + item.quantidade, 0)} unidades</span>
                 </div>
                   {produtoSelecionado.cor && (
                     <div className="mt-2">

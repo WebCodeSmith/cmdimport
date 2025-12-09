@@ -63,19 +63,24 @@ export default function CadastrarProdutoSection() {
       })
 
       if (response.success && response.data) {
-        // Extrair apenas nomes únicos de produtos
+        // Extrair apenas nomes únicos de produtos (normalizando para comparação)
         const nomesUnicos = new Map<string, ProdutoSugestao>()
         response.data.forEach((produto: any) => {
-          if (!nomesUnicos.has(produto.nome)) {
-            nomesUnicos.set(produto.nome, {
+          // Normalizar nome: trim e lowercase para comparação
+          const nomeNormalizado = (produto.nome || '').trim().toLowerCase()
+          if (nomeNormalizado && !nomesUnicos.has(nomeNormalizado)) {
+            nomesUnicos.set(nomeNormalizado, {
               id: produto.id,
-              nome: produto.nome,
+              nome: produto.nome.trim(), // Manter nome original formatado
               cor: produto.cor
             })
           }
         })
         setSugestoes(Array.from(nomesUnicos.values()))
         setMostrarSugestoes(true)
+      } else {
+        setSugestoes([])
+        setMostrarSugestoes(false)
       }
     } catch (error) {
       console.error('Erro ao buscar produtos:', error)
