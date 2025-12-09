@@ -68,6 +68,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 		adminEstoque := protected.Group("/admin/estoque-usuarios")
 		{
 			adminEstoque.GET("", stockHandler.ListarEstoqueUsuarios)
+			adminEstoque.DELETE("/:id", stockHandler.DeletarEstoque)
 		}
 
 		// Admin - Distribuir

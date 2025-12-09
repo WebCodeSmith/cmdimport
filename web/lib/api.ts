@@ -223,6 +223,12 @@ export const stockApi = {
   listarEstoqueUsuarios: async () => {
     return apiRequest<any[]>('/admin/estoque-usuarios')
   },
+
+  deletarEstoque: async (estoqueId: number) => {
+    return apiRequest<any>(`/admin/estoque-usuarios/${estoqueId}`, {
+      method: 'DELETE',
+    })
+  },
 }
 
 // API de Vendas

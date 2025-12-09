@@ -218,6 +218,28 @@ export default function EstoqueUsuarios() {
     }
   }
 
+  const deletarEstoque = async (estoqueId: number, produtoNome: string, usuarioNome: string) => {
+    if (!confirm(`Tem certeza que deseja deletar o estoque de "${produtoNome}" do usuário "${usuarioNome}"?`)) {
+      return
+    }
+
+    try {
+      const { stockApi } = await import('@/lib/api')
+      const response = await stockApi.deletarEstoque(estoqueId)
+
+      if (response.success) {
+        showToast(`Estoque deletado com sucesso! ${produtoNome} - ${usuarioNome}`, 'success')
+        // Recarregar dados
+        carregarEstoqueUsuarios()
+      } else {
+        showToast('Erro ao deletar estoque: ' + response.message, 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao deletar estoque:', error)
+      showToast('Erro de conexão. Tente novamente.', 'error')
+    }
+  }
+
   const usuariosFiltrados = estoqueUsuarios.map(usuario => {
     // Filtro por nome/email
     const passaFiltroTexto = usuario.nome.toLowerCase().includes(filtroUsuario.toLowerCase()) ||
@@ -542,19 +564,39 @@ export default function EstoqueUsuarios() {
                               )}
                             </td>
                             <td className="py-3 px-2 text-center">
-                              {produto.quantidade > 0 ? (
-                                <button
-                                  onClick={() => abrirModalRedistribuicao(produto, usuario)}
-                                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
-                                  title="Redistribuir produto"
-                                >
-                                  🔄 Redistribuir
-                                </button>
-                              ) : (
-                                <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed">
-                                  ❌ Sem estoque
-                                </span>
-                              )}
+                              <div className="flex items-center justify-center gap-2">
+                                {produto.quantidade > 0 ? (
+                                  <>
+                                    <button
+                                      onClick={() => abrirModalRedistribuicao(produto, usuario)}
+                                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                                      title="Redistribuir produto"
+                                    >
+                                      🔄 Redistribuir
+                                    </button>
+                                    <button
+                                      onClick={() => deletarEstoque(produto.id, produto.nome, usuario.nome)}
+                                      className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                                      title="Deletar estoque"
+                                    >
+                                      🗑️ Deletar
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed">
+                                      ❌ Sem estoque
+                                    </span>
+                                    <button
+                                      onClick={() => deletarEstoque(produto.id, produto.nome, usuario.nome)}
+                                      className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                                      title="Deletar estoque"
+                                    >
+                                      🗑️ Deletar
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             </td>
                           </tr>
                           {/* Linha expandida com descrição */}

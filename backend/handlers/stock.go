@@ -336,3 +336,47 @@ func (h *StockHandler) ListarEstoqueUsuarios(c *gin.Context) {
 	})
 }
 
+func (h *StockHandler) DeletarEstoque(c *gin.Context) {
+	estoqueID := c.Param("id")
+	if estoqueID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID do estoque não fornecido",
+		})
+		return
+	}
+
+	estoqueIDInt, err := strconv.Atoi(estoqueID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID do estoque inválido",
+		})
+		return
+	}
+
+	// Buscar o estoque
+	var estoque models.Estoque
+	if err := h.DB.First(&estoque, estoqueIDInt).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Estoque não encontrado",
+		})
+		return
+	}
+
+	// Deletar o estoque (desativar)
+	if err := h.DB.Model(&estoque).Update("ativo", false).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao deletar estoque",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Estoque deletado com sucesso",
+	})
+}
+
