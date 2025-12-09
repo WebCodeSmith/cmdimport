@@ -75,7 +75,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	if err := query.Select("id", "nome", "descricao", "cor", "imei", "codigoBarras", 
 		"custoDolar", "taxaDolar", "preco", "quantidade", "quantidadeBackup", 
 		"fornecedor", "dataCompra", "createdAt", "updatedAt", 
-		"valorCusto", "valorAtacado", "valorVarejo", "valorParcelado10x").
+		"valorCusto", "valorAtacado", "valorVarejo", "valorRevendaEspecial", "valorParcelado10x").
 		Preload("Estoque", "ativo = ?", true).
 		Preload("Estoque.Usuario").
 		Order("dataCompra DESC").
