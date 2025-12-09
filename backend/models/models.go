@@ -30,9 +30,9 @@ type ProdutoComprado struct {
 	Cor               *string        `json:"cor"`
 	IMEI              *string        `gorm:"type:varchar(255);uniqueIndex" json:"imei"`
 	CodigoBarras      *string        `json:"codigoBarras"`
-	CustoDolar        float64        `gorm:"type:decimal(10,2);not null" json:"custoDolar"`
-	TaxaDolar         float64        `gorm:"type:decimal(10,4);not null" json:"taxaDolar"`
-	Preco             float64        `gorm:"type:decimal(10,2);not null" json:"preco"`
+	CustoDolar        float64        `gorm:"type:decimal(10,2);not null;column:custoDolar" json:"custoDolar"`
+	TaxaDolar         float64        `gorm:"type:decimal(10,4);not null;column:taxaDolar" json:"taxaDolar"`
+	Preco             float64        `gorm:"type:decimal(10,2);not null;column:preco" json:"preco"`
 	Quantidade        int            `gorm:"default:0" json:"quantidade"`
 	QuantidadeBackup  int            `gorm:"default:0" json:"quantidadeBackup"`
 	Fornecedor        *string        `json:"fornecedor"`

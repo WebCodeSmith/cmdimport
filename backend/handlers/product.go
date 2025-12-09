@@ -64,9 +64,13 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	query.Count(&total)
 	totalPaginas := int((total + int64(limite) - 1) / int64(limite))
 
-	// Buscar produtos
+	// Buscar produtos usando Select explícito para garantir que os campos sejam lidos
 	var produtos []models.ProdutoComprado
-	if err := query.Preload("Estoque", "ativo = ?", true).
+	if err := query.Select("id", "nome", "descricao", "cor", "imei", "codigoBarras", 
+		"custoDolar", "taxaDolar", "preco", "quantidade", "quantidadeBackup", 
+		"fornecedor", "dataCompra", "createdAt", "updatedAt", 
+		"valorCusto", "valorAtacado", "valorVarejo", "valorParcelado10x").
+		Preload("Estoque", "ativo = ?", true).
 		Preload("Estoque.Usuario").
 		Order("dataCompra DESC").
 		Offset(offset).
