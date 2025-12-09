@@ -35,7 +35,7 @@ interface ApiResponse<T> {
 }
 
 interface RequestOptions extends RequestInit {
-  params?: Record<string, string | number | undefined>
+  params?: Record<string, string | number | boolean | undefined>
 }
 
 async function apiRequest<T>(
@@ -156,6 +156,7 @@ export const productApi = {
     busca?: string
     dataInicio?: string
     dataFim?: string
+    ocultarEstoqueZerado?: boolean
   }) => {
     return apiRequest<any[]>('/admin/produtos', { params })
   },

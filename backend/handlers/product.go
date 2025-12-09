@@ -40,6 +40,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	busca := c.Query("busca")
 	dataInicio := c.Query("dataInicio")
 	dataFim := c.Query("dataFim")
+	ocultarEstoqueZerado := c.Query("ocultarEstoqueZerado") == "true"
 
 	offset := (pagina - 1) * limite
 
@@ -57,6 +58,11 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	}
 	if dataFim != "" {
 		query = query.Where("dataCompra <= ?", dataFim+" 23:59:59")
+	}
+
+	// Filtro de estoque zerado
+	if ocultarEstoqueZerado {
+		query = query.Where("quantidade > ?", 0)
 	}
 
 	// Contar total

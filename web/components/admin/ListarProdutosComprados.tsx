@@ -83,6 +83,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         busca: filtroBusca || undefined,
         dataInicio: filtroDataInicio || undefined,
         dataFim: filtroDataFim || undefined,
+        ocultarEstoqueZerado: ocultarEstoqueZerado || undefined,
       })
 
       if (response.success && response.data) {
@@ -110,7 +111,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         setLoading(false)
       }
     }
-  }, [paginaAtual, filtroBusca, filtroDataInicio, filtroDataFim])
+  }, [paginaAtual, filtroBusca, filtroDataInicio, filtroDataFim, ocultarEstoqueZerado])
 
   const [primeiraCarga, setPrimeiraCarga] = useState(true)
 
@@ -122,6 +123,13 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       carregarProdutos(true) // Carregamento silencioso nas demais vezes
     }
   }, [carregarProdutos, primeiraCarga])
+
+  // Resetar para primeira página quando o filtro de estoque zerado mudar
+  useEffect(() => {
+    if (!primeiraCarga) {
+      setPaginaAtual(1)
+    }
+  }, [ocultarEstoqueZerado])
 
   // Cleanup do timeout quando o componente for desmontado
   useEffect(() => {
@@ -143,7 +151,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
     setFiltroDataInicio('')
     setFiltroDataFim('')
     setOcultarEstoqueZerado(false)
-    setPaginaAtual(1)
+    setPaginaAtual(1) // Reset para primeira página ao limpar filtros
   }
 
   const exportarParaExcel = async () => {
@@ -377,17 +385,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         </div>
       ) : (produtos.length > 0 || loadingSilencioso) ? (
         <div className="space-y-4">
-          {produtos
-            .filter((produto) => {
-              // Se o checkbox estiver marcado, filtrar produtos com estoque zerado
-              if (ocultarEstoqueZerado) {
-                // Usar a mesma lógica da exibição: produto.quantidade
-                // produto.quantidade já representa o estoque disponível total
-                return (produto.quantidade || 0) > 0
-              }
-              return true // Mostrar todos se o checkbox não estiver marcado
-            })
-            .map((produto) => (
+          {produtos.map((produto) => (
             <div key={produto.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div>
