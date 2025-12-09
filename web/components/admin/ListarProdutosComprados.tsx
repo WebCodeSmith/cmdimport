@@ -17,6 +17,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
   const [filtroBusca, setFiltroBusca] = useState('')
   const [filtroDataInicio, setFiltroDataInicio] = useState('')
   const [filtroDataFim, setFiltroDataFim] = useState('')
+  const [ocultarEstoqueZerado, setOcultarEstoqueZerado] = useState(false)
   
   // Estados para os valores dos inputs (sem debounce)
   const [inputBusca, setInputBusca] = useState('')
@@ -141,6 +142,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
     setInputBusca('')
     setFiltroDataInicio('')
     setFiltroDataFim('')
+    setOcultarEstoqueZerado(false)
     setPaginaAtual(1)
   }
 
@@ -336,6 +338,21 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
             </button>
           </div>
         </div>
+        
+        {/* Checkbox para ocultar estoque zerado */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={ocultarEstoqueZerado}
+              onChange={(e) => setOcultarEstoqueZerado(e.target.checked)}
+              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              Ocultar produtos com estoque zerado
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* Indicador de carregamento silencioso */}
@@ -360,7 +377,19 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         </div>
       ) : (produtos.length > 0 || loadingSilencioso) ? (
         <div className="space-y-4">
-          {produtos.map((produto) => (
+          {produtos
+            .filter((produto) => {
+              // Se o checkbox estiver marcado, filtrar produtos com estoque zerado
+              if (ocultarEstoqueZerado) {
+                // Verificar se o estoque está zerado (quantidade = 0 ou soma do estoque = 0)
+                const estoqueTotal = produto.estoque 
+                  ? produto.estoque.reduce((total, item) => total + (item.ativo ? item.quantidade : 0), 0)
+                  : produto.quantidade || 0
+                return estoqueTotal > 0
+              }
+              return true // Mostrar todos se o checkbox não estiver marcado
+            })
+            .map((produto) => (
             <div key={produto.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div>
@@ -470,47 +499,103 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       ) : null}
 
       {/* Paginação */}
-      {totalPaginas > 1 && !loadingSilencioso && (
-        <div className="mt-8 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, totalProdutos)} de {totalProdutos} produtos
-          </div>
+      {totalPaginas > 1 && !loadingSilencioso && (() => {
+        // Calcular quais páginas mostrar (máximo 7 páginas visíveis)
+        const getPaginasParaMostrar = () => {
+          const maxPaginasVisiveis = 7
+          const paginas: (number | string)[] = []
           
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setPaginaAtual(paginaAtual - 1)}
-              disabled={paginaAtual === 1}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Anterior
-            </button>
+          if (totalPaginas <= maxPaginasVisiveis) {
+            // Se há poucas páginas, mostrar todas
+            for (let i = 1; i <= totalPaginas; i++) {
+              paginas.push(i)
+            }
+          } else {
+            // Sempre mostrar primeira página
+            paginas.push(1)
             
-            <div className="flex space-x-1">
-              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
-                <button
-                  key={pagina}
-                  onClick={() => setPaginaAtual(pagina)}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                    pagina === paginaAtual
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {pagina}
-                </button>
-              ))}
+            if (paginaAtual <= 4) {
+              // Páginas iniciais: 1, 2, 3, 4, 5, ..., última
+              for (let i = 2; i <= 5; i++) {
+                paginas.push(i)
+              }
+              paginas.push('...')
+              paginas.push(totalPaginas)
+            } else if (paginaAtual >= totalPaginas - 3) {
+              // Páginas finais: 1, ..., penúltimas, última
+              paginas.push('...')
+              for (let i = totalPaginas - 4; i <= totalPaginas; i++) {
+                paginas.push(i)
+              }
+            } else {
+              // Páginas do meio: 1, ..., anterior, atual, próxima, ..., última
+              paginas.push('...')
+              for (let i = paginaAtual - 1; i <= paginaAtual + 1; i++) {
+                paginas.push(i)
+              }
+              paginas.push('...')
+              paginas.push(totalPaginas)
+            }
+          }
+          
+          return paginas
+        }
+        
+        const paginasParaMostrar = getPaginasParaMostrar()
+        
+        return (
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-700">
+              Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, totalProdutos)} de {totalProdutos} produtos
             </div>
             
-            <button
-              onClick={() => setPaginaAtual(paginaAtual + 1)}
-              disabled={paginaAtual === totalPaginas}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Próxima
-            </button>
+            <div className="flex items-center space-x-2 flex-wrap justify-center">
+              <button
+                onClick={() => setPaginaAtual(paginaAtual - 1)}
+                disabled={paginaAtual === 1}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Anterior
+              </button>
+              
+              <div className="flex space-x-1 flex-wrap justify-center">
+                {paginasParaMostrar.map((pagina, index) => {
+                  if (pagina === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-2 py-2 text-sm text-gray-500">
+                        ...
+                      </span>
+                    )
+                  }
+                  
+                  const numPagina = pagina as number
+                  return (
+                    <button
+                      key={numPagina}
+                      onClick={() => setPaginaAtual(numPagina)}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        numPagina === paginaAtual
+                          ? 'bg-indigo-600 text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {numPagina}
+                    </button>
+                  )
+                })}
+              </div>
+              
+              <button
+                onClick={() => setPaginaAtual(paginaAtual + 1)}
+                disabled={paginaAtual === totalPaginas}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Próxima
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
