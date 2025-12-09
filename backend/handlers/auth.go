@@ -129,7 +129,8 @@ func (h *AuthHandler) ListarUsuarios(c *gin.Context) {
 
 func (h *AuthHandler) ListarAtendentes(c *gin.Context) {
 	var usuarios []models.Usuario
-	if err := h.DB.Where("isAdmin = ?", false).Find(&usuarios).Error; err != nil {
+	// Remover filtro de isAdmin para incluir todos os usuários (incluindo admins)
+	if err := h.DB.Unscoped().Find(&usuarios).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar atendentes"})
 		return
 	}
