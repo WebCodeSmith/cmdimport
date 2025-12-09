@@ -372,8 +372,27 @@ export default function AdminPage() {
           'success'
         )
         fecharModalDistribuicao()
-        // Forçar atualização dos componentes filhos
-        setRefreshKey(prev => prev + 1)
+        
+        // Buscar produto atualizado do backend para atualizar o estoque em tempo real
+        try {
+          const produtoAtualizadoResponse = await productApi.buscarPorID(produtoSelecionado.id)
+          if (produtoAtualizadoResponse.success && produtoAtualizadoResponse.data) {
+            // Atualizar produto no estado local sem recarregar a página
+            if (atualizarProdutoRef.current) {
+              atualizarProdutoRef.current(produtoAtualizadoResponse.data)
+            } else {
+              // Fallback: recarregar se a função não estiver disponível
+              setRefreshKey(prev => prev + 1)
+            }
+          } else {
+            // Fallback: recarregar se não conseguir buscar o produto atualizado
+            setRefreshKey(prev => prev + 1)
+          }
+        } catch (error) {
+          console.error('Erro ao buscar produto atualizado:', error)
+          // Fallback: recarregar em caso de erro
+          setRefreshKey(prev => prev + 1)
+        }
       } else {
         console.error('Erro ao distribuir produto:', response.message)
         showToast(response.message || 'Erro ao distribuir produto', 'error')
