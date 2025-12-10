@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://cmdimport.online/api'}/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://www.cmdimport.online/api'}/:path*`,
       },
     ];
   },
