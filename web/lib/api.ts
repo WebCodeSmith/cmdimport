@@ -2,20 +2,14 @@
 
 // Detectar URL da API baseado no ambiente
 const getApiUrl = () => {
-  // Prioridade 1: Variável de ambiente NEXT_PUBLIC_API_URL (se configurada)
-  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL) {
+  // Prioridade 1: Variável de ambiente NEXT_PUBLIC_API_URL (configurada na Vercel)
+  // Next.js injeta variáveis NEXT_PUBLIC_* no código durante o build
+  if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL
   }
   
-  // Prioridade 2: No cliente (browser), verificar variável de ambiente do window
+  // Prioridade 2: No cliente (browser), usar a mesma origem do frontend
   if (typeof window !== 'undefined') {
-    // Next.js expõe variáveis NEXT_PUBLIC_ no window durante build
-    const envApiUrl = (window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_API_URL
-    
-    if (envApiUrl) {
-      return envApiUrl
-    }
-    
     const hostname = window.location.hostname
     // Se não for localhost, usar a mesma origem do frontend
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
