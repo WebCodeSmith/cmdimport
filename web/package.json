@@ -15,24 +15,24 @@
   },
   "dependencies": {
     "@prisma/client": "^7.1.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/uuid": "^11.0.0",
     "@zxing/library": "^0.21.3",
     "next": "16.0.8",
     "prisma": "^7.1.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "tailwindcss": "^4.1.17",
     "uuid": "^13.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
-    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.8",
-    "tailwindcss": "^4.1.17",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
