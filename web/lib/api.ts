@@ -2,15 +2,11 @@
 
 // Detectar URL da API baseado no ambiente
 const getApiUrl = () => {
-  // Se tiver variável de ambiente, usar ela
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL
-  }
-  
-  // Se estiver no cliente (browser), verificar a URL atual
+  // Se estiver no cliente (browser), sempre usar URL relativa em produção
+  // O Next.js vai fazer o proxy server-side através do rewrite configurado
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
-    // Se não for localhost, assumir que está em produção e usar URL relativa
+    // Se não for localhost, usar URL relativa (Next.js faz proxy)
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
       return '/api'
     }
