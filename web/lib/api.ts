@@ -2,13 +2,14 @@
 
 // Detectar URL da API baseado no ambiente
 const getApiUrl = () => {
-  // Se estiver no cliente (browser), sempre usar URL relativa em produção
-  // O Next.js vai fazer o proxy server-side através do rewrite configurado
+  // Se estiver no cliente (browser)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
-    // Se não for localhost, usar URL relativa (Next.js faz proxy)
+    // Se não for localhost, usar a mesma origem do frontend
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return '/api'
+      // Usar a mesma origem (protocolo + hostname) para evitar CORS
+      // Isso garante que sempre use www se o frontend estiver em www
+      return `${window.location.protocol}//${window.location.hostname}/api`
     }
   }
   
