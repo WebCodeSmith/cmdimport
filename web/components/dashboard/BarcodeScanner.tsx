@@ -14,7 +14,7 @@ export default function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScann
   const stopScanning = useCallback(() => {
     if (codeReaderRef.current) {
       try {
-        // Tentar parar o ZXing se tiver método para isso
+        // Tentar parar o ZXing se tiver método para iss
         if ('reset' in codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
           codeReaderRef.current.reset()
         }
