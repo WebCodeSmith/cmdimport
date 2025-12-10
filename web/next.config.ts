@@ -1,14 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://www.cmdimport.online/api'}/:path*`,
-      },
-    ];
-  },
+  // Rewrite removido - o nginx já faz proxy de /api/ para o backend
+  // O código cliente usa URL relativa que vai direto para o nginx
 };
 
 export default nextConfig;
