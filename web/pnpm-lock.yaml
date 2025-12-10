@@ -11,6 +11,18 @@ importers:
       '@prisma/client':
         specifier: ^7.1.0
         version: 7.1.0(prisma@7.1.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript@5.9.3))(typescript@5.9.3)
+      '@tailwindcss/postcss':
+        specifier: ^4.1.17
+        version: 4.1.17
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -29,6 +41,12 @@ importers:
       react-dom:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
+      tailwindcss:
+        specifier: ^4.1.17
+        version: 4.1.17
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -39,33 +57,15 @@ importers:
       '@eslint/eslintrc':
         specifier: ^3.3.3
         version: 3.3.3
-      '@tailwindcss/postcss':
-        specifier: ^4.1.17
-        version: 4.1.17
-      '@types/node':
-        specifier: ^24.10.1
-        version: 24.10.1
-      '@types/react':
-        specifier: ^19.2.7
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.7)
       eslint:
         specifier: ^9.39.1
         version: 9.39.1(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.0.8
         version: 16.0.8(@typescript-eslint/parser@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
-      tailwindcss:
-        specifier: ^4.1.17
-        version: 4.1.17
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
 packages:
 
