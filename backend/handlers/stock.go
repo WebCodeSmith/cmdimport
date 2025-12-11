@@ -37,8 +37,17 @@ func (h *StockHandler) Listar(c *gin.Context) {
 		return
 	}
 
+	ocultarEstoqueZerado := c.Query("ocultarEstoqueZerado") == "true"
+
+	query := h.DB.Where("ativo = ? AND usuarioId = ?", true, usuarioIDInt)
+	
+	// Filtro de estoque zerado
+	if ocultarEstoqueZerado {
+		query = query.Where("quantidade > ?", 0)
+	}
+
 	var estoque []models.Estoque
-	if err := h.DB.Where("ativo = ? AND usuarioId = ?", true, usuarioIDInt).
+	if err := query.
 		Preload("ProdutoComprado").
 		Preload("Usuario").
 		Order("produtoCompradoId ASC").

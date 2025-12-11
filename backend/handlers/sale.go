@@ -214,11 +214,14 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
 		"message": "Venda cadastrada com sucesso!",
-		"venda": map[string]interface{}{
-			"clienteNome": req.ClienteNome,
-			"produtos":    produtosResposta,
-			"valorTotal":  valorTotal,
+		"data": map[string]interface{}{
+			"venda": map[string]interface{}{
+				"clienteNome": req.ClienteNome,
+				"produtos":    produtosResposta,
+				"valorTotal":  valorTotal,
+			},
 		},
 	})
 }
