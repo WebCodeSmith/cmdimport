@@ -498,7 +498,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               )}
 
               <div className="border-t border-gray-200 pt-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="flex items-center">
                     <div className="text-sm">
                       <span className="text-gray-500">Estoque disponível:</span>
@@ -507,30 +507,31 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2">
                     <button
                       onClick={() => onEditarProduto(produto)}
-                      className="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-200 transition-colors flex items-center"
+                      className="w-full px-4 py-2.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-200 active:bg-blue-300 transition-colors flex items-center justify-center sm:justify-start"
                     >
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Editar
+                      <span>Editar</span>
                     </button>
                     <button
                       onClick={() => onAbrirPrecificacao(produto)}
-                      className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-200 transition-colors"
+                      className="w-full px-4 py-2.5 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-200 active:bg-indigo-300 transition-colors flex items-center justify-center sm:justify-start"
                     >
-                      💰 Precificação
+                      <span className="mr-1.5">💰</span>
+                      <span>Precificação</span>
                     </button>
                     <button
                       onClick={() => onDistribuirProduto(produto)}
-                      className="px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors flex items-center"
+                      className="w-full px-4 py-2.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 active:bg-green-300 transition-colors flex items-center justify-center sm:justify-start"
                     >
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
-                      Distribuir
+                      <span>Distribuir</span>
                     </button>
                   </div>
                 </div>
