@@ -951,7 +951,7 @@ export default function AdminPage() {
           </div>
 
           {/* Footer do Sidebar */}
-          <div className="p-4 sm:p-6 pb-6 sm:pb-6 border-t border-gray-200 bg-gray-50">
+          <div className="px-4 pt-4 pb-3 sm:p-6 border-t border-gray-200 bg-gray-50">
             <button
               onClick={salvarDistribuicao}
               disabled={salvandoDistribuicao || !formularioDistribuicao.atendenteId || !formularioDistribuicao.quantidade}
