@@ -861,40 +861,40 @@ export default function AdminPage() {
       </div>
 
       {/* Sidebar de Distribuição */}
-      <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-40 border-l border-gray-200 ${
+      <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-full sm:w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-40 border-l border-gray-200 ${
         modalDistribuicao ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="h-full flex flex-col">
           {/* Header do Sidebar */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                 </svg>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Distribuir Produto</h3>
-                <p className="text-sm text-gray-600">Atribuir produto a um atendente</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Distribuir Produto</h3>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">Atribuir produto a um atendente</p>
               </div>
             </div>
             <button
               onClick={fecharModalDistribuicao}
-              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors group"
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors group flex-shrink-0 ml-2"
             >
-              <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {/* Conteúdo do Sidebar */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {produtoSelecionado && (
               <>
                 {/* Informações do Produto */}
                 <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{produtoSelecionado.nome}</h4>
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 break-words">{produtoSelecionado.nome}</h4>
                   <div className="flex items-center justify-between text-sm text-gray-600">
                     <span>Quantidade: {produtoSelecionado.quantidade} unidades</span>
                   </div>
@@ -907,7 +907,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Campos de Distribuição */}
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       👤 Atendente *
@@ -915,7 +915,7 @@ export default function AdminPage() {
                     <select
                       value={formularioDistribuicao.atendenteId}
                       onChange={(e) => handleDistribuicaoChange('atendenteId', e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 font-medium transition-all duration-200"
+                      className="w-full px-4 py-3.5 sm:py-3 text-base sm:text-sm border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 font-medium transition-all duration-200"
                       required
                     >
                       <option value="">Selecione um atendente</option>
@@ -937,7 +937,7 @@ export default function AdminPage() {
                       max={produtoSelecionado.quantidade}
                       value={formularioDistribuicao.quantidade}
                       onChange={(e) => handleDistribuicaoChange('quantidade', e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 font-medium transition-all duration-200"
+                      className="w-full px-4 py-3.5 sm:py-3 text-base sm:text-sm border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 font-medium transition-all duration-200"
                       placeholder="1"
                       required
                     />
@@ -951,18 +951,18 @@ export default function AdminPage() {
           </div>
 
           {/* Footer do Sidebar */}
-          <div className="p-6 border-t border-gray-200 bg-gray-50">
-            <div className="flex space-x-3">
+          <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3 sm:gap-0">
               <button
                 onClick={fecharModalDistribuicao}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold hover:shadow-md"
+                className="w-full sm:flex-1 px-4 py-3.5 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 font-semibold hover:shadow-md text-base sm:text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={salvarDistribuicao}
                 disabled={salvandoDistribuicao || !formularioDistribuicao.atendenteId || !formularioDistribuicao.quantidade}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105"
+                className="w-full sm:flex-1 px-4 py-3.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105 active:scale-100 text-base sm:text-sm"
               >
                 {salvandoDistribuicao ? (
                   <div className="flex items-center justify-center space-x-2">
