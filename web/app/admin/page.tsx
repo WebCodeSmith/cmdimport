@@ -951,29 +951,21 @@ export default function AdminPage() {
           </div>
 
           {/* Footer do Sidebar */}
-          <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3 sm:gap-0">
-              <button
-                onClick={fecharModalDistribuicao}
-                className="w-full sm:flex-1 px-4 py-3.5 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 font-semibold hover:shadow-md text-base sm:text-sm"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={salvarDistribuicao}
-                disabled={salvandoDistribuicao || !formularioDistribuicao.atendenteId || !formularioDistribuicao.quantidade}
-                className="w-full sm:flex-1 px-4 py-3.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105 active:scale-100 text-base sm:text-sm"
-              >
-                {salvandoDistribuicao ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Distribuindo...</span>
-                  </div>
-                ) : (
-                  '🎯 Distribuir'
-                )}
-              </button>
-            </div>
+          <div className="p-4 sm:p-6 pb-6 sm:pb-6 border-t border-gray-200 bg-gray-50">
+            <button
+              onClick={salvarDistribuicao}
+              disabled={salvandoDistribuicao || !formularioDistribuicao.atendenteId || !formularioDistribuicao.quantidade}
+              className="w-full px-4 py-3.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105 active:scale-100 text-base sm:text-sm"
+            >
+              {salvandoDistribuicao ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Distribuindo...</span>
+                </div>
+              ) : (
+                '🎯 Distribuir'
+              )}
+            </button>
           </div>
         </div>
       </div>
