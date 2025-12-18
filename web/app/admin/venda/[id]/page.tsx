@@ -516,6 +516,7 @@ export default function DetalhesVendaPage() {
                             <p className="font-medium text-gray-900">{produto.produtoNome}</p>
                             <div className="text-sm text-gray-600 mt-1">
                               {produto.imei && <span className="mr-3">IMEI: {produto.imei}</span>}
+                              {produto.codigoBarras && <span className="mr-3">Código: {produto.codigoBarras}</span>}
                               {produto.cor && <span className="mr-3">Cor: {produto.cor}</span>}
                             </div>
                           </div>
