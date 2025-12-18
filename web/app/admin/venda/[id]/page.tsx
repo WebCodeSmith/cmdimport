@@ -150,12 +150,8 @@ export default function DetalhesVendaPage() {
         dadosTroca.precoUnitario = parseFloat(precoPersonalizado)
       }
 
-      console.log('Enviando dados de troca:', dadosTroca)
-
       const response = await saleApi.trocarProduto(dadosTroca)
-      
-      console.log('Resposta da API:', response)
-
+  
       if (response.success) {
         alert('Produto trocado com sucesso!')
         
@@ -345,7 +341,12 @@ export default function DetalhesVendaPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-600">Valor Total da Venda</label>
-                <p className="text-3xl font-bold text-green-600">R$ {venda.valorTotal.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-green-600">
+                  R$ {(venda.valorTotal > 0 
+                    ? venda.valorTotal 
+                    : venda.produtos.reduce((acc, p) => acc + (p.precoUnitario * p.quantidade), 0)
+                  ).toFixed(2)}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600">Total de Produtos</label>
