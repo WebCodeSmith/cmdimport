@@ -4,13 +4,45 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { HistoricoVenda } from '@/types/venda'
 import { formatDate, formatPhone } from '@/lib/formatters'
-import { saleApi } from '@/lib/api'
+import { saleApi, stockApi } from '@/lib/api'
+
+interface Produto {
+  id: number
+  produtoNome: string
+  quantidade: number
+  precoUnitario: number
+  produtoDetalhes?: {
+    imei?: string
+    cor?: string
+    descricao?: string
+  } | null
+}
+
+interface EstoqueDisponivel {
+  id: number
+  produtoNome: string
+  quantidade: number
+  preco: number
+  imei?: string
+  cor?: string
+  descricao?: string
+}
 
 export default function DetalhesVendaPage() {
   const params = useParams()
   const router = useRouter()
   const [venda, setVenda] = useState<HistoricoVenda | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  // Estados para troca de produto
+  const [modalTrocaAberto, setModalTrocaAberto] = useState(false)
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null)
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState<EstoqueDisponivel[]>([])
+  const [novoProdutoId, setNovoProdutoId] = useState<number | null>(null)
+  const [precoPersonalizado, setPrecoPersonalizado] = useState<string>('')
+  const [carregandoEstoque, setCarregandoEstoque] = useState(false)
+  const [processandoTroca, setProcessandoTroca] = useState(false)
+  const [buscaEstoque, setBuscaEstoque] = useState('')
 
   useEffect(() => {
     const carregarVenda = async () => {
@@ -43,6 +75,112 @@ export default function DetalhesVendaPage() {
     }
   }, [params.id, router])
 
+  const abrirModalTroca = async (produto: Produto) => {
+    setProdutoSelecionado(produto)
+    setModalTrocaAberto(true)
+    setNovoProdutoId(null)
+    setPrecoPersonalizado('')
+    setBuscaEstoque('')
+    
+    // Carregar produtos disponíveis no estoque de todos os usuários
+    setCarregandoEstoque(true)
+    try {
+      const response = await stockApi.listarEstoqueUsuarios()
+      if (response.success && response.data) {
+        // O endpoint retorna usuários com seus produtos, precisamos desagrupar
+        const todosOsProdutos: EstoqueDisponivel[] = []
+        
+        response.data.forEach((usuario: any) => {
+          if (usuario.produtos && Array.isArray(usuario.produtos)) {
+            usuario.produtos.forEach((item: any) => {
+              if (item.quantidade > 0) {
+                todosOsProdutos.push({
+                  id: item.id,
+                  produtoNome: item.nome || item.produtoNome,
+                  quantidade: item.quantidade,
+                  preco: item.preco || 0,
+                  imei: item.imei,
+                  cor: item.cor,
+                  descricao: item.descricao
+                })
+              }
+            })
+          }
+        })
+        
+        setProdutosDisponiveis(todosOsProdutos)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estoque:', error)
+      alert('Erro ao carregar produtos disponíveis')
+    } finally {
+      setCarregandoEstoque(false)
+    }
+  }
+
+  const fecharModalTroca = () => {
+    setModalTrocaAberto(false)
+    setProdutoSelecionado(null)
+    setNovoProdutoId(null)
+    setPrecoPersonalizado('')
+    setBuscaEstoque('')
+  }
+
+  const confirmarTroca = async () => {
+    if (!produtoSelecionado || !novoProdutoId) {
+      alert('Selecione um produto para trocar')
+      return
+    }
+
+    if (!confirm('Tem certeza que deseja trocar este produto?')) {
+      return
+    }
+
+    setProcessandoTroca(true)
+    try {
+      const dadosTroca: any = {
+        historicoVendaId: produtoSelecionado.id,
+        novoEstoqueId: novoProdutoId,
+      }
+
+      // Só adicionar precoUnitario se foi informado
+      if (precoPersonalizado && parseFloat(precoPersonalizado) > 0) {
+        dadosTroca.precoUnitario = parseFloat(precoPersonalizado)
+      }
+
+      console.log('Enviando dados de troca:', dadosTroca)
+
+      const response = await saleApi.trocarProduto(dadosTroca)
+
+      if (response.success) {
+        alert('Produto trocado com sucesso!')
+        
+        // Recarregar a venda
+        const id = Number(params.id)
+        const vendaResponse = await saleApi.buscarPorIDAdmin(id)
+        if (vendaResponse.success && vendaResponse.data) {
+          setVenda(vendaResponse.data)
+        }
+        
+        fecharModalTroca()
+      } else {
+        alert(response.message || 'Erro ao trocar produto')
+      }
+    } catch (error) {
+      console.error('Erro ao trocar produto:', error)
+      alert('Erro ao processar troca. Tente novamente.')
+    } finally {
+      setProcessandoTroca(false)
+    }
+  }
+
+  const produtosFiltrados = produtosDisponiveis.filter(p =>
+    p.produtoNome.toLowerCase().includes(buscaEstoque.toLowerCase()) ||
+    p.imei?.toLowerCase().includes(buscaEstoque.toLowerCase()) ||
+    p.cor?.toLowerCase().includes(buscaEstoque.toLowerCase())
+  )
+
+  const produtoSelecionadoDetalhes = produtosDisponiveis.find(p => p.id === novoProdutoId)
 
   if (loading) {
     return (
@@ -138,9 +276,20 @@ export default function DetalhesVendaPage() {
                 <div key={produto.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-gray-900">{produto.produtoNome}</h3>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {produto.quantidade}x
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        {produto.quantidade}x
+                      </span>
+                      <button
+                        onClick={() => abrirModalTroca(produto)}
+                        className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-sm font-medium rounded-lg hover:from-purple-200 hover:to-pink-200 transition-all duration-200 flex items-center space-x-1 border border-purple-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        <span>Trocar</span>
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -265,7 +414,201 @@ export default function DetalhesVendaPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Troca de Produto */}
+      {modalTrocaAberto && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-200">
+            {/* Header do Modal */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Trocar Produto</h3>
+                    <p className="text-sm text-gray-600">Substituir produto da venda</p>
+                  </div>
+                </div>
+                <button
+                  onClick={fecharModalTroca}
+                  className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors group"
+                  disabled={processandoTroca}
+                >
+                  <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Corpo do Modal */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              {/* Produto Atual */}
+              {produtoSelecionado && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-2">Produto Atual (será devolvido ao estoque)</h4>
+                      <p className="text-gray-800 font-medium">{produtoSelecionado.produtoNome}</p>
+                      <p className="text-sm text-gray-600 mt-1">Quantidade: {produtoSelecionado.quantidade} unidades</p>
+                      {produtoSelecionado.produtoDetalhes?.imei && (
+                        <p className="text-sm text-gray-600">IMEI: {produtoSelecionado.produtoDetalhes.imei}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Busca */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  🔍 Buscar Produto para Substituir
+                </label>
+                <input
+                  type="text"
+                  value={buscaEstoque}
+                  onChange={(e) => setBuscaEstoque(e.target.value)}
+                  placeholder="Digite o nome, IMEI ou cor..."
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 font-medium transition-all duration-200 hover:border-gray-300"
+                />
+              </div>
+
+              {/* Lista de Produtos Disponíveis */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  📦 Selecione o Novo Produto
+                </label>
+                
+                {carregandoEstoque ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Carregando produtos disponíveis...</p>
+                  </div>
+                ) : produtosFiltrados.length === 0 ? (
+                  <p className="text-center py-8 text-gray-500">
+                    Nenhum produto disponível no estoque
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto border-2 border-gray-200 rounded-xl p-3 bg-gray-50">
+                    {produtosFiltrados.map((produto) => (
+                      <button
+                        key={produto.id}
+                        onClick={() => setNovoProdutoId(produto.id)}
+                        className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                          novoProdutoId === produto.id
+                            ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-500 shadow-md'
+                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-900">{produto.produtoNome}</p>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {produto.imei && <span className="mr-3">IMEI: {produto.imei}</span>}
+                              {produto.cor && <span className="mr-3">Cor: {produto.cor}</span>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">
+                              R$ {produto.preco.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Estoque: {produto.quantidade}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Produto Selecionado */}
+              {produtoSelecionadoDetalhes && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-2">Novo Produto Selecionado</h4>
+                      <p className="text-gray-800 font-medium">{produtoSelecionadoDetalhes.produtoNome}</p>
+                      <p className="text-sm text-gray-600 mt-1">Preço: R$ {produtoSelecionadoDetalhes.preco.toFixed(2)}</p>
+                      {produtoSelecionadoDetalhes.imei && (
+                        <p className="text-sm text-gray-600">IMEI: {produtoSelecionadoDetalhes.imei}</p>
+                      )}
+                      <p className="text-sm text-gray-600">Disponível: {produtoSelecionadoDetalhes.quantidade} unidades</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Preço Personalizado (Opcional) */}
+              {novoProdutoId && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    💵 Preço Personalizado (Opcional)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={precoPersonalizado}
+                    onChange={(e) => setPrecoPersonalizado(e.target.value)}
+                    placeholder={`Deixe vazio para usar R$ ${produtoSelecionadoDetalhes?.preco.toFixed(2)}`}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 font-medium transition-all duration-200 hover:border-gray-300"
+                  />
+                  <p className="text-xs text-gray-600 mt-2 bg-purple-50 p-2 rounded-lg border border-purple-100">
+                    💡 Se deixar vazio, será usado o preço padrão do produto
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+              <div className="flex space-x-3">
+                <button
+                  onClick={fecharModalTroca}
+                  disabled={processandoTroca}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold hover:shadow-md disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmarTroca}
+                  disabled={!novoProdutoId || processandoTroca}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105"
+                >
+                  {processandoTroca ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>Processando...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                      </svg>
+                      <span>Confirmar Troca</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-

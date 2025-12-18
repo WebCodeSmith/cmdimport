@@ -281,6 +281,17 @@ export const saleApi = {
   buscarPorIDAdmin: async (id: number) => {
     return apiRequest<any>(`/admin/venda/${id}`)
   },
+
+  trocarProduto: async (data: {
+    historicoVendaId: number
+    novoEstoqueId: number
+    precoUnitario?: number
+  }) => {
+    return apiRequest<any>('/admin/venda/trocar-produto', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
 }
 
 // API de Upload

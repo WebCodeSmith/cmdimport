@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { HistoricoVenda } from '@/types/venda'
 import { formatDate, formatPhone } from '@/lib/formatters'
+import { saleApi } from '@/lib/api'
 
 export default function DetalhesVendaVendedorPage() {
   const { user } = useAuth()
@@ -21,13 +22,19 @@ export default function DetalhesVendaVendedorPage() {
 
     const carregarVenda = async () => {
       try {
-        const response = await fetch(`/api/vendas/venda/${params.id}`)
-        const data = await response.json()
+        const id = Number(params.id)
+        if (isNaN(id)) {
+          console.error('ID inválido:', params.id)
+          router.push('/dashboard/historico')
+          return
+        }
+
+        const response = await saleApi.buscarPorID(id)
         
-        if (data.success) {
-          setVenda(data.data)
+        if (response.success && response.data) {
+          setVenda(response.data)
         } else {
-          console.error('Erro ao carregar venda:', data.message)
+          console.error('Erro ao carregar venda:', response.message)
           router.push('/dashboard/historico')
         }
       } catch (error) {

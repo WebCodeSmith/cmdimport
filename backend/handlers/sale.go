@@ -822,3 +822,107 @@ func contains(s, substr string) bool {
 	return false
 }
 
+// TrocarProduto substitui um produto em uma venda
+func (h *SaleHandler) TrocarProduto(c *gin.Context) {
+	var req struct {
+		HistoricoVendaID int `json:"historicoVendaId" binding:"required"`
+		NovoEstoqueID    int `json:"novoEstoqueId" binding:"required"`
+		PrecoUnitario    float64 `json:"precoUnitario"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Dados obrigatórios não fornecidos",
+		})
+		return
+	}
+
+	// Buscar registro da venda original
+	var historicoVenda models.HistoricoVenda
+	if err := h.DB.Preload("Estoque").
+		Preload("Estoque.ProdutoComprado").
+		First(&historicoVenda, req.HistoricoVendaID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Registro de venda não encontrado",
+		})
+		return
+	}
+
+	// Buscar o novo produto de estoque
+	var novoEstoque models.Estoque
+	if err := h.DB.Where("id = ? AND ativo = ?", req.NovoEstoqueID, true).
+		Preload("ProdutoComprado").
+		First(&novoEstoque).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Novo produto não encontrado no estoque",
+		})
+		return
+	}
+
+	// Verificar se há quantidade disponível do novo produto
+	if novoEstoque.Quantidade < historicoVenda.Quantidade {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Quantidade insuficiente do novo produto em estoque",
+		})
+		return
+	}
+
+	// Iniciar transação
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. Devolver o produto antigo ao estoque
+		if err := tx.Model(&historicoVenda.Estoque).
+			Update("quantidade", gorm.Expr("quantidade + ?", historicoVenda.Quantidade)).Error; err != nil {
+			return err
+		}
+
+		// 2. Retirar o novo produto do estoque
+		if err := tx.Model(&novoEstoque).
+			Update("quantidade", gorm.Expr("quantidade - ?", historicoVenda.Quantidade)).Error; err != nil {
+			return err
+		}
+
+		// 3. Calcular novo preço se fornecido, senão usar o preço do produto
+		novoPreco := req.PrecoUnitario
+		if novoPreco == 0 {
+			novoPreco = novoEstoque.ProdutoComprado.Preco
+		}
+		novoValorTotal := novoPreco * float64(historicoVenda.Quantidade)
+
+		// 4. Atualizar o registro da venda
+		updates := map[string]interface{}{
+			"estoqueId":     novoEstoque.ID,
+			"produtoNome":   novoEstoque.ProdutoComprado.Nome,
+			"precoUnitario": novoPreco,
+			"valorTotal":    novoValorTotal,
+		}
+
+		if err := tx.Model(&historicoVenda).Updates(updates).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao trocar produto: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Produto trocado com sucesso",
+		"data": gin.H{
+			"produtoAntigo": historicoVenda.Estoque.ProdutoComprado.Nome,
+			"produtoNovo":   novoEstoque.ProdutoComprado.Nome,
+			"quantidade":    historicoVenda.Quantidade,
+		},
+	})
+}
+
