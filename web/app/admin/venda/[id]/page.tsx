@@ -551,6 +551,9 @@ export default function DetalhesVendaPage() {
                       {produtoSelecionadoDetalhes.imei && (
                         <p className="text-sm text-gray-600">IMEI: {produtoSelecionadoDetalhes.imei}</p>
                       )}
+                      {produtoSelecionadoDetalhes.codigoBarras && (
+                        <p className="text-sm text-gray-600">Código de Barras: {produtoSelecionadoDetalhes.codigoBarras}</p>
+                      )}
                       <p className="text-sm text-gray-600">Disponível: {produtoSelecionadoDetalhes.quantidade} unidades</p>
                     </div>
                   </div>
