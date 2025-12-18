@@ -24,6 +24,7 @@ interface EstoqueDisponivel {
   quantidade: number
   preco: number
   imei?: string
+  codigoBarras?: string
   cor?: string
   descricao?: string
 }
@@ -177,6 +178,7 @@ export default function DetalhesVendaPage() {
   const produtosFiltrados = produtosDisponiveis.filter(p =>
     p.produtoNome.toLowerCase().includes(buscaEstoque.toLowerCase()) ||
     p.imei?.toLowerCase().includes(buscaEstoque.toLowerCase()) ||
+    p.codigoBarras?.toLowerCase().includes(buscaEstoque.toLowerCase()) ||
     p.cor?.toLowerCase().includes(buscaEstoque.toLowerCase())
   )
 
@@ -477,7 +479,7 @@ export default function DetalhesVendaPage() {
                   type="text"
                   value={buscaEstoque}
                   onChange={(e) => setBuscaEstoque(e.target.value)}
-                  placeholder="Digite o nome, IMEI ou cor..."
+                  placeholder="Digite o nome, IMEI, código de barras ou cor..."
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 font-medium transition-all duration-200 hover:border-gray-300"
                 />
               </div>
