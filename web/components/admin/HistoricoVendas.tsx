@@ -11,9 +11,11 @@ export default function HistoricoVendas() {
   const [vendas, setVendas] = useState<HistoricoVenda[]>([])
   const [loading, setLoading] = useState(true)
   const [filtroCliente, setFiltroCliente] = useState('')
+  const [filtroClienteDebounced, setFiltroClienteDebounced] = useState('')
   const [filtroDataInicio, setFiltroDataInicio] = useState('')
   const [filtroDataFim, setFiltroDataFim] = useState('')
   const [filtroImeiCodigo, setFiltroImeiCodigo] = useState('')
+  const [filtroImeiCodigoDebounced, setFiltroImeiCodigoDebounced] = useState('')
   const [ordenacao, setOrdenacao] = useState<'data' | 'valor' | 'vendedor'>('data')
   const [paginaAtual, setPaginaAtual] = useState(1)
   const [totalPaginas, setTotalPaginas] = useState(1)
@@ -29,6 +31,26 @@ export default function HistoricoVendas() {
   const [exportando, setExportando] = useState(false)
   const itensPorPagina = 10
 
+  // Debounce para filtro de cliente
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltroClienteDebounced(filtroCliente)
+      setPaginaAtual(1) // Resetar para primeira página ao filtrar
+    }, 500) // Espera 500ms após o usuário parar de digitar
+
+    return () => clearTimeout(timer)
+  }, [filtroCliente])
+
+  // Debounce para filtro de IMEI/Código
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltroImeiCodigoDebounced(filtroImeiCodigo)
+      setPaginaAtual(1) // Resetar para primeira página ao filtrar
+    }, 500) // Espera 500ms após o usuário parar de digitar
+
+    return () => clearTimeout(timer)
+  }, [filtroImeiCodigo])
+
   const carregarHistorico = useCallback(async () => {
     try {
       setLoading(true)
@@ -37,8 +59,8 @@ export default function HistoricoVendas() {
         pagina: paginaAtual,
         limite: itensPorPagina,
         ordenacao,
-        cliente: filtroCliente || undefined,
-        imeiCodigo: filtroImeiCodigo || undefined,
+        cliente: filtroClienteDebounced || undefined,
+        imeiCodigo: filtroImeiCodigoDebounced || undefined,
         dataInicio: filtroDataInicio || undefined,
         dataFim: filtroDataFim || undefined,
       })
@@ -53,7 +75,7 @@ export default function HistoricoVendas() {
     } finally {
       setLoading(false)
     }
-  }, [paginaAtual, ordenacao, filtroCliente, filtroDataInicio, filtroDataFim, filtroImeiCodigo])
+  }, [paginaAtual, ordenacao, filtroClienteDebounced, filtroDataInicio, filtroDataFim, filtroImeiCodigoDebounced])
 
   const carregarResumoVendedores = useCallback(async () => {
     try {
@@ -84,9 +106,11 @@ export default function HistoricoVendas() {
 
   const limparFiltros = () => {
     setFiltroCliente('')
+    setFiltroClienteDebounced('')
     setFiltroDataInicio('')
     setFiltroDataFim('')
     setFiltroImeiCodigo('')
+    setFiltroImeiCodigoDebounced('')
     setPaginaAtual(1)
   }
 
