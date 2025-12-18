@@ -10,12 +10,11 @@ export default function HistoricoVendas() {
   const router = useRouter()
   const [vendas, setVendas] = useState<HistoricoVenda[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingLista, setLoadingLista] = useState(false)
   const [filtroCliente, setFiltroCliente] = useState('')
-  const [filtroClienteDebounced, setFiltroClienteDebounced] = useState('')
   const [filtroDataInicio, setFiltroDataInicio] = useState('')
   const [filtroDataFim, setFiltroDataFim] = useState('')
   const [filtroImeiCodigo, setFiltroImeiCodigo] = useState('')
-  const [filtroImeiCodigoDebounced, setFiltroImeiCodigoDebounced] = useState('')
   const [ordenacao, setOrdenacao] = useState<'data' | 'valor' | 'vendedor'>('data')
   const [paginaAtual, setPaginaAtual] = useState(1)
   const [totalPaginas, setTotalPaginas] = useState(1)
@@ -31,36 +30,20 @@ export default function HistoricoVendas() {
   const [exportando, setExportando] = useState(false)
   const itensPorPagina = 10
 
-  // Debounce para filtro de cliente
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFiltroClienteDebounced(filtroCliente)
-      setPaginaAtual(1) // Resetar para primeira página ao filtrar
-    }, 500) // Espera 500ms após o usuário parar de digitar
-
-    return () => clearTimeout(timer)
-  }, [filtroCliente])
-
-  // Debounce para filtro de IMEI/Código
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFiltroImeiCodigoDebounced(filtroImeiCodigo)
-      setPaginaAtual(1) // Resetar para primeira página ao filtrar
-    }, 500) // Espera 500ms após o usuário parar de digitar
-
-    return () => clearTimeout(timer)
-  }, [filtroImeiCodigo])
-
-  const carregarHistorico = useCallback(async () => {
+  const carregarHistorico = useCallback(async (isInitialLoad = false) => {
     try {
-      setLoading(true)
+      if (isInitialLoad) {
+        setLoading(true)
+      } else {
+        setLoadingLista(true)
+      }
       const { saleApi } = await import('@/lib/api')
       const response = await saleApi.historicoAdmin({
         pagina: paginaAtual,
         limite: itensPorPagina,
         ordenacao,
-        cliente: filtroClienteDebounced || undefined,
-        imeiCodigo: filtroImeiCodigoDebounced || undefined,
+        cliente: filtroCliente || undefined,
+        imeiCodigo: filtroImeiCodigo || undefined,
         dataInicio: filtroDataInicio || undefined,
         dataFim: filtroDataFim || undefined,
       })
@@ -74,8 +57,9 @@ export default function HistoricoVendas() {
     } catch (error) {
     } finally {
       setLoading(false)
+      setLoadingLista(false)
     }
-  }, [paginaAtual, ordenacao, filtroClienteDebounced, filtroDataInicio, filtroDataFim, filtroImeiCodigoDebounced])
+  }, [paginaAtual, ordenacao, filtroCliente, filtroDataInicio, filtroDataFim, filtroImeiCodigo])
 
   const carregarResumoVendedores = useCallback(async () => {
     try {
@@ -96,21 +80,29 @@ export default function HistoricoVendas() {
     }
   }, [filtroDataInicio, filtroDataFim])
 
+  // Carregamento inicial
   useEffect(() => {
     if (abaAtiva === 'historico') {
-      carregarHistorico()
+      carregarHistorico(true)
     } else {
       carregarResumoVendedores()
     }
-  }, [abaAtiva, carregarHistorico, carregarResumoVendedores])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abaAtiva])
+
+  // Atualização por filtros (sem loading da página toda)
+  useEffect(() => {
+    if (abaAtiva === 'historico' && !loading) {
+      carregarHistorico(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paginaAtual, ordenacao, filtroCliente, filtroDataInicio, filtroDataFim, filtroImeiCodigo])
 
   const limparFiltros = () => {
     setFiltroCliente('')
-    setFiltroClienteDebounced('')
     setFiltroDataInicio('')
     setFiltroDataFim('')
     setFiltroImeiCodigo('')
-    setFiltroImeiCodigoDebounced('')
     setPaginaAtual(1)
   }
 
@@ -418,8 +410,21 @@ export default function HistoricoVendas() {
         </div>
       </div>
 
+      {/* Loading da Lista */}
+      {loadingLista && (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Atualizando histórico...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Desktop Table */}
-      <div className="hidden lg:block overflow-x-auto">
+      {!loadingLista && (
+        <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
@@ -511,8 +516,10 @@ export default function HistoricoVendas() {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Mobile Cards */}
+      {!loadingLista && (
       <div className="lg:hidden space-y-4">
         {vendasFiltradas.map((venda) => (
           <div 
@@ -588,8 +595,10 @@ export default function HistoricoVendas() {
           </div>
         ))}
       </div>
+      )}
 
-      {vendasFiltradas.length === 0 && (
+      {/* Empty State */}
+      {!loadingLista && vendasFiltradas.length === 0 && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,7 +613,7 @@ export default function HistoricoVendas() {
       )}
 
       {/* Paginação */}
-      {totalPaginas > 1 && (() => {
+      {!loadingLista && totalPaginas > 1 && (() => {
         // Calcular quais páginas mostrar (máximo 7 páginas visíveis)
         const getPaginasParaMostrar = () => {
           const maxPaginasVisiveis = 7
