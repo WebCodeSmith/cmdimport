@@ -54,6 +54,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 			produtos.GET("/:id", productHandler.BuscarPorID)
 			produtos.PUT("/:id", productHandler.Atualizar)
 			produtos.PUT("/:id/precificacao", productHandler.AtualizarPrecificacao)
+			produtos.DELETE("/:id", productHandler.Deletar)
 		}
 
 		// Estoque
@@ -102,6 +103,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 		adminVenda := protected.Group("/admin/venda")
 		{
 			adminVenda.GET("/:id", saleHandler.BuscarPorIDAdmin)
+			adminVenda.POST("/trocar-produto", saleHandler.TrocarProduto)
 		}
 
 		// Admin - Usuários

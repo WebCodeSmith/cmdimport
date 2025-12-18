@@ -744,3 +744,53 @@ func (h *ProductHandler) Redistribuir(c *gin.Context) {
 	})
 }
 
+func (h *ProductHandler) Deletar(c *gin.Context) {
+	id := c.Param("id")
+	produtoID, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID do produto inválido",
+		})
+		return
+	}
+
+	// Buscar produto
+	var produto models.ProdutoComprado
+	if err := h.DB.First(&produto, produtoID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Produto não encontrado",
+		})
+		return
+	}
+
+	// Deletar em transação para garantir integridade
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		// Deletar estoques relacionados
+		if err := tx.Where("produtoCompradoId = ?", produtoID).Delete(&models.Estoque{}).Error; err != nil {
+			return err
+		}
+
+		// Deletar produto
+		if err := tx.Delete(&produto).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao deletar produto",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Produto deletado com sucesso",
+	})
+}
+
