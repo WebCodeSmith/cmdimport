@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { HistoricoVenda } from '@/types/venda'
 import { formatDate, formatPhone } from '@/lib/formatters'
+import { saleApi } from '@/lib/api'
 
 export default function DetalhesVendaPage() {
   const params = useParams()
@@ -14,13 +15,19 @@ export default function DetalhesVendaPage() {
   useEffect(() => {
     const carregarVenda = async () => {
       try {
-        const response = await fetch(`/api/admin/venda/${params.id}`)
-        const data = await response.json()
+        const id = Number(params.id)
+        if (isNaN(id)) {
+          console.error('ID inválido:', params.id)
+          router.push('/admin')
+          return
+        }
+
+        const response = await saleApi.buscarPorIDAdmin(id)
         
-        if (data.success) {
-          setVenda(data.data)
+        if (response.success && response.data) {
+          setVenda(response.data)
         } else {
-          console.error('Erro ao carregar venda:', data.message)
+          console.error('Erro ao carregar venda:', response.message)
           router.push('/admin')
         }
       } catch (error) {
