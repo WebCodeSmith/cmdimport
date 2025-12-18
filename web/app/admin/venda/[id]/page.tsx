@@ -153,6 +153,8 @@ export default function DetalhesVendaPage() {
       console.log('Enviando dados de troca:', dadosTroca)
 
       const response = await saleApi.trocarProduto(dadosTroca)
+      
+      console.log('Resposta da API:', response)
 
       if (response.success) {
         alert('Produto trocado com sucesso!')
