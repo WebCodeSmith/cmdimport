@@ -101,6 +101,7 @@ export default function DetalhesVendaPage() {
                   quantidade: item.quantidade,
                   preco: item.preco || 0,
                   imei: item.imei,
+                  codigoBarras: item.codigoBarras,
                   cor: item.cor,
                   descricao: item.descricao
                 })
