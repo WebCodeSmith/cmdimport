@@ -369,9 +369,9 @@ export default function DetalhesVendaPage() {
                 <div>
                   <label className="text-sm font-medium text-gray-600">Valor Total da Venda</label>
                   <p className="text-3xl font-bold text-green-600">
-                    R$ {(venda.valorTotal > 0
-                      ? venda.valorTotal
-                      : venda.produtos.reduce((acc, p) => acc + (p.precoUnitario * p.quantidade), 0)
+                    R$ {(venda.formaPagamento === 'crediario'
+                      ? venda.produtos.reduce((acc, p) => acc + (p.precoUnitario * p.quantidade), 0)
+                      : venda.valorTotal
                     ).toFixed(2)}
                   </p>
                 </div>
