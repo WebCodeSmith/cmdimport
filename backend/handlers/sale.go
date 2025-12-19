@@ -171,7 +171,7 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 			ProdutoNome:    produtoEstoque.Estoque.ProdutoComprado.Nome,
 			Quantidade:     quantidade,
 			PrecoUnitario:  precoUnitario,
-			ValorTotal:     subtotal,
+			ValorTotal:     valorTotal,  // Valor total da venda completa
 			Observacoes:    req.Observacoes,
 			VendedorNome:   vendedor.Nome,
 			VendedorEmail:  vendedor.Email,
@@ -755,6 +755,12 @@ func (h *SaleHandler) BuscarPorID(c *gin.Context) {
 		produtos[i] = produtoMap
 	}
 
+	// Calcular valor total somando todos os produtos
+	valorTotalCalculado := 0.0
+	for _, venda := range vendas {
+		valorTotalCalculado += venda.PrecoUnitario * float64(venda.Quantidade)
+	}
+
 	vendaFormatada := map[string]interface{}{
 		"vendaId":        vendaIDStr,
 		"clienteNome":    vendaBase.ClienteNome,
@@ -770,7 +776,7 @@ func (h *SaleHandler) BuscarPorID(c *gin.Context) {
 		"valorCartao":    vendaBase.ValorCartao,
 		"valorDinheiro":  vendaBase.ValorDinheiro,
 		"produtos":       produtos,
-		"valorTotal":     vendaBase.ValorTotal,
+		"valorTotal":     valorTotalCalculado,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
