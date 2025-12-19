@@ -34,7 +34,7 @@ export default function DetalhesVendaPage() {
   const router = useRouter()
   const [venda, setVenda] = useState<HistoricoVenda | null>(null)
   const [loading, setLoading] = useState(true)
-  
+
   // Estados para troca de produto
   const [modalTrocaAberto, setModalTrocaAberto] = useState(false)
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null)
@@ -56,7 +56,7 @@ export default function DetalhesVendaPage() {
         }
 
         const response = await saleApi.buscarPorIDAdmin(id)
-        
+
         if (response.success && response.data) {
           setVenda(response.data)
         } else {
@@ -82,7 +82,7 @@ export default function DetalhesVendaPage() {
     setNovoProdutoId(null)
     setPrecoPersonalizado('')
     setBuscaEstoque('')
-    
+
     // Carregar produtos disponíveis no estoque de todos os usuários
     setCarregandoEstoque(true)
     try {
@@ -90,7 +90,7 @@ export default function DetalhesVendaPage() {
       if (response.success && response.data) {
         // O endpoint retorna usuários com seus produtos, precisamos desagrupar
         const todosOsProdutos: EstoqueDisponivel[] = []
-        
+
         response.data.forEach((usuario: any) => {
           if (usuario.produtos && Array.isArray(usuario.produtos)) {
             usuario.produtos.forEach((item: any) => {
@@ -109,7 +109,7 @@ export default function DetalhesVendaPage() {
             })
           }
         })
-        
+
         setProdutosDisponiveis(todosOsProdutos)
       }
     } catch (error) {
@@ -151,17 +151,17 @@ export default function DetalhesVendaPage() {
       }
 
       const response = await saleApi.trocarProduto(dadosTroca)
-  
+
       if (response.success) {
         alert('Produto trocado com sucesso!')
-        
+
         // Recarregar a venda
         const id = Number(params.id)
         const vendaResponse = await saleApi.buscarPorIDAdmin(id)
         if (vendaResponse.success && vendaResponse.data) {
           setVenda(vendaResponse.data)
         }
-        
+
         fecharModalTroca()
       } else {
         alert(response.message || 'Erro ao trocar produto')
@@ -219,7 +219,7 @@ export default function DetalhesVendaPage() {
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/admin')}
-                className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors print:hidden"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -227,12 +227,23 @@ export default function DetalhesVendaPage() {
               </button>
               <h1 className="text-xl font-bold text-gray-900">📋 Detalhes da Venda</h1>
             </div>
-            <button
-              onClick={() => router.push('/admin')}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Fechar
-            </button>
+            <div className="flex items-center space-x-3 print:hidden">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                <span>Gerar PDF</span>
+              </button>
+              <button
+                onClick={() => router.push('/admin')}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -241,7 +252,7 @@ export default function DetalhesVendaPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Informações do Cliente */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-sm border print:shadow-none print:border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -265,7 +276,7 @@ export default function DetalhesVendaPage() {
           </div>
 
           {/* Informações dos Produtos */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-sm border print:shadow-none print:border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -283,7 +294,7 @@ export default function DetalhesVendaPage() {
                       </span>
                       <button
                         onClick={() => abrirModalTroca(produto)}
-                        className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-sm font-medium rounded-lg hover:from-purple-200 hover:to-pink-200 transition-all duration-200 flex items-center space-x-1 border border-purple-200"
+                        className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-sm font-medium rounded-lg hover:from-purple-200 hover:to-pink-200 transition-all duration-200 flex items-center space-x-1 border border-purple-200 print:hidden"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -292,7 +303,7 @@ export default function DetalhesVendaPage() {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-600">Quantidade</label>
@@ -331,7 +342,7 @@ export default function DetalhesVendaPage() {
           </div>
 
           {/* Informações Financeiras */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-sm border print:shadow-none print:border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -342,8 +353,8 @@ export default function DetalhesVendaPage() {
               <div>
                 <label className="text-sm font-medium text-gray-600">Valor Total da Venda</label>
                 <p className="text-3xl font-bold text-green-600">
-                  R$ {(venda.valorTotal > 0 
-                    ? venda.valorTotal 
+                  R$ {(venda.valorTotal > 0
+                    ? venda.valorTotal
                     : venda.produtos.reduce((acc, p) => acc + (p.precoUnitario * p.quantidade), 0)
                   ).toFixed(2)}
                 </p>
@@ -354,7 +365,7 @@ export default function DetalhesVendaPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600">Forma de Pagamento</label>
-                <p className="text-gray-900 font-medium capitalize">{venda.formaPagamento.replace(/_/g,' + ')}</p>
+                <p className="text-gray-900 font-medium capitalize">{venda.formaPagamento.replace(/_/g, ' + ')}</p>
               </div>
               {(venda.valorPix || venda.valorCartao || venda.valorDinheiro) && (
                 <div className="sm:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -376,7 +387,7 @@ export default function DetalhesVendaPage() {
           </div>
 
           {/* Informações do Vendedor */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-sm border print:shadow-none print:border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -396,7 +407,7 @@ export default function DetalhesVendaPage() {
           </div>
 
           {/* Data e Observações */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-sm border print:shadow-none print:border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -493,7 +504,7 @@ export default function DetalhesVendaPage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   📦 Selecione o Novo Produto
                 </label>
-                
+
                 {carregandoEstoque ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
@@ -509,11 +520,10 @@ export default function DetalhesVendaPage() {
                       <button
                         key={produto.id}
                         onClick={() => setNovoProdutoId(produto.id)}
-                        className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${
-                          novoProdutoId === produto.id
+                        className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${novoProdutoId === produto.id
                             ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-500 shadow-md'
                             : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
-                        }`}
+                          }`}
                       >
                         <div className="flex justify-between items-start">
                           <div>
