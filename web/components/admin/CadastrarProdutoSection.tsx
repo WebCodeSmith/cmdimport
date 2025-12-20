@@ -25,7 +25,7 @@ export default function CadastrarProdutoSection() {
   const [loading, setLoading] = useState(false)
   const [tipoIdentificacao, setTipoIdentificacao] = useState<'imei' | 'codigoBarras' | 'ambos'>('ambos')
   const { showToast } = useToastContext()
-  
+
   // Estados para autocomplete
   const [sugestoes, setSugestoes] = useState<ProdutoSugestao[]>([])
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
@@ -33,7 +33,7 @@ export default function CadastrarProdutoSection() {
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   // Hooks para formatação de números
   const custoFormatter = useNumberFormatter()
   const taxaFormatter = useNumberFormatter()
@@ -91,12 +91,12 @@ export default function CadastrarProdutoSection() {
 
   // Debounce na busca
   const handleNomeChange = (valor: string) => {
-    setFormData({...formData, nome: valor})
-    
+    setFormData({ ...formData, nome: valor })
+
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
     }
-    
+
     debounceTimeoutRef.current = setTimeout(() => {
       buscarProdutos(valor)
     }, 300)
@@ -104,7 +104,7 @@ export default function CadastrarProdutoSection() {
 
   // Selecionar sugestão
   const selecionarSugestao = (produto: ProdutoSugestao) => {
-    setFormData({...formData, nome: produto.nome})
+    setFormData({ ...formData, nome: produto.nome })
     setSugestoes([])
     setMostrarSugestoes(false)
     if (inputRef.current) {
@@ -143,7 +143,7 @@ export default function CadastrarProdutoSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validação para modo "ambos" - pelo menos um campo deve ser preenchido
     if (tipoIdentificacao === 'ambos') {
       if (!formData.imei.trim() && !formData.codigoBarras.trim()) {
@@ -151,37 +151,37 @@ export default function CadastrarProdutoSection() {
         return
       }
     }
-    
+
     // Validar campos obrigatórios
     const custoDolar = custoFormatter.getNumericValue()
     const taxaDolar = taxaFormatter.getNumericValue()
     const quantidade = parseInt(formData.quantidade) || 0
-    
+
     if (!formData.nome.trim()) {
       showToast('O nome do produto é obrigatório', 'error')
       return
     }
-    
+
     if (custoDolar <= 0) {
       showToast('O custo em dólar deve ser maior que zero', 'error')
       return
     }
-    
+
     if (taxaDolar <= 0) {
       showToast('A taxa do dólar deve ser maior que zero', 'error')
       return
     }
-    
+
     if (quantidade <= 0) {
       showToast('A quantidade deve ser maior que zero', 'error')
       return
     }
-    
+
     setLoading(true)
-    
+
     try {
       const { productApi } = await import('@/lib/api')
-      
+
       // Preparar dados para envio
       const dadosEnvio: any = {
         nome: formData.nome.trim(),
@@ -190,16 +190,16 @@ export default function CadastrarProdutoSection() {
         quantidade,
         tipoIdentificacao
       }
-      
+
       // Adicionar campos opcionais apenas se preenchidos
       if (formData.descricao.trim()) {
         dadosEnvio.descricao = formData.descricao.trim()
       }
-      
+
       if (formData.cor.trim()) {
         dadosEnvio.cor = formData.cor.trim()
       }
-      
+
       // IMEI e Código de Barras baseado no tipo de identificação
       if (tipoIdentificacao === 'imei') {
         // Modo IMEI: IMEI é obrigatório
@@ -226,7 +226,7 @@ export default function CadastrarProdutoSection() {
           dadosEnvio.codigoBarras = formData.codigoBarras.trim()
         }
       }
-      
+
       const response = await productApi.cadastrar(dadosEnvio)
 
       if (response.success && response.data) {
@@ -295,7 +295,7 @@ export default function CadastrarProdutoSection() {
                   </svg>
                 </div>
               )}
-              
+
               {/* Dropdown de sugestões */}
               {mostrarSugestoes && sugestoes.length > 0 && (
                 <div
@@ -327,7 +327,7 @@ export default function CadastrarProdutoSection() {
             <input
               type="text"
               value={formData.cor}
-              onChange={(e) => setFormData({...formData, cor: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, cor: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
               placeholder="Ex: Azul, Preto, Branco"
             />
@@ -387,7 +387,7 @@ export default function CadastrarProdutoSection() {
                 type="text"
                 required={tipoIdentificacao === 'imei'}
                 value={formData.imei}
-                onChange={(e) => setFormData({...formData, imei: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Ex: 123456789012345"
                 maxLength={15}
@@ -407,7 +407,7 @@ export default function CadastrarProdutoSection() {
                 type="text"
                 required={tipoIdentificacao === 'codigoBarras'}
                 value={formData.codigoBarras}
-                onChange={(e) => setFormData({...formData, codigoBarras: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, codigoBarras: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Ex: 1234567890123"
                 maxLength={50}
@@ -423,7 +423,7 @@ export default function CadastrarProdutoSection() {
           {tipoIdentificacao === 'ambos' && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-800">
-                💡 <strong>Modo Ambos:</strong> Você pode preencher IMEI, Código de Barras ou ambos. 
+                💡 <strong>Modo Ambos:</strong> Você pode preencher IMEI, Código de Barras ou ambos.
                 Pelo menos um dos campos deve ser preenchido para identificar o produto.
               </p>
             </div>
@@ -445,7 +445,7 @@ export default function CadastrarProdutoSection() {
                 value={taxaFormatter.value}
                 onChange={(e) => {
                   const formatted = taxaFormatter.handleChange(e.target.value, 4)
-                  setFormData({...formData, taxaDolar: formatted})
+                  setFormData({ ...formData, taxaDolar: formatted })
                 }}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
                 placeholder="0,0000"
@@ -467,7 +467,7 @@ export default function CadastrarProdutoSection() {
                 value={custoFormatter.value}
                 onChange={(e) => {
                   const formatted = custoFormatter.handleChange(e.target.value, 2)
-                  setFormData({...formData, custoDolar: formatted})
+                  setFormData({ ...formData, custoDolar: formatted })
                 }}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
                 placeholder="0,00"
@@ -507,8 +507,9 @@ export default function CadastrarProdutoSection() {
               min="0"
               required
               value={formData.quantidade}
-              onChange={(e) => setFormData({...formData, quantidade: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
+              onChange={(e) => setFormData({ ...formData, quantidade: e.target.value })}
+              onWheel={(e) => e.currentTarget.blur()}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="0"
             />
           </div>
@@ -522,7 +523,7 @@ export default function CadastrarProdutoSection() {
             <input
               type="text"
               value={formData.descricao}
-              onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
               placeholder="Descrição opcional do produto"
             />

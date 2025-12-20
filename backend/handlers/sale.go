@@ -161,7 +161,7 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 		produtoEstoque := produtosEstoque[i]
 		quantidade := int(produtoComPreco["quantidade"].(int))
 		precoUnitario := produtoComPreco["precoUnitario"].(float64)
-		subtotal := produtoComPreco["subtotal"].(float64)
+
 
 		historicoVenda := models.HistoricoVenda{
 			VendaID:        &vendaID,

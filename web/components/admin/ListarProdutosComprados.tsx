@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import * as XLSX from 'xlsx'
-import { formatDate, formatCurrency } from '@/lib/formatters'
+import { formatDate, formatCurrency, formatDateOnly } from '@/lib/formatters'
 import { ProdutoComprado } from '@/types/produto'
 import { ListarProdutosCompradosProps } from '@/types/components'
 
@@ -18,10 +18,10 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
   const [filtroDataInicio, setFiltroDataInicio] = useState('')
   const [filtroDataFim, setFiltroDataFim] = useState('')
   const [ocultarEstoqueZerado, setOcultarEstoqueZerado] = useState(false)
-  
+
   // Estados para os valores dos inputs (sem debounce)
   const [inputBusca, setInputBusca] = useState('')
-  
+
   const itensPorPagina = 10
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -31,27 +31,27 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       // Verificar se o produto ficou zerado e se o filtro está ativo
       const quantidadeAtualizada = produtoAtualizado.quantidade || 0
       const deveOcultar = ocultarEstoqueZerado && quantidadeAtualizada === 0
-      
+
       if (deveOcultar) {
         // Remover produto da lista se estiver zerado e o filtro estiver ativo
         return prevProdutos.filter(produto => produto.id !== produtoAtualizado.id)
       }
-      
+
       // Atualizar produto normalmente
-      return prevProdutos.map(produto => 
-        produto.id === produtoAtualizado.id 
+      return prevProdutos.map(produto =>
+        produto.id === produtoAtualizado.id
           ? {
-              ...produtoAtualizado,
-              custoDolar: typeof produtoAtualizado.custoDolar === 'string' ? parseFloat(produtoAtualizado.custoDolar) : (produtoAtualizado.custoDolar || 0),
-              taxaDolar: typeof produtoAtualizado.taxaDolar === 'string' ? parseFloat(produtoAtualizado.taxaDolar) : (produtoAtualizado.taxaDolar || 0),
-              preco: typeof produtoAtualizado.preco === 'string' ? parseFloat(produtoAtualizado.preco) : (produtoAtualizado.preco || 0),
-              // Preservar estoque do produto original se não existir no produto atualizado
-              estoque: produtoAtualizado.estoque || produto.estoque || [],
-            }
+            ...produtoAtualizado,
+            custoDolar: typeof produtoAtualizado.custoDolar === 'string' ? parseFloat(produtoAtualizado.custoDolar) : (produtoAtualizado.custoDolar || 0),
+            taxaDolar: typeof produtoAtualizado.taxaDolar === 'string' ? parseFloat(produtoAtualizado.taxaDolar) : (produtoAtualizado.taxaDolar || 0),
+            preco: typeof produtoAtualizado.preco === 'string' ? parseFloat(produtoAtualizado.preco) : (produtoAtualizado.preco || 0),
+            // Preservar estoque do produto original se não existir no produto atualizado
+            estoque: produtoAtualizado.estoque || produto.estoque || [],
+          }
           : produto
       )
     })
-    
+
     // Atualizar contadores se o produto foi removido
     if (ocultarEstoqueZerado && (produtoAtualizado.quantidade || 0) === 0) {
       setTotalProdutos(prev => Math.max(0, prev - 1))
@@ -75,7 +75,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
     }
-    
+
     debounceTimeoutRef.current = setTimeout(() => {
       setFiltroBusca(novaBusca)
       setPaginaAtual(1) // Reset para primeira página quando filtrar
@@ -165,7 +165,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
     }
-    
+
     setFiltroBusca('')
     setInputBusca('')
     setFiltroDataInicio('')
@@ -177,14 +177,14 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
   const exportarParaExcel = async () => {
     try {
       setLoadingSilencioso(true)
-      
+
       // Buscar todos os produtos fazendo requisições paginadas
       const { productApi } = await import('@/lib/api')
       const todosProdutos: ProdutoComprado[] = []
       let pagina = 1
       const limitePorLote = 100 // Buscar 100 produtos por vez
       let temMaisProdutos = true
-      
+
       // Buscar todos os produtos em lotes
       while (temMaisProdutos) {
         const response = await productApi.listar({
@@ -195,11 +195,11 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
           dataFim: filtroDataFim || undefined,
           ocultarEstoqueZerado: ocultarEstoqueZerado || undefined,
         })
-        
+
         if (!response.success) {
           throw new Error(response.message || 'Erro ao buscar produtos')
         }
-        
+
         if (response.data && response.data.length > 0) {
           // Formatar produtos e adicionar à lista
           const produtosFormatados = response.data.map((produto: any) => ({
@@ -209,7 +209,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
             preco: typeof produto.preco === 'string' ? parseFloat(produto.preco) : (produto.preco || 0),
           }))
           todosProdutos.push(...produtosFormatados)
-          
+
           // Verificar se há mais produtos
           const totalPaginas = response.paginacao?.totalPaginas || 1
           temMaisProdutos = pagina < totalPaginas
@@ -218,7 +218,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
           temMaisProdutos = false
         }
       }
-      
+
       if (todosProdutos.length === 0) {
         throw new Error('Nenhum produto encontrado para exportar')
       }
@@ -243,7 +243,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         'Preço': formatarNumero(produto.preco),
         'Quantidade': produto.quantidade,
         'Quantidade Backup': produto.quantidadeBackup || produto.quantidade,
-        'Data Compra': new Date(produto.dataCompra).toLocaleDateString('pt-BR'),
+        'Data Compra': formatDateOnly(produto.dataCompra),
         'Valor Atacado': produto.valorAtacado ? formatarNumero(produto.valorAtacado) : '',
         'Valor Varejo': produto.valorVarejo ? formatarNumero(produto.valorVarejo) : '',
         'Valor Parcelado 10x': produto.valorParcelado10x ? formatarNumero(produto.valorParcelado10x) : ''
@@ -252,10 +252,10 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
       // Criar arquivo Excel (XLSX) com ajuste automático de colunas
       const workbook = XLSX.utils.book_new()
       const worksheet = XLSX.utils.json_to_sheet(dadosExcel)
-      
+
       // Obter headers das chaves dos dados
       const headers = Object.keys(dadosExcel[0] || {})
-      
+
       // Ajustar largura das colunas automaticamente
       const colWidths = headers.map((header: string) => {
         const maxLength = Math.max(
@@ -267,15 +267,15 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         )
         return { wch: Math.min(Math.max(maxLength + 2, 10), 50) } // Mínimo 10, máximo 50
       })
-      
+
       worksheet['!cols'] = colWidths
-      
+
       // Adicionar worksheet ao workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Produtos Comprados')
-      
+
       // Gerar arquivo Excel
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-      
+
       // Download do arquivo
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
       const link = document.createElement('a')
@@ -358,7 +358,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Data início
@@ -370,7 +370,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Data fim
@@ -382,7 +382,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
             />
           </div>
-          
+
           <div className="flex items-end">
             <button
               onClick={limparFiltros}
@@ -392,7 +392,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
             </button>
           </div>
         </div>
-        
+
         {/* Checkbox para ocultar estoque zerado */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <label className="flex items-center space-x-2 cursor-pointer">
@@ -463,7 +463,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Data</p>
                   <p className="text-sm font-semibold text-gray-900">
-                    {produto.dataCompra ? formatDate(produto.dataCompra) : 'N/A'}
+                    {produto.dataCompra ? formatDateOnly(produto.dataCompra) : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         const getPaginasParaMostrar = () => {
           const maxPaginasVisiveis = 7
           const paginas: (number | string)[] = []
-          
+
           if (totalPaginas <= maxPaginasVisiveis) {
             // Se há poucas páginas, mostrar todas
             for (let i = 1; i <= totalPaginas; i++) {
@@ -556,7 +556,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
           } else {
             // Sempre mostrar primeira página
             paginas.push(1)
-            
+
             if (paginaAtual <= 4) {
               // Páginas iniciais: 1, 2, 3, 4, 5, ..., última
               for (let i = 2; i <= 5; i++) {
@@ -580,18 +580,18 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               paginas.push(totalPaginas)
             }
           }
-          
+
           return paginas
         }
-        
+
         const paginasParaMostrar = getPaginasParaMostrar()
-        
+
         return (
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-700">
               Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, totalProdutos)} de {totalProdutos} produtos
             </div>
-            
+
             <div className="flex items-center space-x-2 flex-wrap justify-center">
               <button
                 onClick={() => setPaginaAtual(paginaAtual - 1)}
@@ -600,7 +600,7 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
               >
                 Anterior
               </button>
-              
+
               <div className="flex space-x-1 flex-wrap justify-center">
                 {paginasParaMostrar.map((pagina, index) => {
                   if (pagina === '...') {
@@ -610,24 +610,23 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
                       </span>
                     )
                   }
-                  
+
                   const numPagina = pagina as number
                   return (
                     <button
                       key={numPagina}
                       onClick={() => setPaginaAtual(numPagina)}
-                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        numPagina === paginaAtual
-                          ? 'bg-indigo-600 text-white'
-                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${numPagina === paginaAtual
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
                     >
                       {numPagina}
                     </button>
                   )
                 })}
               </div>
-              
+
               <button
                 onClick={() => setPaginaAtual(paginaAtual + 1)}
                 disabled={paginaAtual === totalPaginas}

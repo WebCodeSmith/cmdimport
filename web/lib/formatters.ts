@@ -25,12 +25,12 @@ export const formatNumber = (valor: number, minDecimals: number = 2, maxDecimals
  */
 export const formatDate = (data: string | Date | null | undefined): string => {
   if (!data) return ''
-  
+
   const date = typeof data === 'string' ? new Date(data) : data
-  
+
   // Verificar se a data é válida
   if (isNaN(date.getTime())) return ''
-  
+
   return date.toLocaleString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -45,16 +45,17 @@ export const formatDate = (data: string | Date | null | undefined): string => {
  */
 export const formatDateOnly = (data: string | Date | null | undefined): string => {
   if (!data) return ''
-  
+
   const date = typeof data === 'string' ? new Date(data) : data
-  
+
   // Verificar se a data é válida
   if (isNaN(date.getTime())) return ''
-  
+
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   })
 }
 
@@ -64,7 +65,7 @@ export const formatDateOnly = (data: string | Date | null | undefined): string =
 export const formatPhone = (telefone: string): string => {
   // Remove tudo que não é número
   const numbers = telefone.replace(/\D/g, '')
-  
+
   if (numbers.length <= 2) {
     return numbers
   } else if (numbers.length <= 6) {
