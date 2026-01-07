@@ -1,0 +1,79 @@
+<app-main-layout>
+  <div class="space-y-8">
+    <!-- Header -->
+    <div>
+      <h1 class="text-3xl font-bold text-slate-900">Painel Administrativo</h1>
+      <p class="text-sm text-slate-600 mt-2">Gerencie produtos, estoques e vendas</p>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="flex flex-wrap border-b border-slate-200">
+        <button
+          (click)="setActiveTab('historico')"
+          [class.bg-slate-50]="activeTab() === 'historico'"
+          [class.text-slate-900]="activeTab() === 'historico'"
+          [class.font-semibold]="activeTab() === 'historico'"
+          [class.text-slate-600]="activeTab() !== 'historico'"
+          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
+          [class.border-b-slate-900]="activeTab() === 'historico'"
+        >
+          Histórico de Vendas
+        </button>
+        <button
+          (click)="setActiveTab('cadastrar-produto')"
+          [class.bg-slate-50]="activeTab() === 'cadastrar-produto'"
+          [class.text-slate-900]="activeTab() === 'cadastrar-produto'"
+          [class.font-semibold]="activeTab() === 'cadastrar-produto'"
+          [class.text-slate-600]="activeTab() !== 'cadastrar-produto'"
+          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
+          [class.border-b-slate-900]="activeTab() === 'cadastrar-produto'"
+        >
+          Cadastrar Produto
+        </button>
+        <button
+          (click)="setActiveTab('listar-produtos')"
+          [class.bg-slate-50]="activeTab() === 'listar-produtos'"
+          [class.text-slate-900]="activeTab() === 'listar-produtos'"
+          [class.font-semibold]="activeTab() === 'listar-produtos'"
+          [class.text-slate-600]="activeTab() !== 'listar-produtos'"
+          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
+          [class.border-b-slate-900]="activeTab() === 'listar-produtos'"
+        >
+          Listar Produtos
+        </button>
+        <button
+          (click)="setActiveTab('estoque-usuarios')"
+          [class.bg-slate-50]="activeTab() === 'estoque-usuarios'"
+          [class.text-slate-900]="activeTab() === 'estoque-usuarios'"
+          [class.font-semibold]="activeTab() === 'estoque-usuarios'"
+          [class.text-slate-600]="activeTab() !== 'estoque-usuarios'"
+          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
+          [class.border-b-slate-900]="activeTab() === 'estoque-usuarios'"
+        >
+          Estoque de Usuários
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="p-6">
+        @if (activeTab() === 'historico') {
+          <app-historico-vendas />
+        }
+
+        @if (activeTab() === 'cadastrar-produto') {
+          <app-cadastrar-produto />
+        }
+
+        @if (activeTab() === 'listar-produtos') {
+          <app-listar-produtos />
+        }
+
+        @if (activeTab() === 'estoque-usuarios') {
+          <app-estoque-usuarios />
+        }
+      </div>
+    </div>
+  </div>
+</app-main-layout>
+

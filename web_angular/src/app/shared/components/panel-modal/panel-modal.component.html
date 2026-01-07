@@ -1,0 +1,55 @@
+<div *ngIf="isOpen" 
+    (click)="onBackdropClick($event)"
+    class="modal-backdrop fixed inset-0 z-[60] flex items-end justify-end bg-black/50 animate-[fadeIn_0.2s_ease]">
+    
+    <div (click)="$event.stopPropagation()"
+        [class]="'w-full ' + maxWidth + ' ' + height + ' bg-white rounded-t-2xl shadow-2xl border-t border-slate-200 overflow-hidden animate-[slideUp_0.3s_ease] flex flex-col mr-8'">
+
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">{{ title }}</h2>
+                <p *ngIf="subtitle" class="text-xs text-slate-500 mt-0.5">{{ subtitle }}</p>
+            </div>
+            <button (click)="onClose()"
+                class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors">
+                <span class="material-icons text-[20px]">close</span>
+            </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Left Sidebar - Custom Content or Menu Items -->
+            <div *ngIf="showSidebar" 
+                class="w-80 bg-slate-50 border-r border-slate-200 overflow-y-auto custom-scrollbar">
+                <!-- Custom Sidebar Content -->
+                <ng-content select="[sidebar]"></ng-content>
+                
+                <!-- Default Menu Items (if no custom content) -->
+                <div *ngIf="menuItems.length > 0" class="p-4">
+                    <div class="space-y-1.5">
+                        <button 
+                            *ngFor="let item of menuItems"
+                            (click)="!item.disabled && onMenuItemClick(item.id)"
+                            [disabled]="item.disabled"
+                            [class]="'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors ' + 
+                                     (item.disabled
+                                        ? 'opacity-50 cursor-not-allowed text-slate-400'
+                                        : selectedMenuItemId === item.id 
+                                        ? 'bg-slate-900 text-white shadow-sm' 
+                                        : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900')">
+                            <span class="material-icons text-[18px]">{{ item.icon }}</span>
+                            <span class="font-medium text-sm">{{ item.label }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content Area -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar bg-white">
+                <ng-content></ng-content>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -14,6 +14,8 @@ out/
 *.dylib
 cmdimport-backend
 
+mobile/
+
 # Arquivos de ambiente
 .env
 .env.local

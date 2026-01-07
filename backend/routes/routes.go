@@ -103,7 +103,11 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 		adminVenda := protected.Group("/admin/venda")
 		{
 			adminVenda.GET("/:id", saleHandler.BuscarPorIDAdmin)
+			adminVenda.PUT("/:id", saleHandler.AtualizarVenda)
+			adminVenda.DELETE("/:id", saleHandler.DeletarVenda)
 			adminVenda.POST("/trocar-produto", saleHandler.TrocarProduto)
+			adminVenda.PUT("/:id/produto/:produtoId", saleHandler.AtualizarProdutoVenda)
+			adminVenda.DELETE("/:id/produto/:produtoId", saleHandler.DeletarProdutoVenda)
 		}
 
 		// Admin - Usuários

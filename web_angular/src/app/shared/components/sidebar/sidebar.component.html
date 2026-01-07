@@ -1,0 +1,63 @@
+<!-- Overlay para mobile -->
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+    (click)="toggle.emit()"
+  ></div>
+}
+
+<!-- Sidebar - Apenas Mobile -->
+<aside
+  [class.translate-x-0]="isOpen()"
+  [class.-translate-x-full]="!isOpen()"
+  class="fixed top-0 left-0 h-screen bg-white border-r border-gray-200 z-50 transition-transform duration-300 ease-in-out lg:hidden flex flex-col w-64"
+>
+  <!-- Logo e Toggle -->
+  <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-800 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h1 class="text-lg font-semibold text-slate-900">CMD Import</h1>
+    </div>
+    <button
+      (click)="toggle.emit()"
+      class="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+    @for (item of filteredNavItems; track item.href) {
+      <button
+        (click)="navigate(item.href)"
+        [class.bg-slate-100]="isActive(item.href)"
+        [class.text-slate-900]="isActive(item.href)"
+        [class.font-medium]="isActive(item.href)"
+        [class.text-gray-600]="!isActive(item.href)"
+        [class.hover:bg-gray-50]="!isActive(item.href)"
+        [class.hover:text-slate-900]="!isActive(item.href)"
+        class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200"
+      >
+        <svg
+          class="w-5 h-5"
+          [class.text-slate-700]="isActive(item.href)"
+          [class.text-gray-500]="!isActive(item.href)"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+        </svg>
+        <span class="text-sm">{{ item.name }}</span>
+      </button>
+    }
+  </nav>
+</aside>
+

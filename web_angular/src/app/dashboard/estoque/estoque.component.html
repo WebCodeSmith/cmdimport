@@ -1,0 +1,136 @@
+<div class="space-y-6">
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
+        <p class="text-slate-600">Carregando estoque...</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Filtro -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mt-8">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [checked]="mostrarEstoquesZerados()"
+            (change)="toggleMostrarEstoquesZerados()"
+            class="h-4 w-4 text-slate-600 focus:ring-slate-500 border-slate-300 rounded"
+          />
+          <span class="ml-2 text-sm text-slate-700">
+            Mostrar estoques zerados
+          </span>
+        </label>
+        <div class="text-sm text-slate-500">
+          {{ produtosComEstoque() }} produtos com estoque
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de Produtos -->
+    @if (estoqueFiltrado().length === 0) {
+      <div class="text-center py-12 bg-white border border-slate-200 rounded-xl">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h4 class="text-lg font-medium text-slate-900 mb-2">
+          {{ mostrarEstoquesZerados() ? 'Nenhum produto encontrado' : 'Nenhum produto em estoque' }}
+        </h4>
+        <p class="text-slate-600">
+          {{ mostrarEstoquesZerados() 
+            ? 'Tente ajustar os filtros de busca' 
+            : 'Entre em contato com o administrador para adicionar produtos.'
+          }}
+        </p>
+      </div>
+    } @else {
+      <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+              <tr class="border-b border-slate-200">
+                <th class="text-left py-4 px-6 font-medium text-slate-700">Produto</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">Qtd</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">Status</th>
+                <th class="text-right py-4 px-4 font-medium text-slate-700">Preço</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">Cor</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">IMEI</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">Código de Barras</th>
+                <th class="text-center py-4 px-4 font-medium text-slate-700">Descrição</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of estoqueFiltrado(); track item.id) {
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td class="py-4 px-6">
+                    <div class="font-bold text-slate-900 text-base">{{ item.nome }}</div>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="font-bold text-slate-900 text-base">{{ item.quantidade }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusClass(item.quantidade) }}">
+                      {{ getStatus(item.quantidade) }}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <span class="font-bold text-slate-900 text-base">{{ formatCurrency(item.preco) }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="font-bold text-slate-900 text-base">{{ item.cor || '-' }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="font-bold text-slate-900 font-mono text-base">{{ item.imei || '-' }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="font-bold text-slate-900 font-mono text-base">{{ item.codigoBarras || '-' }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    @if (item.descricao) {
+                      <button
+                        (click)="toggleDescricao(item.id)"
+                        class="p-1 text-slate-600 hover:text-slate-800 transition-colors"
+                        title="Ver descrição"
+                      >
+                        <svg class="w-4 h-4 transition-transform duration-200 {{ produtoExpandido() === item.id ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    } @else {
+                      <span class="text-slate-400">-</span>
+                    }
+                  </td>
+                </tr>
+                <!-- Linha expandida com descrição -->
+                @if (produtoExpandido() === item.id && item.descricao) {
+                  <tr class="bg-slate-50">
+                    <td colspan="8" class="py-4 px-6">
+                      <div class="bg-white border border-slate-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                          <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
+                              <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="flex-1">
+                            <h4 class="text-sm font-semibold text-slate-900 mb-2">Descrição do Produto</h4>
+                            <p class="text-slate-700 text-sm leading-relaxed">{{ item.descricao }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>
+

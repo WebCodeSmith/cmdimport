@@ -1,0 +1,15 @@
+@for (position of getPositions(); track position) {
+  @if (getToastsByPosition(position).length > 0) {
+    <div [class]="getPositionClasses(position)">
+      @for (toast of getToastsByPosition(position); track toast.id) {
+        <div class="pointer-events-auto">
+          <app-toast 
+            [toast]="toast" 
+            (close)="onClose($event)"
+          />
+        </div>
+      }
+    </div>
+  }
+}
+

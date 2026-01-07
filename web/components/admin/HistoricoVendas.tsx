@@ -160,10 +160,10 @@ export default function HistoricoVendas() {
 
       const vendasExport = todasVendas as Array<VendaExport>
 
-      // Criar uma linha para cada produto vendido (igual à exportação de produtos comprados)
+      // Criar uma linha para cada produto vendido com TODAS as informações
       const linhas: Array<Record<string, string | number>> = []
       
-      vendasExport.forEach((venda: VendaExport) => {
+      vendasExport.forEach((venda: any) => {
         const produtos = venda.produtos || []
         
         if (produtos.length === 0) {
@@ -176,20 +176,26 @@ export default function HistoricoVendas() {
             'Endereço': venda.endereco || '',
             'Tipo de Cliente': getTipoClienteNome(venda.tipoCliente),
             'Produto': '',
+            'Cor': '',
+            'IMEI': '',
+            'Descrição': '',
             'Quantidade': 0,
             'Preço Unitário': '',
             'Subtotal': '',
+            'Valor Total da Venda': venda.valorTotal != null ? Number(venda.valorTotal).toFixed(2).replace('.', ',') : '',
             'Forma de Pagamento': venda.formaPagamento || '',
             'Valor Pix': venda.valorPix != null ? Number(venda.valorPix).toFixed(2).replace('.', ',') : '',
             'Valor Cartão': venda.valorCartao != null ? Number(venda.valorCartao).toFixed(2).replace('.', ',') : '',
             'Valor Dinheiro': venda.valorDinheiro != null ? Number(venda.valorDinheiro).toFixed(2).replace('.', ',') : '',
             'Vendedor': venda.vendedorNome || '',
+            'Email do Vendedor': venda.vendedorEmail || '',
             'Data': venda.createdAt ? formatDate(venda.createdAt) : '',
             'Observações': venda.observacoes || ''
           })
         } else {
-          // Criar uma linha para cada produto
-          produtos.forEach((produto: ProdutoItem) => {
+          // Criar uma linha para cada produto com TODAS as informações
+          produtos.forEach((produto: any) => {
+            const detalhes = produto.produtoDetalhes || {}
             linhas.push({
               'ID da Venda': venda.vendaId || '',
               'ID do Produto': produto.produtoId || '',
@@ -198,14 +204,19 @@ export default function HistoricoVendas() {
               'Endereço': venda.endereco || '',
               'Tipo de Cliente': getTipoClienteNome(venda.tipoCliente),
               'Produto': produto.produtoNome || '',
+              'Cor': detalhes.cor || '',
+              'IMEI': detalhes.imei || '',
+              'Descrição': detalhes.descricao || '',
               'Quantidade': produto.quantidade || 0,
               'Preço Unitário': Number(produto.precoUnitario || 0).toFixed(2).replace('.', ','),
               'Subtotal': (Number(produto.precoUnitario || 0) * produto.quantidade).toFixed(2).replace('.', ','),
+              'Valor Total da Venda': venda.valorTotal != null ? Number(venda.valorTotal).toFixed(2).replace('.', ',') : '',
               'Forma de Pagamento': venda.formaPagamento || '',
               'Valor Pix': venda.valorPix != null ? Number(venda.valorPix).toFixed(2).replace('.', ',') : '',
               'Valor Cartão': venda.valorCartao != null ? Number(venda.valorCartao).toFixed(2).replace('.', ',') : '',
               'Valor Dinheiro': venda.valorDinheiro != null ? Number(venda.valorDinheiro).toFixed(2).replace('.', ',') : '',
               'Vendedor': venda.vendedorNome || '',
+              'Email do Vendedor': venda.vendedorEmail || '',
               'Data': venda.createdAt ? formatDate(venda.createdAt) : '',
               'Observações': venda.observacoes || ''
             })

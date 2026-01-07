@@ -791,6 +791,33 @@ func (h *SaleHandler) BuscarPorIDAdmin(c *gin.Context) {
 }
 
 // Funções auxiliares
+// buscarPrimeiroRegistroVenda busca o primeiro registro da venda pelo ID numérico e retorna o VendaID
+func (h *SaleHandler) buscarPrimeiroRegistroVenda(id int) (*models.HistoricoVenda, error) {
+	var registro models.HistoricoVenda
+	if err := h.DB.First(&registro, id).Error; err != nil {
+		return nil, err
+	}
+	if registro.VendaID == nil {
+		return nil, fmt.Errorf("VendaID inválido")
+	}
+	return &registro, nil
+}
+
+// recalcularValorTotalVenda recalcula e atualiza o valor total da venda
+func (h *SaleHandler) recalcularValorTotalVenda(tx *gorm.DB, vendaId string) error {
+	var totalVenda float64
+	if err := tx.Model(&models.HistoricoVenda{}).
+		Where("vendaId = ?", vendaId).
+		Select("COALESCE(SUM(precoUnitario * quantidade), 0)").
+		Scan(&totalVenda).Error; err != nil {
+		return err
+	}
+
+	return tx.Model(&models.HistoricoVenda{}).
+		Where("vendaId = ?", vendaId).
+		Update("valorTotal", totalVenda).Error
+}
+
 func removeFormatting(s string) string {
 	// Remove tudo exceto números, vírgula e ponto
 	result := ""
@@ -929,6 +956,379 @@ func (h *SaleHandler) TrocarProduto(c *gin.Context) {
 			"produtoNovo":   novoEstoque.ProdutoComprado.Nome,
 			"quantidade":    historicoVenda.Quantidade,
 		},
+	})
+}
+
+// AtualizarVenda atualiza os dados da venda (cliente, telefone, endereço, observações)
+func (h *SaleHandler) AtualizarVenda(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID inválido",
+		})
+		return
+	}
+
+	var req struct {
+		ClienteNome string  `json:"clienteNome" binding:"required"`
+		Telefone    string  `json:"telefone" binding:"required"`
+		Endereco    string  `json:"endereco"`
+		Observacoes *string `json:"observacoes"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Dados obrigatórios não fornecidos",
+		})
+		return
+	}
+
+	// Buscar o primeiro registro da venda para obter o VendaID
+	primeiroRegistro, err := h.buscarPrimeiroRegistroVenda(id)
+	if err != nil {
+		if err.Error() == "VendaID inválido" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "VendaID inválido",
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "Venda não encontrada",
+			})
+		}
+		return
+	}
+
+	// Atualizar todos os registros da venda com o mesmo VendaID
+	result := h.DB.Model(&models.HistoricoVenda{}).
+		Where("vendaId = ?", *primeiroRegistro.VendaID).
+		Updates(map[string]interface{}{
+			"clienteNome": req.ClienteNome,
+			"telefone":    req.Telefone,
+			"endereco":    req.Endereco,
+			"observacoes": req.Observacoes,
+		})
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao atualizar venda: " + result.Error.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Venda atualizada com sucesso",
+	})
+}
+
+// DeletarVenda deleta uma venda e devolve os produtos ao estoque
+func (h *SaleHandler) DeletarVenda(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID inválido",
+		})
+		return
+	}
+
+	// Buscar o primeiro registro da venda
+	primeiroRegistro, err := h.buscarPrimeiroRegistroVenda(id)
+	if err != nil {
+		if err.Error() == "VendaID inválido" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "VendaID inválido",
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "Venda não encontrada",
+			})
+		}
+		return
+	}
+
+	// Buscar todos os registros da venda com estoque
+	var historicoVendas []models.HistoricoVenda
+	if err := h.DB.Preload("Estoque").Where("vendaId = ?", *primeiroRegistro.VendaID).Find(&historicoVendas).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao buscar registros da venda",
+		})
+		return
+	}
+
+	// Iniciar transação
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. Devolver produtos ao estoque
+		for _, hv := range historicoVendas {
+			if hv.Estoque.ID > 0 {
+				if err := tx.Model(&hv.Estoque).
+					Update("quantidade", gorm.Expr("quantidade + ?", hv.Quantidade)).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		// 2. Deletar todos os registros da venda
+		if err := tx.Where("vendaId = ?", *primeiroRegistro.VendaID).Delete(&models.HistoricoVenda{}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao deletar venda: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Venda deletada com sucesso",
+	})
+}
+
+// AtualizarProdutoVenda atualiza quantidade e preço de um produto específico da venda
+func (h *SaleHandler) AtualizarProdutoVenda(c *gin.Context) {
+	idStr := c.Param("id")
+	produtoIdStr := c.Param("produtoId")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID da venda inválido",
+		})
+		return
+	}
+
+	produtoId, err := strconv.Atoi(produtoIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID do produto inválido",
+		})
+		return
+	}
+
+	var req struct {
+		Quantidade    int     `json:"quantidade" binding:"required,min=1"`
+		PrecoUnitario float64 `json:"precoUnitario" binding:"required,min=0.01"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Dados obrigatórios não fornecidos",
+		})
+		return
+	}
+
+	// Buscar o primeiro registro da venda para obter o VendaID
+	primeiroRegistro, err := h.buscarPrimeiroRegistroVenda(id)
+	if err != nil {
+		if err.Error() == "VendaID inválido" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "VendaID inválido",
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "Venda não encontrada",
+			})
+		}
+		return
+	}
+
+	// Buscar o registro do produto
+	var historicoVenda models.HistoricoVenda
+	if err := h.DB.Preload("Estoque").First(&historicoVenda, produtoId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Produto da venda não encontrado",
+		})
+		return
+	}
+
+	// Verificar se o produto pertence à venda correta
+	if historicoVenda.VendaID == nil || *historicoVenda.VendaID != *primeiroRegistro.VendaID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Produto não pertence a esta venda",
+		})
+		return
+	}
+
+	// Calcular diferença de quantidade
+	diferencaQuantidade := req.Quantidade - historicoVenda.Quantidade
+
+	// Iniciar transação
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. Ajustar estoque se a quantidade mudou
+		if diferencaQuantidade != 0 && historicoVenda.Estoque.ID > 0 {
+			if diferencaQuantidade > 0 {
+				// Reduzir estoque
+				if historicoVenda.Estoque.Quantidade < diferencaQuantidade {
+					return fmt.Errorf("quantidade insuficiente em estoque")
+				}
+				if err := tx.Model(&historicoVenda.Estoque).
+					Update("quantidade", gorm.Expr("quantidade - ?", diferencaQuantidade)).Error; err != nil {
+					return err
+				}
+			} else {
+				// Devolver ao estoque
+				if err := tx.Model(&historicoVenda.Estoque).
+					Update("quantidade", gorm.Expr("quantidade + ?", -diferencaQuantidade)).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		// 2. Atualizar o registro do produto
+		if err := tx.Model(&historicoVenda).Updates(map[string]interface{}{
+			"quantidade":    req.Quantidade,
+			"precoUnitario": req.PrecoUnitario,
+		}).Error; err != nil {
+			return err
+		}
+
+		// 3. Recalcular e atualizar valor total da venda
+		return h.recalcularValorTotalVenda(tx, *historicoVenda.VendaID)
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao atualizar produto: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Produto atualizado com sucesso",
+	})
+}
+
+// DeletarProdutoVenda deleta um produto específico da venda
+func (h *SaleHandler) DeletarProdutoVenda(c *gin.Context) {
+	idStr := c.Param("id")
+	produtoIdStr := c.Param("produtoId")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID da venda inválido",
+		})
+		return
+	}
+
+	produtoId, err := strconv.Atoi(produtoIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID do produto inválido",
+		})
+		return
+	}
+
+	// Buscar o primeiro registro da venda para obter o VendaID
+	primeiroRegistro, err := h.buscarPrimeiroRegistroVenda(id)
+	if err != nil {
+		if err.Error() == "VendaID inválido" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "VendaID inválido",
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "Venda não encontrada",
+			})
+		}
+		return
+	}
+
+	// Buscar o registro do produto
+	var historicoVenda models.HistoricoVenda
+	if err := h.DB.Preload("Estoque").First(&historicoVenda, produtoId).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Produto da venda não encontrado",
+		})
+		return
+	}
+
+	// Verificar se o produto pertence à venda correta
+	if historicoVenda.VendaID == nil || *historicoVenda.VendaID != *primeiroRegistro.VendaID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Produto não pertence a esta venda",
+		})
+		return
+	}
+
+	// Verificar quantos produtos restam na venda
+	vendaIdStr := *historicoVenda.VendaID
+	var totalProdutos int64
+	if err := h.DB.Model(&models.HistoricoVenda{}).
+		Where("vendaId = ?", vendaIdStr).
+		Count(&totalProdutos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao verificar produtos da venda",
+		})
+		return
+	}
+
+	// Iniciar transação
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		// 1. Devolver produto ao estoque
+		if historicoVenda.Estoque.ID > 0 {
+			if err := tx.Model(&historicoVenda.Estoque).
+				Update("quantidade", gorm.Expr("quantidade + ?", historicoVenda.Quantidade)).Error; err != nil {
+				return err
+			}
+		}
+
+		// 2. Deletar o registro do produto
+		if err := tx.Delete(&historicoVenda).Error; err != nil {
+			return err
+		}
+
+		// 3. Se ainda houver produtos, recalcular valor total da venda
+		if totalProdutos > 1 {
+			return h.recalcularValorTotalVenda(tx, vendaIdStr)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao deletar produto: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Produto deletado com sucesso",
 	})
 }
 

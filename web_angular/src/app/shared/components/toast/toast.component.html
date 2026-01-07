@@ -1,0 +1,35 @@
+@if (isVisible) {
+  <div 
+    class="flex items-start space-x-3 px-4 py-3 rounded-lg min-w-[320px] max-w-md transition-all duration-300 ease-in-out"
+    [class]="getToastStyles()"
+    [class.opacity-0]="!isAnimating"
+    [class.translate-x-full]="!isAnimating && (toast.position?.includes('right') || !toast.position)"
+    [class.-translate-x-full]="!isAnimating && toast.position?.includes('left')"
+    [class.translate-y-full]="!isAnimating && toast.position?.includes('bottom')"
+    [class.-translate-y-full]="!isAnimating && toast.position?.includes('top')"
+    [class.opacity-100]="isAnimating"
+    [class.translate-x-0]="isAnimating && (toast.position?.includes('right') || !toast.position)"
+    [class.translate-y-0]="isAnimating && toast.position?.includes('top')"
+  >
+    <!-- Ícone -->
+    <div class="flex-shrink-0 mt-0.5" [innerHTML]="getIcon()"></div>
+    
+    <!-- Mensagem -->
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-medium leading-5 whitespace-pre-line">{{ toast.message }}</p>
+    </div>
+    
+    <!-- Botão Fechar -->
+    <button
+      (click)="dismiss()"
+      type="button"
+      class="flex-shrink-0 ml-2 text-current hover:opacity-70 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current rounded"
+      aria-label="Fechar notificação"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+}
+
