@@ -1,20 +1,23 @@
 <div>
-  <div class="mb-6">
-    <h3 class="text-xl font-bold text-slate-900 mb-2">🛒 Cadastrar Nova Compra</h3>
-    <p class="text-slate-600">Registre produtos comprados que serão adicionados ao estoque</p>
+  <!-- Header - Estilo Bitrix24 -->
+  <div class="mb-5">
+    <h3 class="text-lg font-semibold text-slate-900">Cadastrar Nova Compra</h3>
+    <p class="text-sm text-slate-600 mt-0.5">Registre produtos comprados que serão adicionados ao estoque</p>
   </div>
 
-  <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <!-- Formulário - Estilo Bitrix24 -->
+  <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm p-6">
+    <form [formGroup]="produtoForm" (ngSubmit)="onSubmit()" class="space-y-5">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <!-- Nome do Produto com Autocomplete -->
       <div class="relative">
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Nome do Produto *
         </label>
         <div class="relative">
           <input type="text" formControlName="nome"
             (focus)="mostrarSugestoes() && sugestoes().length > 0 ? mostrarSugestoes.set(true) : null"
-            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
             placeholder="Ex: iPhone 15 Pro ou Redmi" required />
           @if (buscando()) {
           <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -25,13 +28,13 @@
           <!-- Dropdown de sugestões -->
           @if (mostrarSugestoes() && sugestoes().length > 0) {
           <div
-            class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+            class="absolute z-50 w-full mt-1 bg-white border border-slate-300 rounded-md shadow-lg max-h-60 overflow-auto">
             @for (produto of sugestoes(); track produto.id) {
             <button type="button" (click)="selecionarSugestao(produto)"
-              class="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0">
+              class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0">
               <div class="font-medium text-slate-900">{{ produto.nome }}</div>
               @if (produto.cor) {
-              <div class="text-sm text-slate-500">Cor: {{ produto.cor }}</div>
+              <div class="text-xs text-slate-500">Cor: {{ produto.cor }}</div>
               }
             </button>
             }
@@ -42,11 +45,11 @@
 
       <!-- Cor -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Cor
         </label>
         <input type="text" formControlName="cor"
-          class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+          class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
           placeholder="Ex: Azul, Preto, Branco" />
       </div>
     </div>
@@ -54,24 +57,24 @@
     <!-- Seção de Identificação -->
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-3">
+        <label class="block text-xs font-medium text-slate-600 mb-2">
           Tipo de Identificação
         </label>
         <div class="flex space-x-4">
           <label class="flex items-center">
             <input type="radio" name="tipoIdentificacao" value="imei" [checked]="tipoIdentificacao() === 'imei'"
-              (change)="tipoIdentificacao.set('imei')" class="mr-2 text-slate-600 focus:ring-slate-500" />
+              (change)="tipoIdentificacao.set('imei')" class="mr-2 text-indigo-600 focus:ring-indigo-500" />
             <span class="text-sm text-slate-700">IMEI</span>
           </label>
           <label class="flex items-center">
             <input type="radio" name="tipoIdentificacao" value="codigoBarras"
               [checked]="tipoIdentificacao() === 'codigoBarras'" (change)="tipoIdentificacao.set('codigoBarras')"
-              class="mr-2 text-slate-600 focus:ring-slate-500" />
+              class="mr-2 text-indigo-600 focus:ring-indigo-500" />
             <span class="text-sm text-slate-700">Código de Barras</span>
           </label>
           <label class="flex items-center">
             <input type="radio" name="tipoIdentificacao" value="ambos" [checked]="tipoIdentificacao() === 'ambos'"
-              (change)="tipoIdentificacao.set('ambos')" class="mr-2 text-slate-600 focus:ring-slate-500" />
+              (change)="tipoIdentificacao.set('ambos')" class="mr-2 text-indigo-600 focus:ring-indigo-500" />
             <span class="text-sm text-slate-700">Ambos (Opcionais)</span>
           </label>
         </div>
@@ -80,11 +83,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <!-- Campo IMEI -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">
+          <label class="block text-xs font-medium text-slate-600 mb-1.5">
             IMEI {{ tipoIdentificacao() === 'imei' ? '*' : '' }}
           </label>
           <input type="text" formControlName="imei" [required]="tipoIdentificacao() === 'imei'" maxlength="15"
-            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
             placeholder="Ex: 123456789012345" />
           @if (tipoIdentificacao() === 'codigoBarras') {
           <p class="text-xs text-slate-500 mt-1">Campo desabilitado - apenas Código de Barras selecionado</p>
@@ -93,12 +96,12 @@
 
         <!-- Campo Código de Barras -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">
+          <label class="block text-xs font-medium text-slate-600 mb-1.5">
             Código de Barras {{ tipoIdentificacao() === 'codigoBarras' ? '*' : '' }}
           </label>
           <input type="text" formControlName="codigoBarras" [required]="tipoIdentificacao() === 'codigoBarras'"
             maxlength="50"
-            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
             placeholder="Ex: 1234567890123" />
           @if (tipoIdentificacao() === 'imei') {
           <p class="text-xs text-slate-500 mt-1">Campo desabilitado - apenas IMEI selecionado</p>
@@ -108,9 +111,9 @@
 
       <!-- Mensagem informativa para modo "Ambos" -->
       @if (tipoIdentificacao() === 'ambos') {
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <p class="text-sm text-blue-800">
-          💡 <strong>Modo Ambos:</strong> Você pode preencher IMEI, Código de Barras ou ambos.
+      <div class="bg-indigo-50 border border-indigo-200 rounded-md p-3">
+        <p class="text-sm text-indigo-800">
+          <strong>Modo Ambos:</strong> Você pode preencher IMEI, Código de Barras ou ambos.
           Pelo menos um dos campos deve ser preenchido para identificar o produto.
         </p>
       </div>
@@ -120,30 +123,30 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <!-- Taxa do Dólar -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Taxa do Dólar *
         </label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-slate-500 sm:text-sm">R$</span>
+            <span class="text-slate-500 text-sm">R$</span>
           </div>
           <input type="text" formControlName="taxaDolar" (input)="formatTaxaInput($event)"
-            class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+            class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
             placeholder="0,00" required />
         </div>
       </div>
 
       <!-- Custo em Dólar -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Custo em Dólar *
         </label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-slate-500 sm:text-sm">$</span>
+            <span class="text-slate-500 text-sm">$</span>
           </div>
           <input type="text" formControlName="custoDolar" (input)="formatCustoInput($event)"
-            class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+            class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
             placeholder="0,00" required />
         </div>
       </div>
@@ -152,15 +155,15 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <!-- Preço Calculado -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Preço Calculado (Real)
         </label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-slate-500 sm:text-sm">R$</span>
+            <span class="text-slate-500 text-sm">R$</span>
           </div>
           <input type="text" [value]="precoCalculado()" disabled
-            class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl bg-slate-100 text-slate-900 cursor-not-allowed"
+            class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md bg-slate-100 text-slate-900 cursor-not-allowed"
             placeholder="0,00" />
         </div>
         <p class="text-xs text-slate-500 mt-1">
@@ -171,36 +174,39 @@
 
       <!-- Quantidade -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Quantidade *
         </label>
         <input #qtdInput type="number" formControlName="quantidade" min="1" (wheel)="qtdInput.blur()"
-          class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+          class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
           placeholder="0" required />
       </div>
     </div>
 
     <!-- Descrição -->
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-2">
+      <label class="block text-xs font-medium text-slate-600 mb-1.5">
         Descrição
       </label>
       <input type="text" formControlName="descricao"
-        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-500"
+        class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
         placeholder="Descrição opcional do produto" />
     </div>
 
-    <!-- Botão Submit -->
-    <button type="submit" [disabled]="loading() || produtoForm.invalid"
-      class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-slate-600 to-slate-800 hover:from-slate-700 hover:to-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-      @if (loading()) {
-      <div class="flex items-center">
-        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-        Cadastrando...
-      </div>
-      } @else {
-      Registrar Compra
-      }
-    </button>
-  </form>
+    <!-- Botão Submit - Estilo Bitrix24 -->
+    <div class="pt-4 border-t border-slate-200/60">
+      <button type="submit" [disabled]="loading() || produtoForm.invalid"
+        class="w-full flex justify-center items-center py-2.5 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (loading()) {
+        <span class="flex items-center">
+          <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+          Cadastrando...
+        </span>
+        } @else {
+        Registrar Compra
+        }
+      </button>
+    </div>
+    </form>
+  </div>
 </div>

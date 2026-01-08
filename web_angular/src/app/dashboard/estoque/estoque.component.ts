@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { EstoqueItemExtended } from '../../shared/types/estoque.types';
+import { formatCurrency } from '../../shared/utils/formatters';
 
 @Component({
   selector: 'app-estoque',
@@ -96,10 +97,7 @@ export class EstoqueComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    return formatCurrency(value);
   }
 }
 

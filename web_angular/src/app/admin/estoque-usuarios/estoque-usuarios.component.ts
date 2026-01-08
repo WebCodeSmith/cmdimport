@@ -6,11 +6,12 @@ import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { EstoqueUsuario, ProdutoEstoqueCompleto } from '../../shared/types/estoque.types';
 import { UsuarioEstoque } from '../../shared/types/user.types';
+import { PanelModalComponent } from '../../shared/components/panel-modal/panel-modal.component';
 
 @Component({
   selector: 'app-estoque-usuarios',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PanelModalComponent],
   templateUrl: './estoque-usuarios.component.html'
 })
 export class EstoqueUsuariosComponent implements OnInit {
@@ -25,6 +26,8 @@ export class EstoqueUsuariosComponent implements OnInit {
   filtroImeiCodigo = signal<string>('');
   mostrarEstoquesZerados = signal<boolean>(false);
   produtoExpandido = signal<number | null>(null);
+  modalProdutosUsuario = signal<boolean>(false);
+  usuarioSelecionado = signal<EstoqueUsuario | null>(null);
   
   // Modal de redistribuição
   modalRedistribuicao = signal<boolean>(false);
@@ -129,6 +132,16 @@ export class EstoqueUsuariosComponent implements OnInit {
     };
   });
 
+  abrirModalProdutosUsuario(usuario: EstoqueUsuario): void {
+    this.usuarioSelecionado.set(usuario);
+    this.modalProdutosUsuario.set(true);
+  }
+
+  fecharModalProdutosUsuario(): void {
+    this.modalProdutosUsuario.set(false);
+    this.usuarioSelecionado.set(null);
+  }
+
   toggleDescricao(produtoId: number): void {
     this.produtoExpandido.set(this.produtoExpandido() === produtoId ? null : produtoId);
   }
@@ -198,6 +211,17 @@ export class EstoqueUsuariosComponent implements OnInit {
 
       if (response?.success) {
         await this.carregarEstoqueUsuarios();
+        
+        // Atualizar o usuário selecionado no modal se estiver aberto
+        const usuarioAtual = this.usuarioSelecionado();
+        if (usuarioAtual) {
+          const usuariosAtualizados = this.estoqueUsuarios();
+          const usuarioAtualizado = usuariosAtualizados.find(u => u.id === usuarioAtual.id);
+          if (usuarioAtualizado) {
+            this.usuarioSelecionado.set(usuarioAtualizado);
+          }
+        }
+        
         this.fecharModalRedistribuicao();
         this.toastService.success(
           `Produto redistribuído com sucesso! ${produto.nome} - Quantidade: ${formValue.quantidade}`
@@ -250,6 +274,16 @@ export class EstoqueUsuariosComponent implements OnInit {
             };
           });
         });
+        
+        // Atualizar o usuário selecionado no modal se estiver aberto
+        const usuarioAtual = this.usuarioSelecionado();
+        if (usuarioAtual) {
+          const usuariosAtualizados = this.estoqueUsuarios();
+          const usuarioAtualizado = usuariosAtualizados.find(u => u.id === usuarioAtual.id);
+          if (usuarioAtualizado) {
+            this.usuarioSelecionado.set(usuarioAtualizado);
+          }
+        }
         
         this.fecharModalDeletar();
       } else {

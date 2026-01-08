@@ -7,11 +7,12 @@ import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { HistoricoVenda } from '../../shared/types/venda.types';
 import { formatCurrency, formatDate, formatPhone } from '../../shared/utils/formatters';
+import { PanelModalComponent } from '../../shared/components/panel-modal/panel-modal.component';
 
 @Component({
   selector: 'app-historico-vendas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PanelModalComponent],
   templateUrl: './historico-vendas.component.html'
 })
 export class HistoricoVendasComponent implements OnInit {
@@ -28,6 +29,9 @@ export class HistoricoVendasComponent implements OnInit {
   totalVendas = signal<number>(0);
   itensPorPagina = 10;
   fotoModal = signal<string | null>(null);
+  modalDetalhes = signal<boolean>(false);
+  vendaSelecionada = signal<HistoricoVenda | null>(null);
+  carregandoDetalhes = signal<boolean>(false);
 
   filtrosForm: FormGroup;
 
@@ -172,6 +176,34 @@ export class HistoricoVendasComponent implements OnInit {
 
   fecharFoto(): void {
     this.fotoModal.set(null);
+  }
+
+  async abrirDetalhes(produtoId: number): Promise<void> {
+    try {
+      this.carregandoDetalhes.set(true);
+      this.modalDetalhes.set(true);
+      
+      // Buscar detalhes da venda pelo ID do produto
+      const venda = this.vendas().find(v => 
+        v.produtos.some(p => p.id === produtoId)
+      );
+      
+      if (venda) {
+        // Usar os dados que já temos na lista (já contém todas as informações)
+        this.vendaSelecionada.set(venda);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar detalhes:', error);
+      this.toastService.error('Erro ao carregar detalhes da venda');
+      this.modalDetalhes.set(false);
+    } finally {
+      this.carregandoDetalhes.set(false);
+    }
+  }
+
+  fecharDetalhes(): void {
+    this.modalDetalhes.set(false);
+    this.vendaSelecionada.set(null);
   }
 }
 

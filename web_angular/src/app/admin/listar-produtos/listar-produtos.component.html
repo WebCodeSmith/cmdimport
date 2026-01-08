@@ -1,9 +1,10 @@
 <div>
-  <div class="mb-6">
+  <!-- Header -->
+  <div class="mb-5">
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">📦 Produtos Comprados</h3>
-        <p class="text-slate-600">Histórico de todas as compras realizadas</p>
+        <h3 class="text-lg font-semibold text-slate-900">Produtos Comprados</h3>
+        <p class="text-sm text-slate-600 mt-0.5">Histórico de todas as compras realizadas</p>
       </div>
     </div>
   </div>
@@ -16,41 +17,41 @@
       </div>
     </div>
   } @else {
-    <!-- Filtros -->
-    <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
+    <!-- Filtros - Estilo Bitrix24 -->
+    <div class="bg-white border border-slate-200/60 rounded-lg p-4 mb-5 shadow-sm">
       <form [formGroup]="filtrosForm">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Buscar por nome, IMEI ou código de barras
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">
+              Buscar produto
             </label>
             <input
               type="text"
               formControlName="busca"
-              placeholder="Digite o nome, IMEI ou código de barras..."
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900 placeholder-slate-500"
+              placeholder="Nome, IMEI ou código..."
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
             />
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">
               Data início
             </label>
             <input
               type="date"
               formControlName="dataInicio"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
             />
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">
               Data fim
             </label>
             <input
               type="date"
               formControlName="dataFim"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
             />
           </div>
           
@@ -58,20 +59,20 @@
             <button
               type="button"
               (click)="limparFiltros()"
-              class="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+              class="w-full px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors font-medium"
             >
-              Limpar Filtros
+              Limpar
             </button>
           </div>
         </div>
         
-        <!-- Checkbox para ocultar estoque zerado -->
-        <div class="mt-4 pt-4 border-t border-slate-200">
+        <!-- Checkbox -->
+        <div class="mt-3 pt-3 border-t border-slate-200/60">
           <label class="flex items-center space-x-2 cursor-pointer">
             <input
               type="checkbox"
               formControlName="ocultarEstoqueZerado"
-              class="w-4 h-4 text-slate-600 border-slate-300 rounded focus:ring-slate-500 focus:ring-2"
+              class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-2"
             />
             <span class="text-sm font-medium text-slate-700">
               Ocultar produtos com estoque zerado
@@ -92,133 +93,139 @@
     }
 
     @if (produtos().length === 0 && !loadingSilencioso()) {
-      <div class="text-center py-12 bg-white border border-slate-200 rounded-xl">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center py-16 bg-white border border-slate-200/60 rounded-lg">
+        <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-slate-900 mb-2">Nenhum produto comprado</h3>
-        <p class="text-slate-500">Cadastre sua primeira compra para começar!</p>
+        <h3 class="text-base font-medium text-slate-900 mb-1.5">
+          @if (filtrosForm.get('busca')?.value || filtrosForm.get('dataInicio')?.value || filtrosForm.get('dataFim')?.value) {
+            Nenhum produto encontrado
+          } @else {
+            Nenhum produto comprado
+          }
+        </h3>
+        <p class="text-sm text-slate-600">
+          @if (filtrosForm.get('busca')?.value || filtrosForm.get('dataInicio')?.value || filtrosForm.get('dataFim')?.value) {
+            Tente ajustar os filtros de busca.
+          } @else {
+            Cadastre sua primeira compra para começar!
+          }
+        </p>
       </div>
     } @else if (produtos().length > 0 || loadingSilencioso()) {
-      <div class="space-y-4">
-        @for (produto of produtos(); track produto.id) {
-          <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-              <div>
-                <h4 class="text-lg font-semibold text-slate-900">{{ produto.nome }}</h4>
-              </div>
-              <div class="mt-2 sm:mt-0 text-right">
-                <p class="text-2xl font-bold text-green-600">{{ formatCurrency(produto.preco) }}</p>
-                <p class="text-sm text-slate-500">Preço de custo</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Custo</p>
-                <p class="text-sm font-semibold text-slate-900">
-                  $ {{ produto.custoDolar.toFixed(2) }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Taxa</p>
-                <p class="text-sm font-semibold text-slate-900">
-                  R$ {{ formatTaxaDolar(produto.taxaDolar) }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Quantidade</p>
-                <p class="text-sm font-semibold text-slate-900">{{ produto.quantidade }} unidades</p>
-              </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Data</p>
-                <p class="text-sm font-semibold text-slate-900">
-                  {{ formatDate(produto.dataCompra) }}
-                </p>
-              </div>
-            </div>
-
-            @if (produto.cor || produto.imei || produto.codigoBarras || produto.descricao) {
-              <div class="flex flex-wrap gap-4 mb-4">
-                @if (produto.cor) {
-                  <div class="flex items-center">
-                    <span class="text-xs font-medium text-slate-500 mr-2">Cor:</span>
-                    <span class="text-sm text-slate-900 bg-slate-100 px-2 py-1 rounded">{{ produto.cor }}</span>
+      <!-- Tabela de Produtos - Estilo Bitrix24 -->
+      <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-slate-50/80 border-b border-slate-200/60">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Produto</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Cor</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">IMEI</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Código de Barras</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Custo / Taxa</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Quantidade</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Data</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Preço Final</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-slate-200/60">
+              @for (produto of produtos(); track produto.id) {
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3">
+                  <div>
+                    <div class="text-sm font-medium text-slate-900">{{ produto.nome }}</div>
+                    @if (produto.descricao) {
+                    <div class="text-xs text-slate-500 mt-0.5">{{ produto.descricao }}</div>
+                    }
                   </div>
-                }
-                @if (produto.imei) {
-                  <div class="flex items-center">
-                    <span class="text-xs font-medium text-slate-500 mr-2">IMEI:</span>
-                    <span class="text-sm text-slate-900 bg-slate-100 px-2 py-1 rounded font-mono">{{ produto.imei }}</span>
-                  </div>
-                }
-                @if (produto.codigoBarras) {
-                  <div class="flex items-center">
-                    <span class="text-xs font-medium text-slate-500 mr-2">Código de Barras:</span>
-                    <span class="text-sm text-slate-900 bg-slate-100 px-2 py-1 rounded font-mono">{{ produto.codigoBarras }}</span>
-                  </div>
-                }
-                @if (produto.descricao) {
-                  <div class="flex items-center">
-                    <span class="text-xs font-medium text-slate-500 mr-2">Descrição:</span>
-                    <span class="text-sm text-slate-900 bg-slate-100 px-2 py-1 rounded">{{ produto.descricao }}</span>
-                  </div>
-                }
-              </div>
-            }
-
-            <div class="border-t border-slate-200 pt-4">
-              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div class="flex items-center">
-                  <div class="text-sm">
-                    <span class="text-slate-500">Estoque disponível:</span>
-                    <span class="ml-2 font-semibold text-slate-900">
-                      {{ produto.quantidade }} unidades
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex flex-wrap gap-1.5">
+                    @if (produto.cor) {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
+                      {{ produto.cor }}
                     </span>
+                    }
                   </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <button
-                    (click)="abrirModalGerenciar(produto)"
-                    class="px-3 py-1.5 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors flex items-center"
-                  >
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Gerenciar
-                  </button>
-                  <button
-                    (click)="abrirModalDeletar(produto)"
-                    class="px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors flex items-center"
-                  >
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Deletar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+                </td>
+                <td class="px-4 py-3">
+                  @if (produto.imei) {
+                  <div class="text-xs font-mono text-slate-700">{{ produto.imei }}</div>
+                  } @else {
+                  <span class="text-xs text-slate-400">-</span>
+                  }
+                </td>
+                <td class="px-4 py-3">
+                  @if (produto.codigoBarras) {
+                  <div class="text-xs font-mono text-slate-700">{{ produto.codigoBarras }}</div>
+                  } @else {
+                  <span class="text-xs text-slate-400">-</span>
+                  }
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <div class="text-sm text-slate-700">$ {{ produto.custoDolar.toFixed(2) }}</div>
+                  <div class="text-xs text-slate-500">Taxa: R$ {{ formatTaxaDolar(produto.taxaDolar) }}</div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-800">
+                    {{ produto.quantidade }} un
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <div class="text-sm text-slate-700">{{ formatDate(produto.dataCompra) }}</div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-right">
+                  <div class="text-sm font-semibold text-green-600">{{ formatCurrency(produto.preco) }}</div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button
+                      (click)="abrirModalDetalhes(produto)"
+                      class="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                      title="Ver Detalhes"
+                    >
+                      <span class="material-icons text-[18px]">info</span>
+                    </button>
+                    <button
+                      (click)="abrirModalGerenciar(produto)"
+                      class="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+                      title="Gerenciar"
+                    >
+                      <span class="material-icons text-[18px]">settings</span>
+                    </button>
+                    <button
+                      (click)="abrirModalDeletar(produto)"
+                      class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                      title="Deletar"
+                    >
+                      <span class="material-icons text-[18px]">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     }
 
-    <!-- Paginação -->
+    <!-- Paginação - Estilo Bitrix24 -->
     @if (totalPaginas() > 1 && !loadingSilencioso()) {
-      <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="text-sm text-slate-700">
+      <div class="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-slate-600">
           {{ getRangeTexto() }}
         </div>
         
-        <div class="flex items-center space-x-2 flex-wrap justify-center">
+        <div class="flex items-center space-x-1.5 flex-wrap justify-center">
           <button
             (click)="mudarPagina(paginaAtual() - 1)"
             [disabled]="paginaAtual() === 1"
-            class="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Anterior
           </button>
@@ -226,17 +233,17 @@
           <div class="flex space-x-1 flex-wrap justify-center">
             @for (pagina of getPaginasParaMostrar(); track $index) {
               @if (pagina === '...') {
-                <span class="px-2 py-2 text-sm text-slate-500">...</span>
+                <span class="px-2 py-2 text-sm text-slate-400">...</span>
               } @else {
                 <button
                   (click)="mudarPagina(+pagina)"
-                  [class.bg-slate-600]="pagina === paginaAtual()"
+                  [class.bg-indigo-600]="pagina === paginaAtual()"
                   [class.text-white]="pagina === paginaAtual()"
-                  [class.text-slate-500]="pagina !== paginaAtual()"
+                  [class.text-slate-600]="pagina !== paginaAtual()"
                   [class.bg-white]="pagina !== paginaAtual()"
                   [class.border]="pagina !== paginaAtual()"
                   [class.border-slate-300]="pagina !== paginaAtual()"
-                  class="px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-slate-50"
+                  class="px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-50 min-w-[36px]"
                 >
                   {{ pagina }}
                 </button>
@@ -247,7 +254,7 @@
           <button
             (click)="mudarPagina(paginaAtual() + 1)"
             [disabled]="paginaAtual() === totalPaginas()"
-            class="px-3 py-2 text-sm font-medium text-slate-500 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Próxima
           </button>
@@ -255,6 +262,134 @@
       </div>
     }
   }
+
+  <!-- Panel Modal Detalhes do Produto -->
+  <app-panel-modal
+    [isOpen]="modalDetalhes()"
+    [title]="'Detalhes do Produto'"
+    [subtitle]="produtoSelecionado() ? produtoSelecionado()!.nome : ''"
+    [showSidebar]="false"
+    [maxWidth]="'max-w-4xl'"
+    [height]="'h-[90vh]'"
+    (close)="fecharModalDetalhes()">
+    
+    @if (produtoSelecionado()) {
+    <div class="p-6 space-y-5">
+      <!-- Informações Básicas -->
+      <div class="bg-slate-50/50 border border-slate-200/60 rounded-md p-5">
+        <h3 class="text-base font-semibold text-slate-900 mb-4">Informações Básicas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Nome do Produto</p>
+            <p class="text-sm font-medium text-slate-900">{{ produtoSelecionado()!.nome }}</p>
+          </div>
+          @if (produtoSelecionado()!.cor) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Cor</p>
+            <p class="text-sm text-slate-900">{{ produtoSelecionado()!.cor }}</p>
+          </div>
+          }
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Data da Compra</p>
+            <p class="text-sm text-slate-900">{{ formatDate(produtoSelecionado()!.dataCompra) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Quantidade em Estoque</p>
+            <p class="text-sm font-semibold text-slate-900">{{ produtoSelecionado()!.quantidade }} unidades</p>
+          </div>
+        </div>
+        @if (produtoSelecionado()!.descricao) {
+        <div class="mt-4 pt-4 border-t border-slate-200/60">
+          <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Descrição</p>
+          <p class="text-sm text-slate-700">{{ produtoSelecionado()!.descricao }}</p>
+        </div>
+        }
+      </div>
+
+      <!-- Identificação -->
+      <div class="bg-slate-50/50 border border-slate-200/60 rounded-md p-5">
+        <h3 class="text-base font-semibold text-slate-900 mb-4">Identificação</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @if (produtoSelecionado()!.imei) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">IMEI</p>
+            <p class="text-sm font-mono text-slate-900 bg-white px-3 py-2 rounded border border-slate-200">{{ produtoSelecionado()!.imei }}</p>
+          </div>
+          }
+          @if (produtoSelecionado()!.codigoBarras) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Código de Barras</p>
+            <p class="text-sm font-mono text-slate-900 bg-white px-3 py-2 rounded border border-slate-200">{{ produtoSelecionado()!.codigoBarras }}</p>
+          </div>
+          }
+          @if (!produtoSelecionado()!.imei && !produtoSelecionado()!.codigoBarras) {
+          <div class="col-span-2">
+            <p class="text-sm text-slate-500 italic">Nenhuma identificação cadastrada</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Valores e Precificação -->
+      <div class="bg-slate-50/50 border border-slate-200/60 rounded-md p-5">
+        <h3 class="text-base font-semibold text-slate-900 mb-4">Valores e Precificação</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Custo em Dólar</p>
+            <p class="text-sm font-semibold text-slate-900">$ {{ produtoSelecionado()!.custoDolar.toFixed(2) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Taxa do Dólar</p>
+            <p class="text-sm font-semibold text-slate-900">R$ {{ formatTaxaDolar(produtoSelecionado()!.taxaDolar) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Preço Final (Custo)</p>
+            <p class="text-sm font-semibold text-green-600">{{ formatCurrency(produtoSelecionado()!.preco) }}</p>
+          </div>
+          @if (produtoSelecionado()!.valorAtacado) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Valor Atacado</p>
+            <p class="text-sm font-semibold text-slate-900">{{ formatCurrency(produtoSelecionado()!.valorAtacado!) }}</p>
+          </div>
+          }
+          @if (produtoSelecionado()!.valorVarejo) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Valor Varejo</p>
+            <p class="text-sm font-semibold text-slate-900">{{ formatCurrency(produtoSelecionado()!.valorVarejo!) }}</p>
+          </div>
+          }
+          @if (produtoSelecionado()!.valorRevendaEspecial) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Revenda Especial</p>
+            <p class="text-sm font-semibold text-slate-900">{{ formatCurrency(produtoSelecionado()!.valorRevendaEspecial!) }}</p>
+          </div>
+          }
+          @if (produtoSelecionado()!.valorParcelado10x) {
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Parcelado 10x</p>
+            <p class="text-sm font-semibold text-slate-900">{{ formatCurrency(produtoSelecionado()!.valorParcelado10x!) }}</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Resumo Financeiro -->
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/60 rounded-md p-5">
+        <h3 class="text-base font-semibold text-slate-900 mb-3">Resumo Financeiro</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Valor Total do Estoque</p>
+            <p class="text-lg font-bold text-green-600">{{ formatCurrency(produtoSelecionado()!.preco * produtoSelecionado()!.quantidade) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">Quantidade × Preço Unitário</p>
+            <p class="text-sm text-slate-700">{{ produtoSelecionado()!.quantidade }} × {{ formatCurrency(produtoSelecionado()!.preco) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </app-panel-modal>
 
   <!-- Panel Modal Gerenciar Produto -->
   <app-panel-modal
@@ -270,28 +405,31 @@
     (menuItemSelected)="onGerenciarMenuItemSelected($event)">
     
     <div class="p-6">
-      <!-- Conteúdo de Edição -->
+      <!-- Conteúdo de Edição - Estilo Bitrix24 -->
       @if (selectedGerenciarItem() === 'editar') {
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 mb-4">✏️ Editar Informações do Produto</h3>
+        <div class="space-y-5">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900 mb-1">Editar Informações do Produto</h3>
+            <p class="text-sm text-slate-600">Atualize as informações do produto</p>
+          </div>
           
           <form [formGroup]="formularioEdicao" class="space-y-4">
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">📱 Nome do Produto *</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1.5">Nome do Produto *</label>
               <input
                 type="text"
                 formControlName="nome"
-                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 placeholder="Ex: iPhone 15 Pro Max"
                 required
               />
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">📝 Descrição</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1.5">Descrição</label>
               <textarea
                 formControlName="descricao"
-                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 placeholder="Descrição detalhada do produto"
                 rows="3"
               ></textarea>
@@ -299,21 +437,21 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">🎨 Cor</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Cor</label>
                 <input
                   type="text"
                   formControlName="cor"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="Ex: Preto, Branco, Azul"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">📅 Data da Compra *</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Data da Compra *</label>
                 <input
                   type="date"
                   formControlName="dataCompra"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   required
                 />
               </div>
@@ -321,21 +459,21 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">🔢 IMEI</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">IMEI</label>
                 <input
                   type="text"
                   formControlName="imei"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="Número do IMEI"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">📊 Código de Barras</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Código de Barras</label>
                 <input
                   type="text"
                   formControlName="codigoBarras"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="Código de barras do produto"
                 />
               </div>
@@ -343,36 +481,36 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">💵 Custo em Dólar ($) *</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Custo em Dólar ($) *</label>
                 <input
                   type="number"
                   step="0.01"
                   formControlName="custoDolar"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="0.00"
                   required
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">📈 Taxa do Dólar (R$) *</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Taxa do Dólar (R$) *</label>
                 <input
                   type="number"
                   step="0.0001"
                   formControlName="taxaDolar"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="0.0000"
                   required
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">💰 Preço Final (R$) *</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Preço Final (R$) *</label>
                 <input
                   type="number"
                   step="0.01"
                   formControlName="preco"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                   placeholder="0.00"
                   required
                 />
@@ -380,47 +518,50 @@
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">📦 Quantidade *</label>
+              <label class="block text-xs font-medium text-slate-600 mb-1.5">Quantidade *</label>
               <input
                 type="number"
                 min="0"
                 formControlName="quantidade"
-                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 placeholder="0"
                 required
               />
             </div>
           </form>
 
-          <div class="mt-6 pt-6 border-t border-slate-200">
+          <div class="pt-4 border-t border-slate-200/60">
             <button
               (click)="salvarEdicao()"
               [disabled]="salvandoEdicao() || formularioEdicao.invalid"
-              class="w-full px-4 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               @if (salvandoEdicao()) {
-                <div class="flex items-center justify-center space-x-2">
-                  <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Salvando...</span>
-                </div>
+                <span class="flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  Salvando...
+                </span>
               } @else {
-                💾 Salvar Alterações
+                Salvar Alterações
               }
             </button>
           </div>
         </div>
       }
       
-      <!-- Conteúdo de Precificação -->
+      <!-- Conteúdo de Precificação - Estilo Bitrix24 -->
       @if (selectedGerenciarItem() === 'precificacao') {
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 mb-4">💰 Definir Valores de Venda</h3>
+        <div class="space-y-5">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900 mb-1">Definir Valores de Venda</h3>
+            <p class="text-sm text-slate-600">Configure os preços de venda do produto</p>
+          </div>
           
           @if (produtoSelecionado()) {
-            <div class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-              <div class="flex items-center justify-between text-sm text-slate-600 mb-2">
-                <span>Estoque: {{ calcularEstoqueTotal(produtoSelecionado()!) }} unidades</span>
-                <span class="text-lg font-bold text-green-600">{{ formatCurrency(produtoSelecionado()!.preco) }}</span>
+            <div class="p-4 bg-slate-50/50 border border-slate-200/60 rounded-md">
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span class="text-slate-600">Estoque: <strong class="text-slate-900">{{ calcularEstoqueTotal(produtoSelecionado()!) }} unidades</strong></span>
+                <span class="text-base font-semibold text-green-600">{{ formatCurrency(produtoSelecionado()!.preco) }}</span>
               </div>
               @if (produtoSelecionado()!.cor) {
                 <div class="mt-2">
@@ -432,59 +573,59 @@
 
             <form [formGroup]="formularioPrecificacao" class="space-y-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">🏢 Valor de Venda para Atacado</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Valor de Venda para Atacado</label>
                 <input
                   type="text"
                   formControlName="valorAtacado"
                   placeholder="0,00"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">🛍️ Valor para Venda do Varejo</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Valor para Venda do Varejo</label>
                 <input
                   type="text"
                   formControlName="valorVarejo"
                   placeholder="0,00"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">➕ Valor para Revenda Especial</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Valor para Revenda Especial</label>
                 <input
                   type="text"
                   formControlName="valorRevendaEspecial"
                   placeholder="0,00"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-2">📅 Valor Parcelado 10x</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">Valor Parcelado 10x</label>
                 <input
                   type="text"
                   formControlName="valorParcelado10x"
                   placeholder="0,00"
-                  class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                 />
               </div>
             </form>
 
-            <div class="mt-6 pt-6 border-t border-slate-200">
+            <div class="pt-4 border-t border-slate-200/60">
               <button
                 (click)="salvarPrecificacao()"
                 [disabled]="salvandoPrecificacao()"
-                class="w-full px-4 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 @if (salvandoPrecificacao()) {
-                  <div class="flex items-center justify-center space-x-2">
-                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Salvando...</span>
-                  </div>
+                  <span class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    Salvando...
+                  </span>
                 } @else {
-                  💾 Salvar Precificação
+                  Salvar Precificação
                 }
               </button>
             </div>
@@ -492,17 +633,20 @@
         </div>
       }
       
-      <!-- Conteúdo de Distribuição -->
+      <!-- Conteúdo de Distribuição - Estilo Bitrix24 -->
       @if (selectedGerenciarItem() === 'distribuir') {
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 mb-4">👥 Distribuir Produto</h3>
+        <div class="space-y-5">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900 mb-1">Distribuir Produto</h3>
+            <p class="text-sm text-slate-600">Distribua produtos para os atendentes</p>
+          </div>
           
           @if (produtoSelecionado()) {
             @if (produtoSelecionado()!.quantidade > 0) {
-              <div class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                <h4 class="text-lg font-semibold text-slate-900 mb-2">{{ produtoSelecionado()!.nome }}</h4>
-                <div class="flex items-center justify-between text-sm text-slate-600 mb-2">
-                  <span>Quantidade disponível: <strong class="text-slate-900">{{ produtoSelecionado()!.quantidade }} unidades</strong></span>
+              <div class="p-4 bg-slate-50/50 border border-slate-200/60 rounded-md">
+                <h4 class="text-sm font-semibold text-slate-900 mb-2">{{ produtoSelecionado()!.nome }}</h4>
+                <div class="flex items-center justify-between text-sm mb-2">
+                  <span class="text-slate-600">Quantidade disponível: <strong class="text-slate-900">{{ produtoSelecionado()!.quantidade }} unidades</strong></span>
                 </div>
                 @if (produtoSelecionado()!.cor) {
                   <div class="mt-2">
@@ -514,10 +658,10 @@
 
               <form [formGroup]="formularioDistribuicao" class="space-y-4">
                 <div>
-                  <label class="block text-sm font-semibold text-slate-700 mb-2">👤 Atendente *</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1.5">Atendente *</label>
                   <select
                     formControlName="atendenteId"
-                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                    class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 bg-white"
                     required
                   >
                     <option value="">Selecione um atendente</option>
@@ -530,13 +674,13 @@
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-slate-700 mb-2">📦 Quantidade *</label>
+                  <label class="block text-xs font-medium text-slate-600 mb-1.5">Quantidade *</label>
                   <input
                     type="number"
                     formControlName="quantidade"
                     [min]="1"
                     [max]="produtoSelecionado()!.quantidade"
-                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900"
+                    class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
                     placeholder="1"
                     required
                   />
@@ -546,26 +690,26 @@
                 </div>
               </form>
 
-              <div class="mt-6 pt-6 border-t border-slate-200">
+              <div class="pt-4 border-t border-slate-200/60">
                 <button
                   (click)="salvarDistribuicao()"
                   [disabled]="salvandoDistribuicao() || !formularioDistribuicao.get('atendenteId')?.value || !formularioDistribuicao.get('quantidade')?.value"
-                  class="w-full px-4 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   @if (salvandoDistribuicao()) {
-                    <div class="flex items-center justify-center space-x-2">
-                      <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Distribuindo...</span>
-                    </div>
+                    <span class="flex items-center justify-center">
+                      <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      Distribuindo...
+                    </span>
                   } @else {
-                    🎯 Distribuir Produto
+                    Distribuir Produto
                   }
                 </button>
               </div>
             } @else {
-              <div class="p-6 bg-red-50 border border-red-200 rounded-lg">
-                <p class="text-red-700 font-medium">⚠️ Este produto não possui estoque disponível para distribuição.</p>
-                <p class="text-red-600 text-sm mt-2">Quantidade atual: {{ produtoSelecionado()!.quantidade }} unidades</p>
+              <div class="p-4 bg-red-50/50 border border-red-200/60 rounded-md">
+                <p class="text-sm font-medium text-red-700">Este produto não possui estoque disponível para distribuição.</p>
+                <p class="text-xs text-red-600 mt-1.5">Quantidade atual: {{ produtoSelecionado()!.quantidade }} unidades</p>
               </div>
             }
           }

@@ -52,12 +52,14 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 			"%"+busca+"%", "%"+busca+"%", "%"+busca+"%")
 	}
 
-	// Filtro de data
+	// Filtro de data - usar DATE() para comparar apenas a parte da data, ignorando hora
 	if dataInicio != "" {
-		query = query.Where("dataCompra >= ?", dataInicio)
+		// Usar DATE() para extrair apenas a parte da data e comparar
+		query = query.Where("DATE(dataCompra) >= ?", dataInicio)
 	}
 	if dataFim != "" {
-		query = query.Where("dataCompra <= ?", dataFim+" 23:59:59")
+		// Usar DATE() para extrair apenas a parte da data e comparar
+		query = query.Where("DATE(dataCompra) <= ?", dataFim)
 	}
 
 	// Filtro de estoque zerado

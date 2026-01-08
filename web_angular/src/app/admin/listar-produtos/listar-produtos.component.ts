@@ -41,6 +41,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   modalPrecificacao = signal<boolean>(false);
   modalDistribuicao = signal<boolean>(false);
   modalDeletar = signal<boolean>(false);
+  modalDetalhes = signal<boolean>(false);
   produtoSelecionado = signal<ProdutoComprado | null>(null);
   salvandoEdicao = signal<boolean>(false);
   salvandoPrecificacao = signal<boolean>(false);
@@ -189,8 +190,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         this.apiService.get<any[]>('/admin/produtos', params)
       );
 
-      if (response?.success && response.data) {
-        const produtosFormatados = response.data.map((produto: any) => ({
+      if (response?.success) {
+        // Se response.data for um array vazio, ainda é sucesso (apenas não há resultados)
+        const produtosData = response.data || [];
+        const produtosFormatados = produtosData.map((produto: any) => ({
           ...produto,
           custoDolar: typeof produto.custoDolar === 'string' ? parseFloat(produto.custoDolar) : (produto.custoDolar || 0),
           taxaDolar: typeof produto.taxaDolar === 'string' ? parseFloat(produto.taxaDolar) : (produto.taxaDolar || 0),
@@ -298,6 +301,16 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   }
 
   // Métodos do Panel Modal (Gerenciar Produto)
+  abrirModalDetalhes(produto: ProdutoComprado): void {
+    this.produtoSelecionado.set(produto);
+    this.modalDetalhes.set(true);
+  }
+
+  fecharModalDetalhes(): void {
+    this.modalDetalhes.set(false);
+    this.produtoSelecionado.set(null);
+  }
+
   async abrirModalGerenciar(produto: ProdutoComprado): Promise<void> {
     this.produtoSelecionado.set(produto);
     this.selectedGerenciarItem.set('editar');

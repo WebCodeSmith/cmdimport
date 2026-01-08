@@ -1,62 +1,78 @@
 <app-main-layout>
-  <div class="space-y-8">
+  <div class="space-y-6">
     <!-- Header -->
-    <div>
-      <h1 class="text-3xl font-bold text-slate-900">Painel Administrativo</h1>
-      <p class="text-sm text-slate-600 mt-2">Gerencie produtos, estoques e vendas</p>
+    <div class="mb-2">
+      <h1 class="text-2xl font-semibold text-slate-900">Painel Administrativo</h1>
+      <p class="text-sm text-slate-600 mt-1">Gerencie produtos, estoques e vendas</p>
     </div>
 
-    <!-- Tabs Navigation -->
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-      <div class="flex flex-wrap border-b border-slate-200">
+    <!-- Tabs Navigation - Estilo Bitrix24 -->
+    <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
+      <div class="flex flex-wrap border-b border-slate-200/60 bg-slate-50/50">
         <button
           (click)="setActiveTab('historico')"
-          [class.bg-slate-50]="activeTab() === 'historico'"
-          [class.text-slate-900]="activeTab() === 'historico'"
-          [class.font-semibold]="activeTab() === 'historico'"
+          [class.bg-white]="activeTab() === 'historico'"
+          [class.text-indigo-700]="activeTab() === 'historico'"
+          [class.font-medium]="activeTab() === 'historico'"
           [class.text-slate-600]="activeTab() !== 'historico'"
-          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
-          [class.border-b-slate-900]="activeTab() === 'historico'"
+          [class.border-b-2]="activeTab() === 'historico'"
+          [class.border-indigo-600]="activeTab() === 'historico'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent"
         >
           Histórico de Vendas
         </button>
         <button
           (click)="setActiveTab('cadastrar-produto')"
-          [class.bg-slate-50]="activeTab() === 'cadastrar-produto'"
-          [class.text-slate-900]="activeTab() === 'cadastrar-produto'"
-          [class.font-semibold]="activeTab() === 'cadastrar-produto'"
+          [class.bg-white]="activeTab() === 'cadastrar-produto'"
+          [class.text-indigo-700]="activeTab() === 'cadastrar-produto'"
+          [class.font-medium]="activeTab() === 'cadastrar-produto'"
           [class.text-slate-600]="activeTab() !== 'cadastrar-produto'"
-          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
-          [class.border-b-slate-900]="activeTab() === 'cadastrar-produto'"
+          [class.border-b-2]="activeTab() === 'cadastrar-produto'"
+          [class.border-indigo-600]="activeTab() === 'cadastrar-produto'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent"
         >
           Cadastrar Produto
         </button>
         <button
           (click)="setActiveTab('listar-produtos')"
-          [class.bg-slate-50]="activeTab() === 'listar-produtos'"
-          [class.text-slate-900]="activeTab() === 'listar-produtos'"
-          [class.font-semibold]="activeTab() === 'listar-produtos'"
+          [class.bg-white]="activeTab() === 'listar-produtos'"
+          [class.text-indigo-700]="activeTab() === 'listar-produtos'"
+          [class.font-medium]="activeTab() === 'listar-produtos'"
           [class.text-slate-600]="activeTab() !== 'listar-produtos'"
-          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
-          [class.border-b-slate-900]="activeTab() === 'listar-produtos'"
+          [class.border-b-2]="activeTab() === 'listar-produtos'"
+          [class.border-indigo-600]="activeTab() === 'listar-produtos'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent"
         >
           Listar Produtos
         </button>
         <button
           (click)="setActiveTab('estoque-usuarios')"
-          [class.bg-slate-50]="activeTab() === 'estoque-usuarios'"
-          [class.text-slate-900]="activeTab() === 'estoque-usuarios'"
-          [class.font-semibold]="activeTab() === 'estoque-usuarios'"
+          [class.bg-white]="activeTab() === 'estoque-usuarios'"
+          [class.text-indigo-700]="activeTab() === 'estoque-usuarios'"
+          [class.font-medium]="activeTab() === 'estoque-usuarios'"
           [class.text-slate-600]="activeTab() !== 'estoque-usuarios'"
-          class="flex-1 min-w-[150px] px-6 py-4 text-sm hover:bg-slate-50 transition-colors border-b-2 border-transparent"
-          [class.border-b-slate-900]="activeTab() === 'estoque-usuarios'"
+          [class.border-b-2]="activeTab() === 'estoque-usuarios'"
+          [class.border-indigo-600]="activeTab() === 'estoque-usuarios'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent"
         >
           Estoque de Usuários
+        </button>
+        <button
+          (click)="setActiveTab('precificacao')"
+          [class.bg-white]="activeTab() === 'precificacao'"
+          [class.text-indigo-700]="activeTab() === 'precificacao'"
+          [class.font-medium]="activeTab() === 'precificacao'"
+          [class.text-slate-600]="activeTab() !== 'precificacao'"
+          [class.border-b-2]="activeTab() === 'precificacao'"
+          [class.border-indigo-600]="activeTab() === 'precificacao'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent"
+        >
+          Precificação
         </button>
       </div>
 
       <!-- Tab Content -->
-      <div class="p-6">
+      <div class="p-6 bg-white">
         @if (activeTab() === 'historico') {
           <app-historico-vendas />
         }
@@ -71,6 +87,10 @@
 
         @if (activeTab() === 'estoque-usuarios') {
           <app-estoque-usuarios />
+        }
+
+        @if (activeTab() === 'precificacao') {
+          <app-precificacao />
         }
       </div>
     </div>

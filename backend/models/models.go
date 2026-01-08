@@ -104,3 +104,36 @@ func (HistoricoVenda) TableName() string {
 	return "HistoricoVenda"
 }
 
+// CategoriaDespesa representa uma categoria de despesas
+type CategoriaDespesa struct {
+	ID        int       `gorm:"primaryKey" json:"id"`
+	Nome      string    `gorm:"type:varchar(255);not null" json:"nome"`
+	Descricao *string   `gorm:"type:text" json:"descricao"`
+	CreatedAt time.Time `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt" json:"updatedAt"`
+	Despesas  []Despesa `gorm:"foreignKey:CategoriaID" json:"-"`
+}
+
+// TableName especifica o nome da tabela no banco
+func (CategoriaDespesa) TableName() string {
+	return "CategoriaDespesa"
+}
+
+// Despesa representa uma despesa
+type Despesa struct {
+	ID          int             `gorm:"primaryKey" json:"id"`
+	Nome        string          `gorm:"type:varchar(255);not null" json:"nome"`
+	Valor       float64         `gorm:"type:decimal(10,2);not null" json:"valor"`
+	CategoriaID int             `gorm:"not null;column:categoriaId" json:"categoriaId"`
+	Categoria   CategoriaDespesa `gorm:"foreignKey:CategoriaID" json:"categoria,omitempty"`
+	Descricao   *string         `gorm:"type:text" json:"descricao"`
+	Data        time.Time       `gorm:"type:date;not null" json:"data"`
+	CreatedAt   time.Time       `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt   time.Time       `gorm:"column:updatedAt" json:"updatedAt"`
+}
+
+// TableName especifica o nome da tabela no banco
+func (Despesa) TableName() string {
+	return "Despesa"
+}
+

@@ -1,6 +1,6 @@
-<header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-200/60 backdrop-blur-sm">
+  <div class="max-w-[1920px] mx-auto px-6">
+    <div class="flex items-center justify-between h-14">
       <!-- Logo e Menu Mobile -->
       <div class="flex items-center space-x-4 flex-shrink-0">
         <button
@@ -14,32 +14,33 @@
         </button>
         
         <!-- Logo -->
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <h1 class="hidden sm:block text-lg font-semibold text-slate-900 whitespace-nowrap">CMD Import</h1>
+          <h1 class="hidden sm:block text-base font-semibold text-slate-800 whitespace-nowrap">CMD Import</h1>
         </div>
       </div>
 
       <!-- Navegação Desktop - Centralizada -->
-      <nav class="hidden lg:flex items-center space-x-1 flex-1 justify-center mx-8" #navDropdownRef>
+      <nav class="hidden lg:flex items-center space-x-0.5 flex-1 justify-center mx-8" #navDropdownRef>
         @for (item of filteredNavItems; track item.name) {
           @if (item.children && item.children.length > 0) {
             <div class="relative">
               <button
                 (click)="toggleNavDropdown(item.name)"
                 [class.text-slate-900]="isActive(item.href) || openDropdown() === item.name"
+                [class.bg-slate-50]="isActive(item.href) || openDropdown() === item.name"
                 [class.text-slate-600]="!isActive(item.href) && openDropdown() !== item.name"
                 [class.font-medium]="isActive(item.href) || openDropdown() === item.name"
-                class="flex items-center space-x-1 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm whitespace-nowrap"
+                class="flex items-center space-x-1.5 px-3.5 py-2 rounded-md hover:bg-slate-50 transition-all text-sm whitespace-nowrap"
               >
                 <span>{{ item.name }}</span>
                 <svg
                   [class.rotate-180]="openDropdown() === item.name"
-                  class="w-4 h-4 transition-transform"
+                  class="w-3.5 h-3.5 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -50,14 +51,14 @@
 
               <!-- Dropdown -->
               @if (openDropdown() === item.name) {
-                <div class="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                <div class="absolute top-full left-0 mt-1.5 w-56 bg-white rounded-md shadow-xl border border-slate-200/80 py-1.5 z-50">
                   @for (child of item.children; track child.href) {
                     <button
                       (click)="navigate(child.href)"
-                      [class.bg-slate-50]="isActive(child.href)"
-                      [class.text-slate-900]="isActive(child.href)"
-                      [class.text-slate-600]="!isActive(child.href)"
-                      class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors"
+                      [class.bg-indigo-50]="isActive(child.href)"
+                      [class.text-indigo-700]="isActive(child.href)"
+                      [class.text-slate-700]="!isActive(child.href)"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors"
                     >
                       {{ child.name }}
                     </button>
@@ -69,9 +70,10 @@
             <button
               (click)="navigate(item.href)"
               [class.text-slate-900]="isActive(item.href)"
+              [class.bg-slate-50]="isActive(item.href)"
               [class.font-medium]="isActive(item.href)"
               [class.text-slate-600]="!isActive(item.href)"
-              class="px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors text-sm whitespace-nowrap"
+              class="px-3.5 py-2 rounded-md hover:bg-slate-50 transition-all text-sm whitespace-nowrap"
             >
               {{ item.name }}
             </button>
@@ -80,23 +82,23 @@
       </nav>
 
       <!-- User Info -->
-      <div class="flex items-center space-x-3 flex-shrink-0">
+      <div class="flex items-center space-x-2.5 flex-shrink-0">
         <!-- User Info com Dropdown -->
         <div class="relative" #dropdownRef>
           <button
             (click)="toggleDropdown()"
-            class="flex items-center space-x-2 hover:bg-slate-50 rounded-lg px-3 py-1.5 transition-colors"
+            class="flex items-center space-x-2 hover:bg-slate-50 rounded-md px-2.5 py-1.5 transition-colors"
           >
             <div class="hidden md:block text-right min-w-0">
-              <p class="text-sm font-medium text-slate-900 truncate max-w-[120px]">{{ user()?.nome || 'Usuário' }}</p>
+              <p class="text-sm font-medium text-slate-800 truncate max-w-[120px]">{{ user()?.nome || 'Usuário' }}</p>
               <p class="text-xs text-slate-500 truncate max-w-[120px]">{{ user()?.email || '' }}</p>
             </div>
-            <div class="w-9 h-9 bg-gradient-to-br from-slate-400 to-slate-600 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
-              <span class="text-white text-sm font-semibold">{{ userInitial }}</span>
+            <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
+              <span class="text-white text-xs font-semibold">{{ userInitial }}</span>
             </div>
             <svg
               [class.rotate-180]="dropdownOpen()"
-              class="w-4 h-4 text-slate-500 transition-transform flex-shrink-0"
+              class="w-3.5 h-3.5 text-slate-500 transition-transform flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -107,16 +109,16 @@
 
           <!-- Dropdown Menu -->
           @if (dropdownOpen()) {
-            <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50">
-              <div class="px-4 py-3 border-b border-slate-200">
+            <div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-xl border border-slate-200/80 py-1.5 z-50">
+              <div class="px-4 py-3 border-b border-slate-200/60">
                 <p class="text-sm font-semibold text-slate-900">{{ user()?.nome || 'Usuário' }}</p>
                 <p class="text-xs text-slate-500 truncate">{{ user()?.email || '' }}</p>
               </div>
               <button
                 (click)="handleLogout()"
-                class="w-full flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                class="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 <span>Sair</span>

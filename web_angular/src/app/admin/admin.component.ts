@@ -7,11 +7,12 @@ import { CadastrarProdutoComponent } from './cadastrar-produto/cadastrar-produto
 import { ListarProdutosComponent } from './listar-produtos/listar-produtos.component';
 import { EstoqueUsuariosComponent } from './estoque-usuarios/estoque-usuarios.component';
 import { HistoricoVendasAdminComponent } from './historico-vendas/historico-vendas.component';
+import { PrecificacaoComponent } from './precificacao/precificacao.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, MainLayoutComponent, CadastrarProdutoComponent, ListarProdutosComponent, EstoqueUsuariosComponent, HistoricoVendasAdminComponent],
+  imports: [CommonModule, MainLayoutComponent, CadastrarProdutoComponent, ListarProdutosComponent, EstoqueUsuariosComponent, HistoricoVendasAdminComponent, PrecificacaoComponent],
   templateUrl: './admin.component.html'
 })
 export class AdminComponent implements OnInit, OnDestroy {
@@ -19,7 +20,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
 
-  activeTab = signal<'historico' | 'cadastrar-produto' | 'listar-produtos' | 'estoque-usuarios'>('historico');
+  activeTab = signal<'historico' | 'cadastrar-produto' | 'listar-produtos' | 'estoque-usuarios' | 'precificacao'>('historico');
 
   ngOnInit(): void {
     // Verificar tab da query string
@@ -35,6 +36,8 @@ export class AdminComponent implements OnInit, OnDestroy {
           this.activeTab.set('listar-produtos');
         } else if (tab === 'estoque-usuarios') {
           this.activeTab.set('estoque-usuarios');
+        } else if (tab === 'precificacao') {
+          this.activeTab.set('precificacao');
         } else {
           this.activeTab.set('historico');
         }
@@ -46,7 +49,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  setActiveTab(tab: 'historico' | 'cadastrar-produto' | 'listar-produtos' | 'estoque-usuarios'): void {
+  setActiveTab(tab: 'historico' | 'cadastrar-produto' | 'listar-produtos' | 'estoque-usuarios' | 'precificacao'): void {
     this.activeTab.set(tab);
     this.router.navigate(['/admin'], { queryParams: { tab } });
   }

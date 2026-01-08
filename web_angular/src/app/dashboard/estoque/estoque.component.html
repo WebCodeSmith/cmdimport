@@ -1,4 +1,10 @@
-<div class="space-y-6">
+<div>
+  <!-- Header - Estilo Bitrix24 -->
+  <div class="mb-5">
+    <h3 class="text-lg font-semibold text-slate-900">Meu Estoque</h3>
+    <p class="text-sm text-slate-600 mt-0.5">Produtos disponíveis para venda</p>
+  </div>
+
   @if (loading()) {
     <div class="flex items-center justify-center py-12">
       <div class="text-center">
@@ -7,38 +13,38 @@
       </div>
     </div>
   } @else {
-    <!-- Filtro -->
-    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mt-8">
+    <!-- Filtros - Estilo Bitrix24 -->
+    <div class="bg-white border border-slate-200/60 rounded-lg p-4 mb-5 shadow-sm">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <label class="flex items-center cursor-pointer">
           <input
             type="checkbox"
             [checked]="mostrarEstoquesZerados()"
             (change)="toggleMostrarEstoquesZerados()"
-            class="h-4 w-4 text-slate-600 focus:ring-slate-500 border-slate-300 rounded"
+            class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-2"
           />
-          <span class="ml-2 text-sm text-slate-700">
-            Mostrar estoques zerados
+          <span class="ml-2 text-sm font-medium text-slate-700">
+            Ocultar produtos com estoque zerado
           </span>
         </label>
-        <div class="text-sm text-slate-500">
-          {{ produtosComEstoque() }} produtos com estoque
+        <div class="text-sm text-slate-600">
+          <span class="font-medium">{{ produtosComEstoque() }}</span> produtos com estoque
         </div>
       </div>
     </div>
 
-    <!-- Tabela de Produtos -->
+    <!-- Tabela de Produtos - Estilo Bitrix24 -->
     @if (estoqueFiltrado().length === 0) {
-      <div class="text-center py-12 bg-white border border-slate-200 rounded-xl">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center py-16 bg-white border border-slate-200/60 rounded-lg">
+        <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
-        <h4 class="text-lg font-medium text-slate-900 mb-2">
+        <h4 class="text-base font-medium text-slate-900 mb-1">
           {{ mostrarEstoquesZerados() ? 'Nenhum produto encontrado' : 'Nenhum produto em estoque' }}
         </h4>
-        <p class="text-slate-600">
+        <p class="text-sm text-slate-500">
           {{ mostrarEstoquesZerados() 
             ? 'Tente ajustar os filtros de busca' 
             : 'Entre em contato com o administrador para adicionar produtos.'
@@ -46,52 +52,68 @@
         </p>
       </div>
     } @else {
-      <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50">
-              <tr class="border-b border-slate-200">
-                <th class="text-left py-4 px-6 font-medium text-slate-700">Produto</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">Qtd</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">Status</th>
-                <th class="text-right py-4 px-4 font-medium text-slate-700">Preço</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">Cor</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">IMEI</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">Código de Barras</th>
-                <th class="text-center py-4 px-4 font-medium text-slate-700">Descrição</th>
+          <table class="w-full">
+            <thead class="bg-slate-50/80 border-b border-slate-200/60">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Produto</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Quantidade</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Preço</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Cor</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">IMEI</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Código de Barras</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Descrição</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-white divide-y divide-slate-200/60">
               @for (item of estoqueFiltrado(); track item.id) {
-                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td class="py-4 px-6">
-                    <div class="font-bold text-slate-900 text-base">{{ item.nome }}</div>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-4 py-3">
+                    <div class="text-sm font-medium text-slate-900">{{ item.nome }}</div>
                   </td>
-                  <td class="py-4 px-4 text-center">
-                    <span class="font-bold text-slate-900 text-base">{{ item.quantidade }}</span>
+                  <td class="px-4 py-3 whitespace-nowrap text-center">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-800">
+                      {{ item.quantidade }} un
+                    </span>
                   </td>
-                  <td class="py-4 px-4 text-center">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusClass(item.quantidade) }}">
+                  <td class="px-4 py-3 whitespace-nowrap text-center">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium {{ getStatusClass(item.quantidade) }}">
                       {{ getStatus(item.quantidade) }}
                     </span>
                   </td>
-                  <td class="py-4 px-4 text-right">
-                    <span class="font-bold text-slate-900 text-base">{{ formatCurrency(item.preco) }}</span>
+                  <td class="px-4 py-3 whitespace-nowrap text-right">
+                    <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(item.preco) }}</span>
                   </td>
-                  <td class="py-4 px-4 text-center">
-                    <span class="font-bold text-slate-900 text-base">{{ item.cor || '-' }}</span>
+                  <td class="px-4 py-3">
+                    @if (item.cor) {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
+                      {{ item.cor }}
+                    </span>
+                    } @else {
+                    <span class="text-xs text-slate-400">-</span>
+                    }
                   </td>
-                  <td class="py-4 px-4 text-center">
-                    <span class="font-bold text-slate-900 font-mono text-base">{{ item.imei || '-' }}</span>
+                  <td class="px-4 py-3">
+                    @if (item.imei) {
+                    <span class="text-xs font-mono text-slate-700">{{ item.imei }}</span>
+                    } @else {
+                    <span class="text-xs text-slate-400">-</span>
+                    }
                   </td>
-                  <td class="py-4 px-4 text-center">
-                    <span class="font-bold text-slate-900 font-mono text-base">{{ item.codigoBarras || '-' }}</span>
+                  <td class="px-4 py-3">
+                    @if (item.codigoBarras) {
+                    <span class="text-xs font-mono text-slate-700">{{ item.codigoBarras }}</span>
+                    } @else {
+                    <span class="text-xs text-slate-400">-</span>
+                    }
                   </td>
-                  <td class="py-4 px-4 text-center">
+                  <td class="px-4 py-3 whitespace-nowrap text-center">
                     @if (item.descricao) {
                       <button
                         (click)="toggleDescricao(item.id)"
-                        class="p-1 text-slate-600 hover:text-slate-800 transition-colors"
+                        class="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                         title="Ver descrição"
                       >
                         <svg class="w-4 h-4 transition-transform duration-200 {{ produtoExpandido() === item.id ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,15 +121,15 @@
                         </svg>
                       </button>
                     } @else {
-                      <span class="text-slate-400">-</span>
+                      <span class="text-xs text-slate-400">-</span>
                     }
                   </td>
                 </tr>
                 <!-- Linha expandida com descrição -->
                 @if (produtoExpandido() === item.id && item.descricao) {
-                  <tr class="bg-slate-50">
-                    <td colspan="8" class="py-4 px-6">
-                      <div class="bg-white border border-slate-200 rounded-lg p-4">
+                  <tr class="bg-slate-50/50">
+                    <td colspan="8" class="px-4 py-3">
+                      <div class="bg-white border border-slate-200/60 rounded-md p-4">
                         <div class="flex items-start space-x-3">
                           <div class="flex-shrink-0">
                             <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
@@ -117,8 +139,8 @@
                             </div>
                           </div>
                           <div class="flex-1">
-                            <h4 class="text-sm font-semibold text-slate-900 mb-2">Descrição do Produto</h4>
-                            <p class="text-slate-700 text-sm leading-relaxed">{{ item.descricao }}</p>
+                            <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">Descrição do Produto</h4>
+                            <p class="text-sm text-slate-700 leading-relaxed">{{ item.descricao }}</p>
                           </div>
                         </div>
                       </div>

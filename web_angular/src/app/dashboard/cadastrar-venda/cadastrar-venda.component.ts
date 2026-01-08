@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Produto } from '../../shared/types/produto.types';
+import { formatCurrency } from '../../shared/utils/formatters';
 
 @Component({
   selector: 'app-cadastrar-venda',
@@ -178,10 +179,7 @@ export class CadastrarVendaComponent implements OnInit {
   // Removido - agora usa computed signal valorTotal
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    return formatCurrency(value);
   }
 
   onPhoneInput(event: Event): void {

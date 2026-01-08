@@ -105,3 +105,26 @@ model HistoricoVenda {
   usuarioId   Int
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 }
+
+model CategoriaDespesa {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  descricao String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  despesas  Despesa[]
+}
+
+model Despesa {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  valor       Decimal  @db.Decimal(10, 2)
+  categoriaId Int
+  categoria   CategoriaDespesa @relation(fields: [categoriaId], references: [id])
+  descricao   String?
+  data        DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
