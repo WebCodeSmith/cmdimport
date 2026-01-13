@@ -23,8 +23,8 @@ function getApiUrl(): string {
         ? 'cmdimport.online' 
         : hostname;
       // Usar HTTPS se estiver em produção, HTTP se for IP
-      const protocol = apiHost === 'cmdimport.online' ? 'https' : window.location.protocol;
-      return `${protocol}//${apiHost}/api`;
+      const protocol = apiHost === 'cmdimport.online' ? 'https://' : 'http://';
+      return `${protocol}${apiHost}/api`;
     }
   }
 
