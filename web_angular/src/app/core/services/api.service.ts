@@ -15,10 +15,16 @@ function getApiUrl(): string {
   // Prioridade 2: No browser, usar a mesma origem do frontend
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    // Se não for localhost, usar a mesma origem do frontend
+    // Se não for localhost, usar o domínio cmdimport.online para API
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      // Usar a mesma origem (protocolo + hostname) para evitar CORS
-      return `${window.location.protocol}//${window.location.hostname}/api`;
+      // Se for IP, usar o domínio cmdimport.online
+      // Se já for o domínio, usar o mesmo
+      const apiHost = hostname.match(/^\d+\.\d+\.\d+\.\d+$/) 
+        ? 'cmdimport.online' 
+        : hostname;
+      // Usar HTTPS se estiver em produção, HTTP se for IP
+      const protocol = apiHost === 'cmdimport.online' ? 'https' : window.location.protocol;
+      return `${protocol}//${apiHost}/api`;
     }
   }
 
