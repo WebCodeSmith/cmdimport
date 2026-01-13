@@ -684,6 +684,11 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     return venda.produtos.reduce((acc, p) => acc + p.quantidade, 0);
   }
 
+  calcularValorTotalVenda(venda: HistoricoVenda): number {
+    // Calcular o valor total somando todos os produtos
+    return venda.produtos.reduce((acc, p) => acc + (p.precoUnitario * p.quantidade), 0);
+  }
+
   // Usar funções do formatters compartilhado diretamente no template
   formatCurrency = formatCurrency;
   formatPhone = formatPhone;
