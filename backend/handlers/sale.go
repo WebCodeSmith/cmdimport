@@ -531,6 +531,7 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 
 			vendaMap := map[string]interface{}{
 				"vendaId":        vendaID,
+				"usuarioId":      venda.UsuarioID,
 				"clienteNome":    venda.ClienteNome,
 				"telefone":       venda.Telefone,
 				"endereco":       venda.Endereco,

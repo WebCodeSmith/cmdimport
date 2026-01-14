@@ -25,6 +25,7 @@ export interface VendaFormData {
 
 export interface HistoricoVenda {
   vendaId: string;
+  usuarioId: number;
   clienteNome: string;
   telefone: string;
   endereco: string;

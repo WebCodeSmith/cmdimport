@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -49,6 +49,15 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   transferindo = signal<boolean>(false);
   transferirForm: FormGroup;
 
+  // Troca de Produto
+  modalTrocarProduto = signal<boolean>(false);
+  trocando = signal<boolean>(false);
+  produtoParaTrocar = signal<any>(null);
+  produtosDisponiveis = signal<any[]>([]);
+  produtosFiltrados = signal<any[]>([]);
+  trocaForm: FormGroup;
+  buscaProdutoControl = new FormControl('');
+
   produtoParaDeletar = signal<number | null>(null);
   deletandoProduto = signal<boolean>(false);
 
@@ -89,6 +98,18 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     this.transferirForm = this.fb.group({
       novoUsuarioId: ['', Validators.required]
     });
+
+    this.trocaForm = this.fb.group({
+      novoEstoqueId: ['', Validators.required],
+      precoUnitario: [0, [Validators.required, Validators.min(0.01)]]
+    });
+
+    // Configurar busca de produtos
+    this.buscaProdutoControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(termo => {
+        this.filtrarProdutos(termo || '');
+      });
   }
 
   ngOnInit(): void {
@@ -792,6 +813,119 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
       this.toastService.error(error?.error?.message || error?.message || 'Erro ao transferir venda');
     } finally {
       this.transferindo.set(false);
+    }
+  }
+
+  // Métodos de Troca de Produto
+  async abrirModalTroca(produtoId: number): Promise<void> {
+    const venda = this.vendaSelecionada();
+    if (!venda) return;
+
+    const produto = venda.produtos.find(p => p.id === produtoId);
+    if (!produto) return;
+
+    this.produtoParaTrocar.set(produto);
+    this.modalTrocarProduto.set(true);
+    this.trocaForm.reset();
+    this.buscaProdutoControl.setValue('');
+
+    // Carregar estoque do vendedor da venda
+    await this.carregarEstoqueVendedor(venda.usuarioId);
+  }
+
+  fecharModalTroca(): void {
+    this.modalTrocarProduto.set(false);
+    this.produtoParaTrocar.set(null);
+    this.produtosDisponiveis.set([]);
+    this.produtosFiltrados.set([]);
+    this.trocaForm.reset();
+  }
+
+  async carregarEstoqueVendedor(usuarioId: number): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.apiService.get<any[]>('/estoque', {
+          usuarioId: usuarioId,
+          ocultarEstoqueZerado: 'true'
+        })
+      );
+
+      if (response.success && response.data) {
+        this.produtosDisponiveis.set(response.data);
+        this.filtrarProdutos('');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estoque:', error);
+      this.toastService.error('Erro ao carregar produtos disponíveis');
+    }
+  }
+
+  filtrarProdutos(termo: string): void {
+    const termoLower = termo.toLowerCase().trim();
+    const todos = this.produtosDisponiveis();
+
+    if (!termoLower) {
+      this.produtosFiltrados.set(todos);
+      return;
+    }
+
+    const filtrados = todos.filter(p =>
+      p.nome.toLowerCase().includes(termoLower) ||
+      (p.imei && p.imei.includes(termoLower)) ||
+      (p.codigoBarras && p.codigoBarras.includes(termoLower))
+    );
+
+    this.produtosFiltrados.set(filtrados);
+  }
+
+  selecionarProdutoTroca(produtoEstoque: any): void {
+    this.trocaForm.patchValue({
+      novoEstoqueId: produtoEstoque.id,
+      precoUnitario: produtoEstoque.preco
+    });
+  }
+
+  async confirmarTroca(): Promise<void> {
+    const venda = this.vendaSelecionada();
+    const produtoAntigo = this.produtoParaTrocar();
+    if (!venda || !produtoAntigo) return;
+
+    if (this.trocaForm.invalid) {
+      this.toastService.error('Selecione um produto e informe o preço');
+      return;
+    }
+
+    try {
+      this.trocando.set(true);
+      const formValue = this.trocaForm.value;
+
+      // O produtoAntigo.id é o historicoVendaId (ID da tabela HistoricoVenda)
+      // Confirmado pelo view_code_item anterior onde produtoMap["id"] = venda.ID
+
+      const payload = {
+        historicoVendaId: produtoAntigo.id,
+        novoEstoqueId: Number(formValue.novoEstoqueId),
+        precoUnitario: Number(formValue.precoUnitario)
+      };
+
+      const response = await firstValueFrom(
+        this.apiService.post('/admin/venda/trocar-produto', payload)
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Erro ao trocar produto');
+      }
+
+      this.toastService.success('Produto trocado com sucesso!');
+      this.fecharModalTroca();
+      this.fecharDetalhes();
+      this.carregarDados();
+
+    } catch (error: any) {
+      console.error('Erro ao trocar produto:', error);
+      this.toastService.error(error?.error?.message || error?.message || 'Erro ao trocar produto');
+    } finally {
+      this.trocando.set(false);
     }
   }
 }
