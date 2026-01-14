@@ -30,6 +30,7 @@ export default function CadastrarProdutoSection() {
   const [sugestoes, setSugestoes] = useState<ProdutoSugestao[]>([])
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
   const [buscando, setBuscando] = useState(false)
+  const [sugestaoSelecionada, setSugestaoSelecionada] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -92,6 +93,7 @@ export default function CadastrarProdutoSection() {
   // Debounce na busca
   const handleNomeChange = (valor: string) => {
     setFormData({ ...formData, nome: valor })
+    setSugestaoSelecionada(false) // Resetar flag quando usuário digitar
 
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current)
@@ -105,10 +107,11 @@ export default function CadastrarProdutoSection() {
   // Selecionar sugestão
   const selecionarSugestao = (produto: ProdutoSugestao) => {
     setFormData({ ...formData, nome: produto.nome })
-    setSugestoes([])
-    setMostrarSugestoes(false)
+    setSugestoes([]) // Limpar sugestões
+    setMostrarSugestoes(false) // Esconder dropdown
+    setSugestaoSelecionada(true) // Marcar que foi selecionado
     if (inputRef.current) {
-      inputRef.current.blur()
+      inputRef.current.blur() // Remover foco do input
     }
   }
 
@@ -246,6 +249,7 @@ export default function CadastrarProdutoSection() {
         })
         setSugestoes([])
         setMostrarSugestoes(false)
+        setSugestaoSelecionada(false) // Resetar flag de seleção
         custoFormatter.reset()
         taxaFormatter.reset()
       } else {
@@ -280,12 +284,14 @@ export default function CadastrarProdutoSection() {
                 value={formData.nome}
                 onChange={(e) => handleNomeChange(e.target.value)}
                 onFocus={() => {
-                  // Sempre mostrar sugestões quando focar no campo, se houver sugestões
-                  if (sugestoes.length > 0) {
-                    setMostrarSugestoes(true)
-                  } else if (formData.nome.length >= 2) {
-                    // Se não houver sugestões mas há texto, buscar novamente
-                    buscarProdutos(formData.nome)
+                  // Só mostrar sugestões se não foi uma seleção anterior
+                  if (!sugestaoSelecionada) {
+                    if (sugestoes.length > 0) {
+                      setMostrarSugestoes(true)
+                    } else if (formData.nome.length >= 2) {
+                      // Se não houver sugestões mas há texto, buscar novamente
+                      buscarProdutos(formData.nome)
+                    }
                   }
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
