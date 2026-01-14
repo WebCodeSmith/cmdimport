@@ -936,15 +936,24 @@ func (h *SaleHandler) TrocarProduto(c *gin.Context) {
 		}
 		novoValorTotal := novoPreco * float64(historicoVenda.Quantidade)
 
+
 		// 4. Atualizar o registro da venda
-		updates := map[string]interface{}{
-			"estoqueId":     novoEstoque.ID,
-			"produtoNome":   novoEstoque.ProdutoComprado.Nome,
-			"precoUnitario": novoPreco,
-			"valorTotal":    novoValorTotal,
+		// Usar struct para garantir mapeamento correto
+		dadosAtualizados := models.HistoricoVenda{
+			EstoqueID:     novoEstoque.ID,
+			ProdutoNome:   novoEstoque.ProdutoComprado.Nome,
+			PrecoUnitario: novoPreco,
+			ValorTotal:    novoValorTotal,
 		}
 
-		if err := tx.Model(&historicoVenda).Updates(updates).Error; err != nil {
+		// Debug
+		fmt.Printf("Atualizando HistoricoVenda ID: %d\n", historicoVenda.ID)
+		fmt.Printf("Novos Dados: %+v\n", dadosAtualizados)
+
+		// Forçar atualização dos campos específicos
+		if err := tx.Debug().Model(&historicoVenda).
+			Select("EstoqueID", "ProdutoNome", "PrecoUnitario", "ValorTotal").
+			Updates(dadosAtualizados).Error; err != nil {
 			return err
 		}
 
