@@ -136,7 +136,7 @@
             class="px-4 py-2 text-sm font-medium rounded-md transition-colors">
             Todas as Semanas
           </button>
-          @for (semana of [1, 2, 3, 4]; track semana) {
+          @for (semana of obterSemanasDoMes(); track semana) {
           <button (click)="selecionarSemana(semana)" [class.bg-indigo-600]="semanaSelecionada() === semana"
             [class.text-white]="semanaSelecionada() === semana" [class.bg-slate-100]="semanaSelecionada() !== semana"
             [class.text-slate-700]="semanaSelecionada() !== semana"

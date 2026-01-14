@@ -87,27 +87,69 @@ export class PrecificacaoComponent implements OnInit {
     return this.despesasPorCategoria().reduce((total, despesa) => total + despesa.valor, 0);
   });
 
-  // Função para calcular a semana do mês (1-4)
-  calcularSemanaDoMes(dataString: string): number {
-    const data = new Date(dataString);
-    const dia = data.getDate();
-    // Semana 1: dias 1-7, Semana 2: dias 8-14, Semana 3: dias 15-21, Semana 4: dias 22+
-    if (dia <= 7) return 1;
-    if (dia <= 14) return 2;
-    if (dia <= 21) return 3;
-    return 4;
+  // Obter todas as semanas do mês atual
+  obterSemanasDoMes(): number[] {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = hoje.getMonth();
+
+    // Primeiro e último dia do mês
+    const primeiroDia = new Date(ano, mes, 1);
+    const ultimoDia = new Date(ano, mes + 1, 0);
+
+    // Calcular número de semanas
+    const semanas = new Set<number>();
+    for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+      const data = new Date(ano, mes, dia);
+      const semana = this.calcularSemanaDoMes(data.toISOString());
+      semanas.add(semana);
+    }
+
+    return Array.from(semanas).sort((a, b) => a - b);
   }
 
-  // Agrupar despesas por semana
+  // Função para calcular a semana do mês baseado no calendário (Segunda a Domingo)
+  calcularSemanaDoMes(dataString: string): number {
+    const data = new Date(dataString);
+    const ano = data.getFullYear();
+    const mes = data.getMonth();
+    const dia = data.getDate();
+
+    // Primeiro dia do mês
+    const primeiroDia = new Date(ano, mes, 1);
+    let diaDaSemana = primeiroDia.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+
+    // Ajustar para que segunda-feira seja 0, domingo seja 6
+    diaDaSemana = diaDaSemana === 0 ? 6 : diaDaSemana - 1;
+
+    // Calcular em qual semana o dia está
+    const diasDesdeInicio = dia - 1;
+    const diasAteCompletarPrimeiraSemana = diaDaSemana === 0 ? 0 : (7 - diaDaSemana);
+
+    if (diasDesdeInicio < diasAteCompletarPrimeiraSemana) {
+      return 1; // Primeira semana (parcial ou completa)
+    }
+
+    const diasAposPrimeiraSemana = diasDesdeInicio - diasAteCompletarPrimeiraSemana;
+    return Math.floor(diasAposPrimeiraSemana / 7) + 2;
+  }
+
+  // Agrupar despesas por semana (dinâmico)
   despesasPorSemana = computed(() => {
     const despesasFiltradas = this.despesasPorCategoria();
-    const semanas: { [key: number]: Despesa[] } = { 1: [], 2: [], 3: [], 4: [] };
+    const semanas: { [key: number]: Despesa[] } = {};
+
+    // Inicializar todas as semanas do mês
+    this.obterSemanasDoMes().forEach(semana => {
+      semanas[semana] = [];
+    });
 
     despesasFiltradas.forEach(despesa => {
       const semana = this.calcularSemanaDoMes(despesa.data);
-      if (semanas[semana]) {
-        semanas[semana].push(despesa);
+      if (!semanas[semana]) {
+        semanas[semana] = [];
       }
+      semanas[semana].push(despesa);
     });
 
     return semanas;
@@ -122,43 +164,50 @@ export class PrecificacaoComponent implements OnInit {
     return this.despesasPorSemana()[semana] || [];
   });
 
-  // Totais por semana
+  // Totais por semana (dinâmico)
   totalPorSemana = computed(() => {
     const semanas = this.despesasPorSemana();
-    return {
-      1: semanas[1].reduce((total, d) => total + d.valor, 0),
-      2: semanas[2].reduce((total, d) => total + d.valor, 0),
-      3: semanas[3].reduce((total, d) => total + d.valor, 0),
-      4: semanas[4].reduce((total, d) => total + d.valor, 0)
-    } as { [key: number]: number };
+    const totais: { [key: number]: number } = {};
+
+    Object.keys(semanas).forEach(semanaStr => {
+      const semana = Number(semanaStr);
+      totais[semana] = semanas[semana].reduce((total, d) => total + d.valor, 0);
+    });
+
+    return totais;
   });
 
   // Função auxiliar para obter total de uma semana
   obterTotalSemana(semana: number | null): number {
-    if (!semana || semana < 1 || semana > 4) return 0;
+    if (!semana) return 0;
     return this.totalPorSemana()[semana] || 0;
   }
 
-  // Obter período da semana (ex: "01/01 - 07/01")
+  // Obter período da semana (ex: "01/01 - 04/01") - Segunda a Domingo
   obterPeriodoSemana(semana: number, mesAno?: string): string {
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mes = hoje.getMonth();
 
+    // Primeiro dia do mês
+    const primeiroDia = new Date(ano, mes, 1);
+    let diaDaSemana = primeiroDia.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+
+    // Ajustar para que segunda-feira seja 0, domingo seja 6
+    diaDaSemana = diaDaSemana === 0 ? 6 : diaDaSemana - 1;
+
     let diaInicio: number, diaFim: number;
 
     if (semana === 1) {
+      // Primeira semana: do dia 1 até o primeiro domingo
       diaInicio = 1;
-      diaFim = 7;
-    } else if (semana === 2) {
-      diaInicio = 8;
-      diaFim = 14;
-    } else if (semana === 3) {
-      diaInicio = 15;
-      diaFim = 21;
+      const diasAteCompletarPrimeiraSemana = diaDaSemana === 0 ? 6 : (7 - diaDaSemana - 1);
+      diaFim = Math.min(diaInicio + diasAteCompletarPrimeiraSemana, new Date(ano, mes + 1, 0).getDate());
     } else {
-      diaInicio = 22;
-      diaFim = new Date(ano, mes + 1, 0).getDate(); // Último dia do mês
+      // Semanas seguintes: segunda a domingo
+      const diasAteCompletarPrimeiraSemana = diaDaSemana === 0 ? 0 : (7 - diaDaSemana);
+      diaInicio = diasAteCompletarPrimeiraSemana + ((semana - 2) * 7) + 1;
+      diaFim = Math.min(diaInicio + 6, new Date(ano, mes + 1, 0).getDate());
     }
 
     const dataInicio = new Date(ano, mes, diaInicio);
