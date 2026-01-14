@@ -42,6 +42,8 @@ type ProdutoComprado struct {
 	ValorVarejo       *float64       `gorm:"type:decimal(10,2);column:valorVarejo" json:"valorVarejo"`
 	ValorRevendaEspecial *float64    `gorm:"type:decimal(10,2);column:valorRevendaEspecial" json:"valorRevendaEspecial"`
 	ValorParcelado10x *float64       `gorm:"type:decimal(10,2);column:valorParcelado10x" json:"valorParcelado10x"`
+	CategoriaID       *int           `gorm:"column:categoriaId" json:"categoriaId"`
+	Categoria         *CategoriaProduto `gorm:"foreignKey:CategoriaID" json:"categoria,omitempty"`
 	CreatedAt         time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt         time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	Estoque           []Estoque      `gorm:"foreignKey:ProdutoCompradoID" json:"estoque,omitempty"`
@@ -135,5 +137,23 @@ type Despesa struct {
 // TableName especifica o nome da tabela no banco
 func (Despesa) TableName() string {
 	return "Despesa"
+}
+
+// CategoriaProduto representa uma categoria de produtos
+type CategoriaProduto struct {
+	ID        int       `gorm:"primaryKey" json:"id"`
+	Nome      string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"nome"`
+	Descricao *string   `gorm:"type:text" json:"descricao"`
+	Icone     *string   `gorm:"type:varchar(100)" json:"icone"`
+	Cor       *string   `gorm:"type:varchar(20)" json:"cor"`
+	Ativo     bool      `gorm:"default:true" json:"ativo"`
+	CreatedAt time.Time `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt" json:"updatedAt"`
+	Produtos  []ProdutoComprado `gorm:"foreignKey:CategoriaID" json:"-"`
+}
+
+// TableName especifica o nome da tabela no banco
+func (CategoriaProduto) TableName() string {
+	return "CategoriaProduto"
 }
 

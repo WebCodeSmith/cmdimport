@@ -27,6 +27,8 @@ export interface ProdutoComprado {
   valorVarejo?: number;
   valorRevendaEspecial?: number;
   valorParcelado10x?: number;
+  categoriaId?: number;
+  categoria?: CategoriaProduto;
   estoque: Array<{
     id: number;
     quantidade: number;
@@ -50,6 +52,7 @@ export interface ProdutoFormData {
   custoDolar: string;
   taxaDolar: string;
   quantidade: string;
+  categoriaId?: string;
 }
 
 export interface ProdutoCompradoSimples {
@@ -65,3 +68,20 @@ export interface ProdutoSugestao {
   cor?: string;
 }
 
+export interface CategoriaProduto {
+  id: number;
+  nome: string;
+  descricao?: string;
+  icone?: string;
+  cor?: string;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CriarCategoriaProdutoRequest {
+  nome: string;
+  descricao?: string;
+  icone?: string;
+  cor?: string;
+}

@@ -31,6 +31,7 @@ type CadastrarProdutoRequest struct {
 	TaxaDolar         float64 `json:"taxaDolar" binding:"required"`
 	Quantidade        int     `json:"quantidade" binding:"required"`
 	TipoIdentificacao string  `json:"tipoIdentificacao"`
+	CategoriaID       *int    `json:"categoriaId"` // Opcional
 }
 
 func (h *ProductHandler) Listar(c *gin.Context) {
@@ -60,6 +61,15 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	if dataFim != "" {
 		// Usar DATE() para extrair apenas a parte da data e comparar
 		query = query.Where("DATE(dataCompra) <= ?", dataFim)
+	}
+
+	// Filtro de categoria
+	categoriaID := c.Query("categoriaId")
+	if categoriaID != "" {
+		id, err := strconv.Atoi(categoriaID)
+		if err == nil {
+			query = query.Where("categoriaId = ?", id)
+		}
 	}
 
 	// Filtro de estoque zerado
@@ -235,6 +245,7 @@ func (h *ProductHandler) Cadastrar(c *gin.Context) {
 		Quantidade:       req.Quantidade,
 		QuantidadeBackup: req.Quantidade, // Salvar backup
 		DataCompra:       time.Now(),
+		CategoriaID:      req.CategoriaID, // Adicionar categoria
 	}
 
 	// Definir IMEI e código de barras baseado no tipo
@@ -327,6 +338,7 @@ func (h *ProductHandler) Atualizar(c *gin.Context) {
 		Quantidade    *int
 		Fornecedor    *string
 		DataCompra    *string
+		CategoriaID   *int
 	}
 
 	req := UpdateRequest{}
@@ -392,6 +404,14 @@ func (h *ProductHandler) Atualizar(c *gin.Context) {
 	if v, ok := reqRaw["quantidade"]; ok && v != nil {
 		if i, err := utils.ParseIntFlexible(v); err == nil && i != nil {
 			req.Quantidade = i
+		}
+	}
+	if v, ok := reqRaw["categoriaId"]; ok {
+		if v == nil {
+			// Se for null explicitamente, definir como nil para remover categoria
+			req.CategoriaID = nil
+		} else if i, err := utils.ParseIntFlexible(v); err == nil && i != nil {
+			req.CategoriaID = i
 		}
 	}
 
@@ -470,6 +490,9 @@ func (h *ProductHandler) Atualizar(c *gin.Context) {
 		if err == nil && !dataCompra.IsZero() {
 			updates["dataCompra"] = dataCompra
 		}
+	}
+	if req.CategoriaID != nil {
+		updates["categoriaId"] = *req.CategoriaID
 	}
 
 	// Atualizar

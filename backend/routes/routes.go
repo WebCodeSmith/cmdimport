@@ -31,6 +31,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	stockHandler := handlers.NewStockHandler(db)
 	saleHandler := handlers.NewSaleHandler(db)
 	expenseHandler := handlers.NewExpenseHandler(db)
+	productCategoryHandler := handlers.NewProductCategoryHandler(db)
 
 	// Rotas públicas
 	api := router.Group("/api")
@@ -139,6 +140,15 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 			adminDespesas.POST("", expenseHandler.CriarDespesa)
 			adminDespesas.PUT("/:id", expenseHandler.AtualizarDespesa)
 			adminDespesas.DELETE("/:id", expenseHandler.DeletarDespesa)
+		}
+
+		// Admin - Categorias de Produtos
+		adminCategoriasProduto := protected.Group("/admin/categorias-produto")
+		{
+			adminCategoriasProduto.GET("", productCategoryHandler.ListarCategorias)
+			adminCategoriasProduto.POST("", productCategoryHandler.CriarCategoria)
+			adminCategoriasProduto.PUT("/:id", productCategoryHandler.AtualizarCategoria)
+			adminCategoriasProduto.DELETE("/:id", productCategoryHandler.DeletarCategoria)
 		}
 	}
 

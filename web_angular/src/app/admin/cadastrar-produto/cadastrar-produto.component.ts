@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ProdutoSugestao } from '../../shared/types/produto.types';
+import { ProdutoSugestao, CategoriaProduto, CriarCategoriaProdutoRequest } from '../../shared/types/produto.types';
 import { formatCurrency, formatNumber as formatNumberUtil } from '../../shared/utils/formatters';
 
 @Component({
@@ -26,7 +26,13 @@ export class CadastrarProdutoComponent implements OnInit {
   buscando = signal<boolean>(false);
   sugestaoSelecionada = signal<boolean>(false);
 
+  // Categorias
+  categorias = signal<CategoriaProduto[]>([]);
+  modalNovaCategoria = signal<boolean>(false);
+  salvandoCategoria = signal<boolean>(false);
+
   produtoForm: FormGroup;
+  categoriaForm: FormGroup;
   precoCalculado = signal<string>('0,00');
 
   private debounceTimeout?: any;
@@ -40,7 +46,15 @@ export class CadastrarProdutoComponent implements OnInit {
       codigoBarras: [''],
       custoDolar: ['', [Validators.required, Validators.min(0.01)]],
       taxaDolar: ['', [Validators.required, Validators.min(0.0001)]], // Campo inicia vazio
-      quantidade: ['', [Validators.required, Validators.min(1)]]
+      quantidade: ['', [Validators.required, Validators.min(1)]],
+      categoriaId: [''] // Opcional
+    });
+
+    this.categoriaForm = this.fb.group({
+      nome: ['', [Validators.required, Validators.minLength(2)]],
+      descricao: [''],
+      icone: [''],
+      cor: ['#4F46E5'] // Cor padrão indigo
     });
 
     // Calcular preço quando custo ou taxa mudarem
@@ -54,6 +68,9 @@ export class CadastrarProdutoComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Carregar categorias
+    this.carregarCategorias();
+
     // Buscar produtos quando nome mudar (com debounce)
     this.produtoForm.get('nome')?.valueChanges.subscribe((valor: string) => {
       // Resetar flag quando usuário digitar
@@ -301,6 +318,14 @@ export class CadastrarProdutoComponent implements OnInit {
         }
       }
 
+      // Categoria (converter string para número)
+      if (formValue.categoriaId) {
+        const categoriaId = parseInt(formValue.categoriaId, 10);
+        if (!isNaN(categoriaId)) {
+          dadosEnvio.categoriaId = categoriaId;
+        }
+      }
+
       const response = await firstValueFrom(
         this.apiService.post<any>('/admin/produtos/cadastrar', dadosEnvio)
       );
@@ -326,6 +351,74 @@ export class CadastrarProdutoComponent implements OnInit {
       this.toastService.error('Erro de conexão. Tente novamente.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  // ============================================
+  // MÉTODOS DE CATEGORIAS
+  // ============================================
+
+  async carregarCategorias(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.apiService.get<CategoriaProduto[]>('/admin/categorias-produto')
+      );
+      if (response?.success && response.data) {
+        // Filtrar apenas categorias ativas
+        this.categorias.set(response.data.filter(c => c.ativo));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
+  }
+
+  abrirModalNovaCategoria(): void {
+    this.categoriaForm.reset({
+      cor: '#4F46E5' // Resetar com cor padrão
+    });
+    this.modalNovaCategoria.set(true);
+  }
+
+  fecharModalNovaCategoria(): void {
+    this.modalNovaCategoria.set(false);
+  }
+
+  async salvarCategoria(): Promise<void> {
+    if (this.categoriaForm.invalid) {
+      this.toastService.error('Preencha o nome da categoria');
+      return;
+    }
+
+    try {
+      this.salvandoCategoria.set(true);
+      const formValue = this.categoriaForm.value;
+
+      const categoria: CriarCategoriaProdutoRequest = {
+        nome: formValue.nome.trim(),
+        descricao: formValue.descricao?.trim() || undefined,
+        icone: formValue.icone?.trim() || undefined,
+        cor: formValue.cor || undefined
+      };
+
+      const response = await firstValueFrom(
+        this.apiService.post<CategoriaProduto>('/admin/categorias-produto', categoria)
+      );
+
+      if (response?.success && response.data) {
+        this.toastService.success('Categoria criada com sucesso!');
+        this.fecharModalNovaCategoria();
+        await this.carregarCategorias();
+
+        // Selecionar a categoria recém-criada no formulário
+        this.produtoForm.patchValue({ categoriaId: response.data.id.toString() });
+      } else {
+        this.toastService.error(response?.message || 'Erro ao criar categoria');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar categoria:', error);
+      this.toastService.error('Erro ao criar categoria');
+    } finally {
+      this.salvandoCategoria.set(false);
     }
   }
 }

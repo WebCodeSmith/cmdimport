@@ -68,6 +68,10 @@ model ProdutoComprado {
   valorRevendaEspecial Decimal? @db.Decimal(10, 2)
   valorParcelado10x Decimal? @db.Decimal(10, 2)
   
+  // Relacionamento com categoria
+  categoriaId Int?
+  categoria   CategoriaProduto? @relation(fields: [categoriaId], references: [id])
+  
   // Relacionamento com estoque
   estoque     Estoque[]
 }
@@ -127,4 +131,18 @@ model Despesa {
   data        DateTime @db.Date
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model CategoriaProduto {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  descricao String?
+  icone     String?
+  cor       String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  produtos  ProdutoComprado[]
 }

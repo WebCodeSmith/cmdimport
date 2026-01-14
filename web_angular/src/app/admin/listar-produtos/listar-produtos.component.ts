@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ProdutoComprado } from '../../shared/types/produto.types';
+import { ProdutoComprado, CategoriaProduto } from '../../shared/types/produto.types';
 import { PanelModalComponent, PanelMenuItem } from '../../shared/components/panel-modal/panel-modal.component';
 import { formatCurrency as formatCurrencyUtil, formatNumber as formatNumberUtil, formatDateOnly } from '../../shared/utils/formatters';
 
@@ -48,11 +48,12 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   salvandoDistribuicao = signal<boolean>(false);
   deletando = signal<boolean>(false);
   atendentes = signal<any[]>([]);
+  categorias = signal<CategoriaProduto[]>([]); // Categorias de produtos
 
   // Panel Modal (Gerenciar Produto)
   modalGerenciar = signal<boolean>(false);
   selectedGerenciarItem = signal('editar');
-  
+
   gerenciarMenuItems: PanelMenuItem[] = [
     { id: 'editar', label: 'Editar Produto', icon: 'edit' },
     { id: 'precificacao', label: 'Precificação', icon: 'attach_money' },
@@ -64,7 +65,8 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       busca: [''],
       dataInicio: [''],
       dataFim: [''],
-      ocultarEstoqueZerado: [false]
+      ocultarEstoqueZerado: [false],
+      categoriaId: [''] // Filtro por categoria
     });
 
     this.formularioEdicao = this.fb.group({
@@ -77,7 +79,8 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       taxaDolar: ['', Validators.required],
       preco: ['', Validators.required],
       quantidade: ['', [Validators.required, Validators.min(0)]],
-      dataCompra: ['', Validators.required]
+      dataCompra: ['', Validators.required],
+      categoriaId: [''] // Opcional
     });
 
     this.formularioPrecificacao = this.fb.group({
@@ -94,6 +97,9 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Carregar categorias
+    this.carregarCategorias();
+
     // Carregar produtos na primeira vez
     this.carregarProdutos().then(() => {
       this.primeiraCarga = false;
@@ -108,7 +114,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((valor: string) => {
         if (this.primeiraCarga) return;
-        
+
         if (this.debounceTimeout) {
           clearTimeout(this.debounceTimeout);
         }
@@ -126,7 +132,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         this.paginaAtual.set(1);
         this.carregarProdutos(true);
       });
-    
+
     this.filtrosForm.get('dataFim')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
@@ -134,13 +140,22 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         this.paginaAtual.set(1);
         this.carregarProdutos(true);
       });
-    
+
+    // Listener para filtro de categoria
+    this.filtrosForm.get('categoriaId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.primeiraCarga) return;
+        this.paginaAtual.set(1);
+        this.carregarProdutos(true);
+      });
+
     // Para ocultarEstoqueZerado, usar o valor do evento diretamente
     this.filtrosForm.get('ocultarEstoqueZerado')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((valor: boolean) => {
         if (this.primeiraCarga) return;
-        
+
         this.paginaAtual.set(1);
         // Usar queueMicrotask para garantir que o valor do formulário foi atualizado
         queueMicrotask(() => {
@@ -180,6 +195,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       }
       if (formValue.dataFim) {
         params.dataFim = formValue.dataFim;
+      }
+      // Filtro de categoria
+      if (formValue.categoriaId) {
+        params.categoriaId = formValue.categoriaId;
       }
       // Se o checkbox estiver marcado (true), ocultar estoques zerados
       if (formValue.ocultarEstoqueZerado === true) {
@@ -227,7 +246,8 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       busca: '',
       dataInicio: '',
       dataFim: '',
-      ocultarEstoqueZerado: false
+      ocultarEstoqueZerado: false,
+      categoriaId: ''
     });
     this.paginaAtual.set(1);
     this.carregarProdutos();
@@ -262,7 +282,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       }
     } else {
       paginas.push(1);
-      
+
       if (atual <= 4) {
         for (let i = 2; i <= 5; i++) {
           paginas.push(i);
@@ -314,14 +334,14 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   async abrirModalGerenciar(produto: ProdutoComprado): Promise<void> {
     this.produtoSelecionado.set(produto);
     this.selectedGerenciarItem.set('editar');
-    
+
     // Atualizar menu items com estado disabled baseado no estoque
     this.gerenciarMenuItems = [
       { id: 'editar', label: 'Editar Produto', icon: 'edit' },
       { id: 'precificacao', label: 'Precificação', icon: 'attach_money' },
       { id: 'distribuir', label: 'Distribuir', icon: 'people', disabled: produto.quantidade <= 0 }
     ];
-    
+
     // Carregar lista de atendentes para distribuição
     try {
       const response = await firstValueFrom(
@@ -333,7 +353,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Erro ao carregar atendentes:', error);
     }
-    
+
     // Preencher formulário de edição
     this.formularioEdicao.patchValue({
       nome: produto.nome,
@@ -345,9 +365,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       taxaDolar: produto.taxaDolar?.toString() || '',
       preco: produto.preco?.toString() || '',
       quantidade: produto.quantidade?.toString() || '',
-      dataCompra: produto.dataCompra ? new Date(produto.dataCompra).toISOString().split('T')[0] : ''
+      dataCompra: produto.dataCompra ? new Date(produto.dataCompra).toISOString().split('T')[0] : '',
+      categoriaId: produto.categoriaId?.toString() || ''
     });
-    
+
     // Preencher formulário de precificação
     this.formularioPrecificacao.patchValue({
       valorAtacado: produto.valorAtacado?.toString().replace('.', ',') || '',
@@ -355,14 +376,14 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       valorRevendaEspecial: produto.valorRevendaEspecial?.toString().replace('.', ',') || '',
       valorParcelado10x: produto.valorParcelado10x?.toString().replace('.', ',') || ''
     });
-    
+
     // Resetar formulário de distribuição
     const quantidadeMaxima = produto.quantidade;
     this.formularioDistribuicao.reset({
       atendenteId: '',
       quantidade: ''
     });
-    
+
     // Atualizar validação de quantidade máxima
     this.formularioDistribuicao.get('quantidade')?.setValidators([
       Validators.required,
@@ -370,7 +391,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       Validators.max(quantidadeMaxima)
     ]);
     this.formularioDistribuicao.get('quantidade')?.updateValueAndValidity();
-    
+
     this.modalGerenciar.set(true);
   }
 
@@ -415,10 +436,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
     try {
       this.salvandoEdicao.set(true);
-      
+
       const formValue = this.formularioEdicao.value;
       const dadosAtualizacao: any = {};
-      
+
       if (formValue.nome?.trim()) {
         dadosAtualizacao.nome = formValue.nome.trim();
       }
@@ -438,23 +459,34 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         dadosAtualizacao.dataCompra = formValue.dataCompra.trim();
       }
       if (formValue.custoDolar !== undefined && formValue.custoDolar !== null && formValue.custoDolar !== '') {
-        dadosAtualizacao.custoDolar = typeof formValue.custoDolar === 'string' 
-          ? formValue.custoDolar.trim() 
+        dadosAtualizacao.custoDolar = typeof formValue.custoDolar === 'string'
+          ? formValue.custoDolar.trim()
           : formValue.custoDolar.toString();
       }
       if (formValue.taxaDolar !== undefined && formValue.taxaDolar !== null && formValue.taxaDolar !== '') {
-        dadosAtualizacao.taxaDolar = typeof formValue.taxaDolar === 'string' 
-          ? formValue.taxaDolar.trim() 
+        dadosAtualizacao.taxaDolar = typeof formValue.taxaDolar === 'string'
+          ? formValue.taxaDolar.trim()
           : formValue.taxaDolar.toString();
       }
       if (formValue.preco !== undefined && formValue.preco !== null && formValue.preco !== '') {
-        dadosAtualizacao.preco = typeof formValue.preco === 'string' 
-          ? formValue.preco.trim() 
+        dadosAtualizacao.preco = typeof formValue.preco === 'string'
+          ? formValue.preco.trim()
           : formValue.preco.toString();
       }
       if (formValue.quantidade !== undefined && formValue.quantidade !== null && formValue.quantidade !== '') {
         // quantidade é um número, não precisa de trim
         dadosAtualizacao.quantidade = formValue.quantidade.toString();
+      }
+      // Categoria (converter string para número ou null)
+      if (formValue.categoriaId !== undefined) {
+        if (formValue.categoriaId === '' || formValue.categoriaId === null) {
+          dadosAtualizacao.categoriaId = null;
+        } else {
+          const categoriaId = parseInt(formValue.categoriaId, 10);
+          if (!isNaN(categoriaId)) {
+            dadosAtualizacao.categoriaId = categoriaId;
+          }
+        }
       }
 
       const response = await firstValueFrom(
@@ -465,7 +497,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         this.toastService.success('Produto atualizado com sucesso!');
         this.fecharModalEdicao();
         this.fecharModalGerenciar();
-        
+
         // Buscar produto atualizado
         try {
           const produtoAtualizadoResponse = await firstValueFrom(
@@ -478,14 +510,14 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
             if (index !== -1) {
               const produtoFormatado = {
                 ...produtoAtualizadoResponse.data,
-                custoDolar: typeof produtoAtualizadoResponse.data.custoDolar === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.custoDolar) 
+                custoDolar: typeof produtoAtualizadoResponse.data.custoDolar === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.custoDolar)
                   : (produtoAtualizadoResponse.data.custoDolar || 0),
-                taxaDolar: typeof produtoAtualizadoResponse.data.taxaDolar === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.taxaDolar) 
+                taxaDolar: typeof produtoAtualizadoResponse.data.taxaDolar === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.taxaDolar)
                   : (produtoAtualizadoResponse.data.taxaDolar || 0),
-                preco: typeof produtoAtualizadoResponse.data.preco === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.preco) 
+                preco: typeof produtoAtualizadoResponse.data.preco === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.preco)
                   : (produtoAtualizadoResponse.data.preco || 0)
               };
               produtosAtual[index] = produtoFormatado;
@@ -539,10 +571,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
     try {
       this.salvandoPrecificacao.set(true);
-      
+
       const formValue = this.formularioPrecificacao.value;
       const dadosPrecificacao: any = {};
-      
+
       if (formValue.valorAtacado?.trim()) {
         dadosPrecificacao.valorAtacado = this.parseNumber(formValue.valorAtacado);
       }
@@ -564,7 +596,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         this.toastService.success('Precificação atualizada com sucesso!');
         this.fecharModalPrecificacao();
         this.fecharModalGerenciar();
-        
+
         // Buscar produto atualizado
         try {
           const produtoAtualizadoResponse = await firstValueFrom(
@@ -616,7 +648,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
     try {
       this.deletando.set(true);
-      
+
       const response = await firstValueFrom(
         this.apiService.delete<any>(`/admin/produtos/${produto.id}`)
       );
@@ -624,13 +656,13 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       if (response?.success) {
         this.toastService.success('Produto deletado com sucesso!');
         this.fecharModalDeletar();
-        
+
         // Remover produto da lista
         const produtosAtual = this.produtos();
         const produtosFiltrados = produtosAtual.filter(p => p.id !== produto.id);
         this.produtos.set(produtosFiltrados);
         this.totalProdutos.set(this.totalProdutos() - 1);
-        
+
         // Se a página ficou vazia e não é a primeira, voltar uma página
         if (produtosFiltrados.length === 0 && this.paginaAtual() > 1) {
           this.paginaAtual.set(this.paginaAtual() - 1);
@@ -651,7 +683,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   // Métodos de Distribuição
   async abrirModalDistribuicao(produto: ProdutoComprado): Promise<void> {
     this.produtoSelecionado.set(produto);
-    
+
     // Carregar lista de atendentes
     try {
       const response = await firstValueFrom(
@@ -664,14 +696,14 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       console.error('Erro ao carregar atendentes:', error);
       this.toastService.error('Erro ao carregar lista de atendentes');
     }
-    
+
     // Resetar formulário com validação de quantidade máxima
     const quantidadeMaxima = produto.quantidade;
     this.formularioDistribuicao.reset({
       atendenteId: '',
       quantidade: ''
     });
-    
+
     // Atualizar validação de quantidade máxima
     this.formularioDistribuicao.get('quantidade')?.setValidators([
       Validators.required,
@@ -679,7 +711,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       Validators.max(quantidadeMaxima)
     ]);
     this.formularioDistribuicao.get('quantidade')?.updateValueAndValidity();
-    
+
     this.modalDistribuicao.set(true);
   }
 
@@ -698,7 +730,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       this.toastService.error('Produto não encontrado');
       return;
     }
-    
+
     if (!this.formularioDistribuicao.valid) {
       if (this.formularioDistribuicao.get('quantidade')?.hasError('max')) {
         this.toastService.error(`A quantidade não pode ser maior que ${produto.quantidade} unidades disponíveis`);
@@ -712,29 +744,29 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
     try {
       this.salvandoDistribuicao.set(true);
-      
+
       const formValue = this.formularioDistribuicao.value;
       const quantidade = parseInt(formValue.quantidade);
-      
+
       // Validação adicional
       if (!produto) {
         this.toastService.error('Produto não encontrado');
         this.salvandoDistribuicao.set(false);
         return;
       }
-      
+
       if (quantidade > produto.quantidade) {
         this.toastService.error(`A quantidade solicitada (${quantidade}) excede a quantidade disponível (${produto.quantidade})`);
         this.salvandoDistribuicao.set(false);
         return;
       }
-      
+
       if (quantidade <= 0) {
         this.toastService.error('A quantidade deve ser maior que zero');
         this.salvandoDistribuicao.set(false);
         return;
       }
-      
+
       const dadosDistribuicao = {
         produtoId: produto.id,
         atendenteId: parseInt(formValue.atendenteId),
@@ -752,7 +784,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
         );
         this.fecharModalDistribuicao();
         this.fecharModalGerenciar();
-        
+
         // Buscar produto atualizado
         try {
           const produtoAtualizadoResponse = await firstValueFrom(
@@ -765,14 +797,14 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
             if (index !== -1) {
               const produtoFormatado = {
                 ...produtoAtualizadoResponse.data,
-                custoDolar: typeof produtoAtualizadoResponse.data.custoDolar === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.custoDolar) 
+                custoDolar: typeof produtoAtualizadoResponse.data.custoDolar === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.custoDolar)
                   : (produtoAtualizadoResponse.data.custoDolar || 0),
-                taxaDolar: typeof produtoAtualizadoResponse.data.taxaDolar === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.taxaDolar) 
+                taxaDolar: typeof produtoAtualizadoResponse.data.taxaDolar === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.taxaDolar)
                   : (produtoAtualizadoResponse.data.taxaDolar || 0),
-                preco: typeof produtoAtualizadoResponse.data.preco === 'string' 
-                  ? parseFloat(produtoAtualizadoResponse.data.preco) 
+                preco: typeof produtoAtualizadoResponse.data.preco === 'string'
+                  ? parseFloat(produtoAtualizadoResponse.data.preco)
                   : (produtoAtualizadoResponse.data.preco || 0)
               };
               produtosAtual[index] = produtoFormatado;
@@ -794,6 +826,20 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       this.toastService.error(errorMessage);
     } finally {
       this.salvandoDistribuicao.set(false);
+    }
+  }
+
+  // Carregar categorias de produtos
+  async carregarCategorias(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.apiService.get<CategoriaProduto[]>('/admin/categorias-produto')
+      );
+      if (response?.success && response.data) {
+        this.categorias.set(response.data.filter(c => c.ativo));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
     }
   }
 }
