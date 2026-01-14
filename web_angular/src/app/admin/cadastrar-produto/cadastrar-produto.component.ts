@@ -23,6 +23,7 @@ export class CadastrarProdutoComponent implements OnInit {
   sugestoes = signal<ProdutoSugestao[]>([]);
   mostrarSugestoes = signal<boolean>(false);
   buscando = signal<boolean>(false);
+  sugestaoSelecionada = signal<boolean>(false);
 
   produtoForm: FormGroup;
   precoCalculado = signal<string>('0,00');
@@ -54,6 +55,9 @@ export class CadastrarProdutoComponent implements OnInit {
   ngOnInit(): void {
     // Buscar produtos quando nome mudar (com debounce)
     this.produtoForm.get('nome')?.valueChanges.subscribe((valor: string) => {
+      // Resetar flag quando usuário digitar
+      this.sugestaoSelecionada.set(false);
+
       if (this.debounceTimeout) {
         clearTimeout(this.debounceTimeout);
       }
@@ -71,7 +75,7 @@ export class CadastrarProdutoComponent implements OnInit {
   private atualizarEstadoCampos(tipo: 'imei' | 'codigoBarras' | 'ambos'): void {
     const imeiControl = this.produtoForm.get('imei');
     const codigoBarrasControl = this.produtoForm.get('codigoBarras');
-    
+
     if (tipo === 'imei') {
       imeiControl?.enable();
       codigoBarrasControl?.disable();
@@ -105,7 +109,7 @@ export class CadastrarProdutoComponent implements OnInit {
   formatCurrencyInput(event: Event, controlName: string, maxDecimals: number = 2): void {
     const input = event.target as HTMLInputElement;
     let value = input.value;
-    
+
     // Se o campo estiver vazio, não processar
     if (!value || value.trim() === '') {
       this.produtoForm.get(controlName)?.setValue('', { emitEvent: false });
@@ -114,10 +118,10 @@ export class CadastrarProdutoComponent implements OnInit {
       }
       return;
     }
-    
+
     // Remove tudo exceto números, vírgula e ponto
     value = value.replace(/[^\d,.]/g, '');
-    
+
     // Se ficou vazio após limpeza, limpar o campo
     if (!value) {
       this.produtoForm.get(controlName)?.setValue('', { emitEvent: false });
@@ -126,24 +130,24 @@ export class CadastrarProdutoComponent implements OnInit {
       }
       return;
     }
-    
+
     // Substitui ponto por vírgula (formato brasileiro)
     value = value.replace(/\./g, ',');
-    
+
     // Garante apenas uma vírgula
     const parts = value.split(',');
     if (parts.length > 2) {
       value = parts[0] + ',' + parts.slice(1).join('');
     }
-    
+
     // Limita casas decimais
     if (parts.length === 2 && parts[1].length > maxDecimals) {
       value = parts[0] + ',' + parts[1].substring(0, maxDecimals);
     }
-    
+
     // Atualiza o valor do campo
     this.produtoForm.get(controlName)?.setValue(value, { emitEvent: false });
-    
+
     // Recalcula o preço se necessário
     if (controlName === 'custoDolar' || controlName === 'taxaDolar') {
       this.calcularPreco();
@@ -204,6 +208,7 @@ export class CadastrarProdutoComponent implements OnInit {
     this.produtoForm.patchValue({ nome: produto.nome });
     this.sugestoes.set([]);
     this.mostrarSugestoes.set(false);
+    this.sugestaoSelecionada.set(true); // Marcar que foi selecionado
   }
 
   async onSubmit(): Promise<void> {
@@ -295,12 +300,13 @@ export class CadastrarProdutoComponent implements OnInit {
         this.toastService.success(
           `Compra registrada com sucesso! Produto: ${produto.nome} - Preço: ${precoFormatado} - Quantidade: ${produto.quantidade} - Produto adicionado ao estoque!`
         );
-        
+
         // Limpar formulário
         this.produtoForm.reset();
         this.precoCalculado.set('0,00');
         this.sugestoes.set([]);
         this.mostrarSugestoes.set(false);
+        this.sugestaoSelecionada.set(false); // Resetar flag de seleção
       } else {
         this.toastService.error(response?.message || 'Erro ao cadastrar produto');
       }
