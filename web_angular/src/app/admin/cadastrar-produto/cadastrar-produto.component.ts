@@ -215,7 +215,8 @@ export class CadastrarProdutoComponent implements OnInit {
   }
 
   selecionarSugestao(produto: ProdutoSugestao): void {
-    this.produtoForm.patchValue({ nome: produto.nome });
+    // Usar emitEvent: false para não disparar valueChanges
+    this.produtoForm.patchValue({ nome: produto.nome }, { emitEvent: false });
     this.sugestoes.set([]);
     this.mostrarSugestoes.set(false);
     this.sugestaoSelecionada.set(true); // Marcar que foi selecionado
