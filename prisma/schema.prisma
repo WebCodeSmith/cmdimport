@@ -108,6 +108,10 @@ model HistoricoVenda {
   estoque     Estoque  @relation(fields: [estoqueId], references: [id])
   usuarioId   Int
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+
+  // Campos de transferência
+  transferida      Boolean  @default(false)
+  vendedorOriginal String?
 }
 
 model CategoriaDespesa {

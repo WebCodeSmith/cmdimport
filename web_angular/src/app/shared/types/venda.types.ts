@@ -50,6 +50,8 @@ export interface HistoricoVenda {
     } | null;
   }[];
   valorTotal: number;
+  transferida: boolean;
+  vendedorOriginal?: string;
 }
 
 export interface ProdutoItem {
@@ -77,6 +79,8 @@ export interface VendaExport {
   createdAt?: string;
   observacoes?: string;
   tipoCliente?: string | null;
+  transferida?: boolean;
+  vendedorOriginal?: string;
 }
 
 export interface ResumoVendedor {

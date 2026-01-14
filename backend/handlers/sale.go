@@ -1393,9 +1393,11 @@ func (h *SaleHandler) TransferirVenda(c *gin.Context) {
 	}
 
 	if err := query.Updates(map[string]interface{}{
-		"usuarioId":     novoVendedor.ID,
-		"vendedorNome":  novoVendedor.Nome,
-		"vendedorEmail": novoVendedor.Email,
+		"usuarioId":        novoVendedor.ID,
+		"vendedorNome":     novoVendedor.Nome,
+		"vendedorEmail":    novoVendedor.Email,
+		"transferida":      true,
+		"vendedorOriginal": vendaOriginal.VendedorNome,
 	}).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{

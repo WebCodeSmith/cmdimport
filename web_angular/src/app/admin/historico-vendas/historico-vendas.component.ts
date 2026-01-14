@@ -663,6 +663,8 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
             'Valor Dinheiro': venda.valorDinheiro || '',
             'Vendedor': venda.vendedorNome,
             'Email Vendedor': venda.vendedorEmail,
+            'Transferida': venda.transferida ? 'Sim' : 'Não',
+            'Vendedor Original': venda.vendedorOriginal || '',
             'Data': this.formatDate(venda.createdAt),
             'Observações': venda.observacoes || ''
           });
