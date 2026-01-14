@@ -1332,3 +1332,84 @@ func (h *SaleHandler) DeletarProdutoVenda(c *gin.Context) {
 	})
 }
 
+func (h *SaleHandler) TransferirVenda(c *gin.Context) {
+	id := c.Param("id")
+	vendaIDInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "ID da venda inválido",
+		})
+		return
+	}
+
+	type TransferirRequest struct {
+		NovoUsuarioID int `json:"novoUsuarioId" binding:"required"`
+	}
+
+	var req TransferirRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Novo usuário não informado",
+		})
+		return
+	}
+
+	// Buscar novo vendedor
+	var novoVendedor models.Usuario
+	if err := h.DB.First(&novoVendedor, req.NovoUsuarioID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Novo vendedor não encontrado",
+		})
+		return
+	}
+
+	// Buscar venda original para obter o VendaID
+	var vendaOriginal models.HistoricoVenda
+	if err := h.DB.First(&vendaOriginal, vendaIDInt).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Venda não encontrada",
+		})
+		return
+	}
+
+	vendaIDStr := ""
+	if vendaOriginal.VendaID != nil {
+		vendaIDStr = *vendaOriginal.VendaID
+	}
+
+	// Iniciar transação
+	tx := h.DB.Begin()
+
+	query := tx.Model(&models.HistoricoVenda{})
+	if vendaIDStr != "" {
+		query = query.Where("vendaId = ?", vendaIDStr)
+	} else {
+		// Fallback para atualizar apenas o registro específico se não houver vendaId agrupador
+		query = query.Where("id = ?", vendaIDInt)
+	}
+
+	if err := query.Updates(map[string]interface{}{
+		"usuarioId":     novoVendedor.ID,
+		"vendedorNome":  novoVendedor.Nome,
+		"vendedorEmail": novoVendedor.Email,
+	}).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao transferir venda: " + err.Error(),
+		})
+		return
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Venda transferida com sucesso para " + novoVendedor.Nome,
+	})
+}
+

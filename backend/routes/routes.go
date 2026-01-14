@@ -110,6 +110,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 			adminVenda.POST("/trocar-produto", saleHandler.TrocarProduto)
 			adminVenda.PUT("/:id/produto/:produtoId", saleHandler.AtualizarProdutoVenda)
 			adminVenda.DELETE("/:id/produto/:produtoId", saleHandler.DeletarProdutoVenda)
+			adminVenda.PUT("/:id/transferir", saleHandler.TransferirVenda)
 		}
 
 		// Admin - Usuários

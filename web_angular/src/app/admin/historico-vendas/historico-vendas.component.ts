@@ -39,22 +39,28 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   deletando = signal<boolean>(false);
   editando = signal<boolean>(false);
   formularioEdicao: FormGroup;
-  
+
   produtoEditando = signal<number | null>(null);
   produtoEditandoForm: FormGroup;
   modalConfirmacaoDeletarProduto = signal<boolean>(false);
+
+  modalTransferir = signal<boolean>(false);
+  atendentes = signal<any[]>([]);
+  transferindo = signal<boolean>(false);
+  transferirForm: FormGroup;
+
   produtoParaDeletar = signal<number | null>(null);
   deletandoProduto = signal<boolean>(false);
-  
+
   itensPorPagina = 10;
   filtrosForm: FormGroup;
 
   totalVendedores = computed(() => this.resumoVendedores().length);
-  
+
   valorTotalVendido = computed(() => {
     return this.resumoVendedores().reduce((acc, v) => acc + v.totalValor, 0);
   });
-  
+
   totalVendasResumo = computed(() => {
     return this.resumoVendedores().reduce((acc, v) => acc + v.totalVendas, 0);
   });
@@ -79,11 +85,15 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
       quantidade: [1, [Validators.required, Validators.min(1)]],
       precoUnitario: [0, [Validators.required, Validators.min(0.01)]]
     });
+
+    this.transferirForm = this.fb.group({
+      novoUsuarioId: ['', Validators.required]
+    });
   }
 
   ngOnInit(): void {
     this.carregarDados();
-    
+
     // Recarregar quando filtros mudarem
     this.filtrosForm.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -114,7 +124,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   async carregarHistorico(): Promise<void> {
     try {
       this.loading.set(true);
-      
+
       const formValue = this.filtrosForm.value;
       const params: any = {
         pagina: this.paginaAtual(),
@@ -159,7 +169,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   async carregarResumoVendedores(): Promise<void> {
     try {
       this.loading.set(true);
-      
+
       const formValue = this.filtrosForm.value;
       const params: any = {};
 
@@ -207,34 +217,34 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     const total = this.totalPaginas();
     const atual = this.paginaAtual();
     const maxPaginas = 5;
-    
+
     if (total <= maxPaginas) {
       return Array.from({ length: total }, (_, i) => i + 1);
     }
-    
+
     const inicio = Math.max(1, atual - Math.floor(maxPaginas / 2));
     const fim = Math.min(total, inicio + maxPaginas - 1);
-    
+
     const paginas: (number | string)[] = [];
-    
+
     if (inicio > 1) {
       paginas.push(1);
       if (inicio > 2) {
         paginas.push('...');
       }
     }
-    
+
     for (let i = inicio; i <= fim; i++) {
       paginas.push(i);
     }
-    
+
     if (fim < total) {
       if (fim < total - 1) {
         paginas.push('...');
       }
       paginas.push(total);
     }
-    
+
     return paginas;
   }
 
@@ -244,7 +254,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     const limite = this.itensPorPagina;
     const inicio = (atual - 1) * limite + 1;
     const fim = Math.min(atual * limite, total);
-    
+
     return `Mostrando ${inicio} a ${fim} de ${total} vendas`;
   }
 
@@ -252,24 +262,24 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     try {
       this.carregandoDetalhes.set(true);
       this.modalDetalhes.set(true);
-      
+
       // Buscar detalhes da venda pelo ID do produto
-      const venda = this.vendas().find(v => 
+      const venda = this.vendas().find(v =>
         v.produtos.some(p => p.id === produtoId)
       );
-      
+
       if (venda) {
         // O endpoint espera o ID numérico do primeiro registro de histórico da venda
         // Usamos o ID do primeiro produto, que é o ID numérico do registro no banco
         const primeiroProdutoId = venda.produtos[0]?.id;
-        
+
         if (primeiroProdutoId) {
           try {
             // Buscar detalhes completos da venda usando o ID numérico
             const response = await firstValueFrom(
               this.apiService.get<HistoricoVenda>(`/admin/venda/${primeiroProdutoId}`)
             );
-            
+
             if (response.success && response.data) {
               this.vendaSelecionada.set(response.data);
             } else {
@@ -334,7 +344,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     try {
       this.editando.set(true);
       const formValue = this.formularioEdicao.value;
-      
+
       const primeiroProdutoId = venda.produtos[0]?.id;
       if (!primeiroProdutoId) {
         this.toastService.error('ID da venda não encontrado');
@@ -357,9 +367,9 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
         endereco: formValue.endereco,
         observacoes: formValue.observacoes
       };
-      
+
       this.vendaSelecionada.set(vendaAtualizada);
-      
+
       // Atualizar na lista também
       const vendas = this.vendas();
       const index = vendas.findIndex(v => v.vendaId === venda.vendaId);
@@ -392,7 +402,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
     try {
       this.deletando.set(true);
-      
+
       const primeiroProdutoId = venda.produtos[0]?.id;
       if (!primeiroProdutoId) {
         this.toastService.error('ID da venda não encontrado');
@@ -463,7 +473,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     try {
       this.editando.set(true);
       const formValue = this.produtoEditandoForm.value;
-      
+
       const primeiroProdutoId = venda.produtos[0]?.id;
       if (!primeiroProdutoId) {
         this.toastService.error('ID da venda não encontrado');
@@ -501,9 +511,9 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
         produtos: produtosAtualizados,
         valorTotal: novoValorTotal
       };
-      
+
       this.vendaSelecionada.set(vendaAtualizada);
-      
+
       // Atualizar na lista também
       const vendas = this.vendas();
       const index = vendas.findIndex(v => v.vendaId === venda.vendaId);
@@ -540,7 +550,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
     try {
       this.deletandoProduto.set(true);
-      
+
       const primeiroProdutoId = venda.produtos[0]?.id;
       if (!primeiroProdutoId) {
         this.toastService.error('ID da venda não encontrado');
@@ -557,7 +567,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
       // Atualizar localmente
       const produtosFiltrados = venda.produtos.filter(p => p.id !== produtoId);
-      
+
       // Se não sobrar nenhum produto, deletar a venda inteira
       if (produtosFiltrados.length === 0) {
         const vendas = this.vendas();
@@ -578,9 +588,9 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
         produtos: produtosFiltrados,
         valorTotal: novoValorTotal
       };
-      
+
       this.vendaSelecionada.set(vendaAtualizada);
-      
+
       // Atualizar na lista também
       const vendas = this.vendas();
       const index = vendas.findIndex(v => v.vendaId === venda.vendaId);
@@ -602,7 +612,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   async exportarHistorico(): Promise<void> {
     try {
       this.exportando.set(true);
-      
+
       // Buscar todas as vendas (sem paginação)
       const formValue = this.filtrosForm.value;
       const params: any = {
@@ -670,7 +680,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
       // Salvar arquivo
       XLSX.writeFile(wb, nomeArquivo);
-      
+
       this.toastService.success('Histórico exportado com sucesso!');
     } catch (error) {
       console.error('Erro ao exportar:', error);
@@ -713,6 +723,74 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
       'revenda': 'Revenda'
     };
     return tipos[tipo] || tipo;
+  }
+
+  async carregarAtendentes(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.apiService.get<any>('/admin/atendentes')
+      );
+      if (response.success && response.data) {
+        this.atendentes.set(response.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar atendentes:', error);
+      this.toastService.error('Erro ao carregar lista de atendentes');
+    }
+  }
+
+  async abrirModalTransferir(): Promise<void> {
+    await this.carregarAtendentes();
+    this.modalTransferir.set(true);
+    this.transferirForm.reset();
+  }
+
+  fecharModalTransferir(): void {
+    this.modalTransferir.set(false);
+    this.transferirForm.reset();
+  }
+
+  async transferirVenda(): Promise<void> {
+    const venda = this.vendaSelecionada();
+    if (!venda) return;
+
+    try {
+      this.transferindo.set(true);
+      const novoUsuarioId = this.transferirForm.get('novoUsuarioId')?.value;
+
+      if (!novoUsuarioId) {
+        this.toastService.error('Selecione um vendedor');
+        return;
+      }
+
+      const primeiroProdutoId = venda.produtos[0]?.id;
+      if (!primeiroProdutoId) {
+        this.toastService.error('ID da venda não encontrado');
+        return;
+      }
+
+      const response = await firstValueFrom(
+        this.apiService.put(`/admin/venda/${primeiroProdutoId}/transferir`, {
+          novoUsuarioId: Number(novoUsuarioId)
+        })
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Erro ao transferir venda');
+      }
+
+      this.toastService.success('Venda transferida com sucesso!');
+      this.fecharModalTransferir();
+      this.fecharDetalhes();
+      // Recarregar listagem para atualizar vendedor
+      this.carregarDados();
+
+    } catch (error: any) {
+      console.error('Erro ao transferir venda:', error);
+      this.toastService.error(error?.error?.message || error?.message || 'Erro ao transferir venda');
+    } finally {
+      this.transferindo.set(false);
+    }
   }
 }
 
