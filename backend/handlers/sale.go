@@ -771,6 +771,7 @@ func (h *SaleHandler) BuscarPorID(c *gin.Context) {
 
 	vendaFormatada := map[string]interface{}{
 		"vendaId":        vendaIDStr,
+		"usuarioId":      vendaBase.UsuarioID,
 		"clienteNome":    vendaBase.ClienteNome,
 		"telefone":       vendaBase.Telefone,
 		"endereco":       vendaBase.Endereco,
@@ -785,6 +786,8 @@ func (h *SaleHandler) BuscarPorID(c *gin.Context) {
 		"valorDinheiro":  vendaBase.ValorDinheiro,
 		"produtos":       produtos,
 		"valorTotal":     valorTotalCalculado,
+		"transferida":      vendaBase.Transferida,
+		"vendedorOriginal": vendaBase.VendedorOriginal,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
