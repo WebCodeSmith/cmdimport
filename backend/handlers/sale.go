@@ -946,12 +946,8 @@ func (h *SaleHandler) TrocarProduto(c *gin.Context) {
 			ValorTotal:    novoValorTotal,
 		}
 
-		// Debug
-		fmt.Printf("Atualizando HistoricoVenda ID: %d\n", historicoVenda.ID)
-		fmt.Printf("Novos Dados: %+v\n", dadosAtualizados)
-
 		// Forçar atualização dos campos específicos
-		if err := tx.Debug().Model(&historicoVenda).
+		if err := tx.Model(&historicoVenda).
 			Select("EstoqueID", "ProdutoNome", "PrecoUnitario", "ValorTotal").
 			Updates(dadosAtualizados).Error; err != nil {
 			return err
