@@ -98,6 +98,8 @@ type HistoricoVenda struct {
 	Estoque          Estoque        `gorm:"foreignKey:EstoqueID" json:"-"`
 	UsuarioID        int            `gorm:"not null;column:usuarioId" json:"usuarioId"`
 	Usuario          Usuario        `gorm:"foreignKey:UsuarioID" json:"-"`
+	Transferida      bool           `gorm:"default:false;column:transferida" json:"transferida"`
+	VendedorOriginal *string        `gorm:"column:vendedorOriginal" json:"vendedorOriginal"`
 	CreatedAt        time.Time      `gorm:"column:createdAt" json:"createdAt"`
 }
 
