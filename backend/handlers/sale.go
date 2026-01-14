@@ -498,6 +498,7 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 
 	// Agrupar por vendaId
 	vendasAgrupadas := make(map[string]*map[string]interface{})
+	vendaIDsAppeared := make([]string, 0) // Para manter a ordem
 
 	for _, venda := range historico {
 		// Se há filtro por IMEI/código, verificar se corresponde
@@ -520,6 +521,8 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 		}
 
 		if _, exists := vendasAgrupadas[vendaID]; !exists {
+			vendaIDsAppeared = append(vendaIDsAppeared, vendaID) // Salva ID na ordem que aparece
+			
 			valorTotal := 0.0
 			var primeiraVenda models.HistoricoVenda
 			if err := h.DB.Where("vendaId = ?", vendaID).First(&primeiraVenda).Error; err == nil {
@@ -543,6 +546,8 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 				"tipoCliente":    venda.TipoCliente,
 				"produtos":       []map[string]interface{}{},
 				"valorTotal":     valorTotal,
+				"transferida":      venda.Transferida,
+				"vendedorOriginal": venda.VendedorOriginal,
 			}
 			vendasAgrupadas[vendaID] = &vendaMap
 		}
@@ -582,8 +587,10 @@ func (h *SaleHandler) HistoricoAdmin(c *gin.Context) {
 	}
 
 	// Converter map para array e filtrar vendas sem produtos (quando há filtro por IMEI/código)
+	// Usando vendaIDsAppeared para garantir a ordem
 	vendasFormatadas := make([]map[string]interface{}, 0)
-	for _, venda := range vendasAgrupadas {
+	for _, vendaID := range vendaIDsAppeared {
+		venda := vendasAgrupadas[vendaID]
 		if imeiCodigo != "" && len((*venda)["produtos"].([]map[string]interface{})) == 0 {
 			continue
 		}
