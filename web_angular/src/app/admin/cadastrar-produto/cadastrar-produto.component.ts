@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, effect } from '@angular/core';
+import { Component, inject, signal, OnInit, effect, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +17,7 @@ export class CadastrarProdutoComponent implements OnInit {
   private apiService = inject(ApiService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
+  private elementRef = inject(ElementRef);
 
   loading = signal<boolean>(false);
   tipoIdentificacao = signal<'imei' | 'codigoBarras' | 'ambos'>('ambos');
@@ -70,6 +71,15 @@ export class CadastrarProdutoComponent implements OnInit {
         }
       }, 300);
     });
+  }
+
+  // Fechar dropdown ao clicar fora
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent): void {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    if (!clickedInside && this.mostrarSugestoes()) {
+      this.mostrarSugestoes.set(false);
+    }
   }
 
   private atualizarEstadoCampos(tipo: 'imei' | 'codigoBarras' | 'ambos'): void {
@@ -205,7 +215,8 @@ export class CadastrarProdutoComponent implements OnInit {
   }
 
   selecionarSugestao(produto: ProdutoSugestao): void {
-    this.produtoForm.patchValue({ nome: produto.nome });
+    // Usar emitEvent: false para não disparar valueChanges
+    this.produtoForm.patchValue({ nome: produto.nome }, { emitEvent: false });
     this.sugestoes.set([]);
     this.mostrarSugestoes.set(false);
     this.sugestaoSelecionada.set(true); // Marcar que foi selecionado
