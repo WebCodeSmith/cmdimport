@@ -702,9 +702,10 @@ export class PrecificacaoComponent implements OnInit {
 
   // Identificar categoria de frete
   getCategoriaFreteId(): number | null {
-    const categoriaFrete = this.categorias().find(c =>
-      c.nome.toLowerCase().includes('frete')
-    );
+    const categoriaFrete = this.categorias().find(c => {
+      const nomeNormalizado = c.nome.toLowerCase();
+      return nomeNormalizado.includes('frete') || nomeNormalizado.includes('custo frete');
+    });
     return categoriaFrete?.id || null;
   }
 
