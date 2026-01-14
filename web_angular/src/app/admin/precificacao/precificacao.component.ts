@@ -24,7 +24,7 @@ export class PrecificacaoComponent implements OnInit {
   despesas = signal<Despesa[]>([]);
   categoriaSelecionada = signal<number | null>(null);
   semanaSelecionada = signal<number | null>(null); // null = todas as semanas
-  
+
   // Calculadora de Custos
   abaAtiva = signal<'despesas' | 'calculadora'>('despesas');
   dataSelecionadaCalc = signal<string>('');
@@ -32,6 +32,7 @@ export class PrecificacaoComponent implements OnInit {
   despesasCalc = signal<Despesa[]>([]);
   carregandoCalc = signal<boolean>(false);
   margemLucro = signal<number>(30); // Margem de lucro padrão: 30%
+  tipoCliente = signal<'revenda' | 'consumidorFinal'>('consumidorFinal');
 
   // Modais
   modalNovaCategoria = signal<boolean>(false);
@@ -57,7 +58,7 @@ export class PrecificacaoComponent implements OnInit {
   // Panel Modal para gerenciar despesa
   modalGerenciarDespesa = signal<boolean>(false);
   selectedGerenciarItem = signal('editar');
-  
+
   gerenciarMenuItems: PanelMenuItem[] = [
     { id: 'editar', label: 'Editar Despesa', icon: 'edit' },
     { id: 'deletar', label: 'Deletar Despesa', icon: 'delete' }
@@ -65,7 +66,7 @@ export class PrecificacaoComponent implements OnInit {
 
   // Panel Modal para gerenciar categoria
   selectedGerenciarCategoriaItem = signal('editar');
-  
+
   gerenciarCategoriaMenuItems: PanelMenuItem[] = [
     { id: 'editar', label: 'Editar Categoria', icon: 'edit' },
     { id: 'deletar', label: 'Deletar Categoria', icon: 'delete' }
@@ -74,11 +75,11 @@ export class PrecificacaoComponent implements OnInit {
   despesasPorCategoria = computed(() => {
     const despesasArray = this.despesas();
     const categoriaId = this.categoriaSelecionada();
-    
+
     if (!categoriaId) {
       return despesasArray;
     }
-    
+
     return despesasArray.filter(d => d.categoriaId === categoriaId);
   });
 
@@ -101,14 +102,14 @@ export class PrecificacaoComponent implements OnInit {
   despesasPorSemana = computed(() => {
     const despesasFiltradas = this.despesasPorCategoria();
     const semanas: { [key: number]: Despesa[] } = { 1: [], 2: [], 3: [], 4: [] };
-    
+
     despesasFiltradas.forEach(despesa => {
       const semana = this.calcularSemanaDoMes(despesa.data);
       if (semanas[semana]) {
         semanas[semana].push(despesa);
       }
     });
-    
+
     return semanas;
   });
 
@@ -143,9 +144,9 @@ export class PrecificacaoComponent implements OnInit {
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mes = hoje.getMonth();
-    
+
     let diaInicio: number, diaFim: number;
-    
+
     if (semana === 1) {
       diaInicio = 1;
       diaFim = 7;
@@ -159,10 +160,10 @@ export class PrecificacaoComponent implements OnInit {
       diaInicio = 22;
       diaFim = new Date(ano, mes + 1, 0).getDate(); // Último dia do mês
     }
-    
+
     const dataInicio = new Date(ano, mes, diaInicio);
     const dataFim = new Date(ano, mes, diaFim);
-    
+
     return `${dataInicio.getDate().toString().padStart(2, '0')}/${(dataInicio.getMonth() + 1).toString().padStart(2, '0')} - ${dataFim.getDate().toString().padStart(2, '0')}/${(dataFim.getMonth() + 1).toString().padStart(2, '0')}`;
   }
 
@@ -261,7 +262,7 @@ export class PrecificacaoComponent implements OnInit {
       if (this.categoriaSelecionada()) {
         params.categoriaId = this.categoriaSelecionada();
       }
-      
+
       const response = await firstValueFrom(
         this.apiService.get<Despesa[]>('/admin/despesas', params)
       );
@@ -287,7 +288,7 @@ export class PrecificacaoComponent implements OnInit {
     this.categoriaEditando.set(categoria);
     this.selectedGerenciarCategoriaItem.set('editar');
     this.modalGerenciarCategoria.set(true);
-    
+
     // Preencher formulário de edição
     this.formularioEditarCategoria.patchValue({
       nome: categoria.nome,
@@ -302,7 +303,7 @@ export class PrecificacaoComponent implements OnInit {
 
   onGerenciarCategoriaMenuItemSelected(itemId: string): void {
     this.selectedGerenciarCategoriaItem.set(itemId);
-    
+
     if (itemId === 'deletar') {
       this.confirmarDeletarCategoria();
     }
@@ -318,7 +319,7 @@ export class PrecificacaoComponent implements OnInit {
       this.salvandoEdicaoCategoria.set(true);
       const formValue = this.formularioEditarCategoria.value;
       const categoriaId = this.categoriaEditando()!.id;
-      
+
       const response = await firstValueFrom(
         this.apiService.put<CategoriaDespesa>(`/admin/categorias-despesa/${categoriaId}`, {
           nome: formValue.nome.trim(),
@@ -346,7 +347,7 @@ export class PrecificacaoComponent implements OnInit {
     try {
       this.deletandoCategoria.set(true);
       const categoriaId = this.categoriaEditando()!.id;
-      
+
       const response = await firstValueFrom(
         this.apiService.delete(`/admin/categorias-despesa/${categoriaId}`)
       );
@@ -386,7 +387,7 @@ export class PrecificacaoComponent implements OnInit {
     try {
       this.salvandoCategoria.set(true);
       const formValue = this.formularioCategoria.value;
-      
+
       const categoria: CriarCategoriaDespesaRequest = {
         nome: formValue.nome.trim(),
         descricao: formValue.descricao?.trim() || undefined
@@ -417,7 +418,7 @@ export class PrecificacaoComponent implements OnInit {
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
     const dia = String(hoje.getDate()).padStart(2, '0');
     const dataFormatada = `${ano}-${mes}-${dia}`;
-    
+
     this.formularioDespesa.reset({
       data: dataFormatada,
       categoriaId: this.categoriaSelecionada() || ''
@@ -438,9 +439,9 @@ export class PrecificacaoComponent implements OnInit {
     try {
       this.salvandoDespesa.set(true);
       const formValue = this.formularioDespesa.value;
-      
+
       const valorNumerico = parseFloat(String(formValue.valor).replace(/[^\d,]/g, '').replace(',', '.'));
-      
+
       // Garantir que a data esteja no formato correto YYYY-MM-DD
       let dataFormatada = formValue.data;
       if (!dataFormatada) {
@@ -450,7 +451,7 @@ export class PrecificacaoComponent implements OnInit {
         const dia = String(hoje.getDate()).padStart(2, '0');
         dataFormatada = `${ano}-${mes}-${dia}`;
       }
-      
+
       const despesa: CriarDespesaRequest = {
         nome: formValue.nome.trim(),
         valor: valorNumerico,
@@ -481,7 +482,7 @@ export class PrecificacaoComponent implements OnInit {
     this.despesaEditando.set(despesa);
     this.selectedGerenciarItem.set('editar');
     this.modalGerenciarDespesa.set(true);
-    
+
     // Preencher formulário de edição
     this.formularioEditarDespesa.patchValue({
       nome: despesa.nome,
@@ -499,7 +500,7 @@ export class PrecificacaoComponent implements OnInit {
 
   onGerenciarMenuItemSelected(itemId: string): void {
     this.selectedGerenciarItem.set(itemId);
-    
+
     if (itemId === 'deletar') {
       this.confirmarDeletarDespesa();
     }
@@ -515,7 +516,7 @@ export class PrecificacaoComponent implements OnInit {
       this.salvandoEdicao.set(true);
       const formValue = this.formularioEditarDespesa.value;
       const despesaId = this.despesaEditando()!.id;
-      
+
       const valorNumerico = parseFloat(String(formValue.valor).replace(/[^\d,]/g, '').replace(',', '.'));
       const response = await firstValueFrom(
         this.apiService.put<Despesa>(`/admin/despesas/${despesaId}`, {
@@ -547,7 +548,7 @@ export class PrecificacaoComponent implements OnInit {
     try {
       this.deletandoDespesa.set(true);
       const despesaId = this.despesaEditando()!.id;
-      
+
       const response = await firstValueFrom(
         this.apiService.delete(`/admin/despesas/${despesaId}`)
       );
@@ -576,7 +577,7 @@ export class PrecificacaoComponent implements OnInit {
 
     try {
       this.deletandoCategoria.set(true);
-      
+
       const response = await firstValueFrom(
         this.apiService.delete(`/admin/categorias-despesa/${categoriaId}`)
       );
@@ -603,7 +604,7 @@ export class PrecificacaoComponent implements OnInit {
 
   mudarAba(aba: 'despesas' | 'calculadora'): void {
     this.abaAtiva.set(aba);
-    
+
     // Se mudou para calculadora, define data de hoje como padrão
     if (aba === 'calculadora' && !this.dataSelecionadaCalc()) {
       const hoje = new Date();
@@ -623,10 +624,10 @@ export class PrecificacaoComponent implements OnInit {
 
     try {
       this.carregandoCalc.set(true);
-      
+
       // Buscar produtos cadastrados nesta data
       const responseProdutos = await firstValueFrom(
-        this.apiService.get<any>('/admin/produtos', { 
+        this.apiService.get<any>('/admin/produtos', {
           dataInicio: data,
           dataFim: data,
           limite: 1000 // Pegar todos os produtos da data
@@ -641,7 +642,7 @@ export class PrecificacaoComponent implements OnInit {
       if (responseProdutos?.success && responseDespesas?.success) {
         const produtos = responseProdutos.data || [];
         const todasDespesas = responseDespesas.data || [];
-        
+
         // Filtrar despesas da data selecionada
         const despesasDaData = todasDespesas.filter((d: Despesa) => {
           const despesaData = new Date(d.data).toISOString().split('T')[0];
@@ -674,13 +675,13 @@ export class PrecificacaoComponent implements OnInit {
     const despesas = this.despesasCalc();
     const todasCategorias = this.categorias();
     const agrupado: { [categoriaId: number]: { categoria: CategoriaDespesa; total: number; despesas: Despesa[] } } = {};
-    
+
     despesas.forEach(despesa => {
       if (!agrupado[despesa.categoriaId]) {
         // Buscar categoria da despesa ou da lista geral
         const categoria = despesa.categoria || todasCategorias.find(c => c.id === despesa.categoriaId);
         if (!categoria) return; // Skip se não encontrar categoria
-        
+
         agrupado[despesa.categoriaId] = {
           categoria,
           total: 0,
@@ -690,7 +691,7 @@ export class PrecificacaoComponent implements OnInit {
       agrupado[despesa.categoriaId].total += despesa.valor;
       agrupado[despesa.categoriaId].despesas.push(despesa);
     });
-    
+
     return agrupado;
   });
 
@@ -699,18 +700,26 @@ export class PrecificacaoComponent implements OnInit {
     return Object.values(this.despesasPorCategoriaCalc());
   });
 
+  // Identificar categoria de frete
+  getCategoriaFreteId(): number | null {
+    const categoriaFrete = this.categorias().find(c =>
+      c.nome.toLowerCase().includes('frete')
+    );
+    return categoriaFrete?.id || null;
+  }
+
   // Calcular custo adicional por categoria
   custoPorCategoriaPorProduto = computed(() => {
     const quantidade = this.quantidadeProdutosCalc();
     if (quantidade === 0) return {};
-    
+
     const custoPorCategoria: { [categoriaId: number]: number } = {};
     const despesasAgrupadas = this.despesasPorCategoriaCalc();
-    
+
     Object.entries(despesasAgrupadas).forEach(([categoriaId, dados]) => {
       custoPorCategoria[Number(categoriaId)] = dados.total / quantidade;
     });
-    
+
     return custoPorCategoria;
   });
 
@@ -718,26 +727,42 @@ export class PrecificacaoComponent implements OnInit {
     const produtos = this.produtosCalc();
     const custoPorCategoria = this.custoPorCategoriaPorProduto();
     const margem = this.margemLucro() / 100;
-    
+    const tipoCliente = this.tipoCliente();
+    const categoriaFreteId = this.getCategoriaFreteId();
+
     return produtos.map(produto => {
       const precoUnitario = produto.preco || 0;
       const quantidade = produto.quantidade || 0;
-      
+
+      // Filtrar categorias baseado no tipo de cliente
+      let categoriasParaCalculo: { [categoriaId: number]: number } = {};
+
+      if (tipoCliente === 'revenda' && categoriaFreteId) {
+        // Modo Revenda: apenas frete
+        if (custoPorCategoria[categoriaFreteId]) {
+          categoriasParaCalculo[categoriaFreteId] = custoPorCategoria[categoriaFreteId];
+        }
+      } else if (tipoCliente === 'consumidorFinal') {
+        // Modo Consumidor Final: todas as categorias
+        categoriasParaCalculo = custoPorCategoria;
+      }
+      // Se revenda e não houver frete, categoriasParaCalculo fica vazio
+
       // Calcular custo adicional de cada categoria
       const custosPorCategoria: { [categoriaId: number]: number } = {};
       let custoAdicionalTotal = 0;
-      
-      Object.entries(custoPorCategoria).forEach(([categoriaId, custoUnitario]) => {
+
+      Object.entries(categoriasParaCalculo).forEach(([categoriaId, custoUnitario]) => {
         const custoTotal = custoUnitario * quantidade;
         custosPorCategoria[Number(categoriaId)] = custoTotal;
         custoAdicionalTotal += custoTotal;
       });
-      
+
       const custoFinal = precoUnitario + (custoAdicionalTotal / quantidade);
       const precoVendaSugerido = custoFinal * (1 + margem);
       const lucroUnitario = precoVendaSugerido - custoFinal;
       const lucroTotal = lucroUnitario * quantidade;
-      
+
       return {
         ...produto,
         custosPorCategoria,
