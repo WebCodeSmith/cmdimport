@@ -280,8 +280,12 @@ export default function CadastrarProdutoSection() {
                 value={formData.nome}
                 onChange={(e) => handleNomeChange(e.target.value)}
                 onFocus={() => {
+                  // Sempre mostrar sugestões quando focar no campo, se houver sugestões
                   if (sugestoes.length > 0) {
                     setMostrarSugestoes(true)
+                  } else if (formData.nome.length >= 2) {
+                    // Se não houver sugestões mas há texto, buscar novamente
+                    buscarProdutos(formData.nome)
                   }
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
@@ -297,17 +301,18 @@ export default function CadastrarProdutoSection() {
               )}
 
               {/* Dropdown de sugestões */}
-              {mostrarSugestoes && sugestoes.length > 0 && (
+              {sugestoes.length > 0 && mostrarSugestoes && (
                 <div
                   ref={dropdownRef}
-                  className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto"
+                  className="absolute z-[100] w-full mt-1 bg-white border-2 border-indigo-200 rounded-xl shadow-2xl max-h-60 overflow-auto"
+                  style={{ boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)' }}
                 >
                   {sugestoes.map((produto) => (
                     <button
                       key={produto.id}
                       type="button"
                       onClick={() => selecionarSugestao(produto)}
-                      className="w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="w-full text-left px-4 py-3 hover:bg-indigo-100 active:bg-indigo-200 transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer focus:outline-none focus:bg-indigo-50"
                     >
                       <div className="font-medium text-gray-900">{produto.nome}</div>
                       {produto.cor && (

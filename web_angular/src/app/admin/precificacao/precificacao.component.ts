@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -11,7 +11,7 @@ import { PanelModalComponent, PanelMenuItem } from '../../shared/components/pane
 @Component({
   selector: 'app-precificacao',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PanelModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PanelModalComponent],
   templateUrl: './precificacao.component.html'
 })
 export class PrecificacaoComponent implements OnInit {
@@ -24,6 +24,14 @@ export class PrecificacaoComponent implements OnInit {
   despesas = signal<Despesa[]>([]);
   categoriaSelecionada = signal<number | null>(null);
   semanaSelecionada = signal<number | null>(null); // null = todas as semanas
+  
+  // Calculadora de Custos
+  abaAtiva = signal<'despesas' | 'calculadora'>('despesas');
+  dataSelecionadaCalc = signal<string>('');
+  produtosCalc = signal<any[]>([]);
+  despesasCalc = signal<Despesa[]>([]);
+  carregandoCalc = signal<boolean>(false);
+  margemLucro = signal<number>(30); // Margem de lucro padrão: 30%
 
   // Modais
   modalNovaCategoria = signal<boolean>(false);
@@ -588,6 +596,169 @@ export class PrecificacaoComponent implements OnInit {
       this.deletandoCategoria.set(false);
     }
   }
+
+  // ============================================
+  // CALCULADORA DE CUSTOS POR DATA
+  // ============================================
+
+  mudarAba(aba: 'despesas' | 'calculadora'): void {
+    this.abaAtiva.set(aba);
+    
+    // Se mudou para calculadora, define data de hoje como padrão
+    if (aba === 'calculadora' && !this.dataSelecionadaCalc()) {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      this.dataSelecionadaCalc.set(`${ano}-${mes}-${dia}`);
+    }
+  }
+
+  async buscarCalculoPorData(): Promise<void> {
+    const data = this.dataSelecionadaCalc();
+    if (!data) {
+      this.toastService.error('Selecione uma data');
+      return;
+    }
+
+    try {
+      this.carregandoCalc.set(true);
+      
+      // Buscar produtos cadastrados nesta data
+      const responseProdutos = await firstValueFrom(
+        this.apiService.get<any>('/admin/produtos', { 
+          dataInicio: data,
+          dataFim: data,
+          limite: 1000 // Pegar todos os produtos da data
+        })
+      );
+
+      // Buscar despesas desta data
+      const responseDespesas = await firstValueFrom(
+        this.apiService.get<any>('/admin/despesas')
+      );
+
+      if (responseProdutos?.success && responseDespesas?.success) {
+        const produtos = responseProdutos.data || [];
+        const todasDespesas = responseDespesas.data || [];
+        
+        // Filtrar despesas da data selecionada
+        const despesasDaData = todasDespesas.filter((d: Despesa) => {
+          const despesaData = new Date(d.data).toISOString().split('T')[0];
+          return despesaData === data;
+        });
+
+        this.produtosCalc.set(produtos);
+        this.despesasCalc.set(despesasDaData);
+      } else {
+        this.toastService.error('Erro ao buscar dados');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar cálculo:', error);
+      this.toastService.error('Erro ao buscar dados');
+    } finally {
+      this.carregandoCalc.set(false);
+    }
+  }
+
+  totalDespesasCalc = computed(() => {
+    return this.despesasCalc().reduce((total, despesa) => total + despesa.valor, 0);
+  });
+
+  quantidadeProdutosCalc = computed(() => {
+    return this.produtosCalc().reduce((total, produto) => total + (produto.quantidade || 0), 0);
+  });
+
+  // Agrupar despesas por categoria
+  despesasPorCategoriaCalc = computed(() => {
+    const despesas = this.despesasCalc();
+    const todasCategorias = this.categorias();
+    const agrupado: { [categoriaId: number]: { categoria: CategoriaDespesa; total: number; despesas: Despesa[] } } = {};
+    
+    despesas.forEach(despesa => {
+      if (!agrupado[despesa.categoriaId]) {
+        // Buscar categoria da despesa ou da lista geral
+        const categoria = despesa.categoria || todasCategorias.find(c => c.id === despesa.categoriaId);
+        if (!categoria) return; // Skip se não encontrar categoria
+        
+        agrupado[despesa.categoriaId] = {
+          categoria,
+          total: 0,
+          despesas: []
+        };
+      }
+      agrupado[despesa.categoriaId].total += despesa.valor;
+      agrupado[despesa.categoriaId].despesas.push(despesa);
+    });
+    
+    return agrupado;
+  });
+
+  // Lista de categorias que têm despesas na data selecionada
+  categoriasComDespesas = computed(() => {
+    return Object.values(this.despesasPorCategoriaCalc());
+  });
+
+  // Calcular custo adicional por categoria
+  custoPorCategoriaPorProduto = computed(() => {
+    const quantidade = this.quantidadeProdutosCalc();
+    if (quantidade === 0) return {};
+    
+    const custoPorCategoria: { [categoriaId: number]: number } = {};
+    const despesasAgrupadas = this.despesasPorCategoriaCalc();
+    
+    Object.entries(despesasAgrupadas).forEach(([categoriaId, dados]) => {
+      custoPorCategoria[Number(categoriaId)] = dados.total / quantidade;
+    });
+    
+    return custoPorCategoria;
+  });
+
+  produtosComCusto = computed(() => {
+    const produtos = this.produtosCalc();
+    const custoPorCategoria = this.custoPorCategoriaPorProduto();
+    const margem = this.margemLucro() / 100;
+    
+    return produtos.map(produto => {
+      const precoUnitario = produto.preco || 0;
+      const quantidade = produto.quantidade || 0;
+      
+      // Calcular custo adicional de cada categoria
+      const custosPorCategoria: { [categoriaId: number]: number } = {};
+      let custoAdicionalTotal = 0;
+      
+      Object.entries(custoPorCategoria).forEach(([categoriaId, custoUnitario]) => {
+        const custoTotal = custoUnitario * quantidade;
+        custosPorCategoria[Number(categoriaId)] = custoTotal;
+        custoAdicionalTotal += custoTotal;
+      });
+      
+      const custoFinal = precoUnitario + (custoAdicionalTotal / quantidade);
+      const precoVendaSugerido = custoFinal * (1 + margem);
+      const lucroUnitario = precoVendaSugerido - custoFinal;
+      const lucroTotal = lucroUnitario * quantidade;
+      
+      return {
+        ...produto,
+        custosPorCategoria,
+        custoAdicionalTotal,
+        custoAdicionalUnitario: custoAdicionalTotal / quantidade,
+        custoFinal,
+        totalComCusto: custoFinal * quantidade,
+        precoVendaSugerido,
+        lucroUnitario,
+        lucroTotal
+      };
+    });
+  });
+
+  lucroTotalEstimado = computed(() => {
+    return this.produtosComCusto().reduce((total, produto) => total + produto.lucroTotal, 0);
+  });
+
+  // ============================================
+  // FORMATAÇÃO E UTILIDADES
+  // ============================================
 
   formatCurrency(value: number): string {
     return formatCurrency(value);
