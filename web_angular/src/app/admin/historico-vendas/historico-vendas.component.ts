@@ -824,6 +824,12 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
     const produto = venda.produtos.find(p => p.id === produtoId);
     if (!produto) return;
 
+    if (!venda.usuarioId) {
+      console.error('Venda sem usuarioId:', venda);
+      this.toastService.error('Erro: ID do vendedor não encontrado. Recarregue a página.');
+      return;
+    }
+
     this.produtoParaTrocar.set(produto);
     this.modalTrocarProduto.set(true);
     this.trocaForm.reset();
