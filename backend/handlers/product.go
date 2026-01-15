@@ -100,13 +100,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 		})
 		return
 	}
-
-	// Debug: verificar se os valores estão sendo lidos corretamente
-	if len(produtos) > 0 {
-		log.Printf("DEBUG - Primeiro produto - CustoDolar: %v, TaxaDolar: %v, Preco: %v", 
-			produtos[0].CustoDolar, produtos[0].TaxaDolar, produtos[0].Preco)
-	}
-
+	
 	// Formatar resposta
 	produtosFormatados := make([]map[string]interface{}, len(produtos))
 	for i, produto := range produtos {
