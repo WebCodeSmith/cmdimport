@@ -637,25 +637,50 @@ func (h *ProductHandler) Distribuir(c *gin.Context) {
 		return
 	}
 
-	// Criar estoque
-	estoque := models.Estoque{
-		ProdutoCompradoID: int(req.ProdutoID),
-		UsuarioID:         &atendente.ID,
-		Quantidade:        req.Quantidade,
-		Ativo:             true,
-		AtendenteNome:     &atendente.Nome,
-	}
+	// Transação para garantir integridade
+	var estoque models.Estoque
+	
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		// Criar estoque
+		estoque = models.Estoque{
+			ProdutoCompradoID: int(req.ProdutoID),
+			UsuarioID:         &atendente.ID,
+			Quantidade:        req.Quantidade,
+			Ativo:             true,
+			AtendenteNome:     &atendente.Nome,
+		}
 
-	if err := h.DB.Create(&estoque).Error; err != nil {
+		if err := tx.Create(&estoque).Error; err != nil {
+			return err
+		}
+
+		// Atualizar quantidade do produto
+		if err := tx.Model(&produto).Update("quantidade", produto.Quantidade-req.Quantidade).Error; err != nil {
+			return err
+		}
+
+		// Registrar histórico
+		historico := models.HistoricoDistribuicao{
+			ProdutoCompradoID: int(req.ProdutoID),
+			UsuarioID:         req.AtendenteID,
+			Quantidade:        req.Quantidade,
+			Data:             time.Now(),
+		}
+
+		if err := tx.Create(&historico).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Erro ao distribuir produto",
+			"message": "Erro ao distribuir produto: " + err.Error(),
 		})
 		return
 	}
-
-	// Atualizar quantidade do produto
-	h.DB.Model(&produto).Update("quantidade", produto.Quantidade-req.Quantidade)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -816,6 +841,49 @@ func (h *ProductHandler) Deletar(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Produto deletado com sucesso",
+	})
+}
+
+func (h *ProductHandler) ListarHistoricoDistribuicaoGlobal(c *gin.Context) {
+	var historico []models.HistoricoDistribuicao
+	
+	// Buscar todo o histórico, ordenado por data decrescente
+	query := h.DB.Preload("ProdutoComprado").Preload("Usuario").Order("data DESC")
+
+	// Filtros opcionais podem ser adicionados aqui (data, usuario, produto)
+	if dataInicio := c.Query("dataInicio"); dataInicio != "" {
+		query = query.Where("DATE(data) >= ?", dataInicio)
+	}
+	if dataFim := c.Query("dataFim"); dataFim != "" {
+		query = query.Where("DATE(data) <= ?", dataFim)
+	}
+
+	if err := query.Find(&historico).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao buscar histórico global",
+		})
+		return
+	}
+
+	// Formatar resposta
+	historicoFormatado := make([]map[string]interface{}, len(historico))
+	for i, item := range historico {
+		historicoFormatado[i] = map[string]interface{}{
+			"id":                 item.ID,
+			"produtoNome":        item.ProdutoComprado.Nome,
+			"produtoCor":         item.ProdutoComprado.Cor,
+			"produtoImei":        item.ProdutoComprado.IMEI,
+			"produtoCodigoBarras": item.ProdutoComprado.CodigoBarras,
+			"atendenteNome":      item.Usuario.Nome,
+			"quantidade":         item.Quantidade,
+			"data":               item.Data.Format(time.RFC3339),
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    historicoFormatado,
 	})
 }
 

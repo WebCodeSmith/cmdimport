@@ -15,6 +15,7 @@ type Usuario struct {
 	UpdatedAt      time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	HistoricoVendas []HistoricoVenda `gorm:"foreignKey:UsuarioID" json:"-"`
 	Estoque        []Estoque      `gorm:"foreignKey:UsuarioID" json:"-"`
+	HistoricoDistribuicao []HistoricoDistribuicao `gorm:"foreignKey:UsuarioID" json:"-"`
 }
 
 // TableName especifica o nome da tabela no banco (com U maiúsculo)
@@ -47,6 +48,7 @@ type ProdutoComprado struct {
 	CreatedAt         time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt         time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	Estoque           []Estoque      `gorm:"foreignKey:ProdutoCompradoID" json:"estoque,omitempty"`
+	HistoricoDistribuicao []HistoricoDistribuicao `gorm:"foreignKey:ProdutoCompradoID" json:"-"`
 }
 
 // TableName especifica o nome da tabela no banco
@@ -157,5 +159,21 @@ type CategoriaProduto struct {
 // TableName especifica o nome da tabela no banco
 func (CategoriaProduto) TableName() string {
 	return "CategoriaProduto"
+}
+
+// HistoricoDistribuicao representa o histórico de distribuição de produtos
+type HistoricoDistribuicao struct {
+	ID                int             `gorm:"primaryKey" json:"id"`
+	ProdutoCompradoID int             `gorm:"not null;column:produtoCompradoId" json:"produtoCompradoId"`
+	ProdutoComprado   ProdutoComprado `gorm:"foreignKey:ProdutoCompradoID" json:"produtoComprado,omitempty"`
+	UsuarioID         int             `gorm:"not null;column:usuarioId" json:"usuarioId"`
+	Usuario           Usuario         `gorm:"foreignKey:UsuarioID" json:"usuario,omitempty"`
+	Quantidade        int             `gorm:"not null" json:"quantidade"`
+	Data              time.Time       `gorm:"not null;default:CURRENT_TIMESTAMP" json:"data"`
+}
+
+// TableName especifica o nome da tabela no banco
+func (HistoricoDistribuicao) TableName() string {
+	return "HistoricoDistribuicao"
 }
 

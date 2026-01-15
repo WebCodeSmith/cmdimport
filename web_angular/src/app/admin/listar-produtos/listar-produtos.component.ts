@@ -1,13 +1,14 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ProdutoComprado, CategoriaProduto } from '../../shared/types/produto.types';
 import { PanelModalComponent, PanelMenuItem } from '../../shared/components/panel-modal/panel-modal.component';
-import { formatCurrency as formatCurrencyUtil, formatNumber as formatNumberUtil, formatDateOnly } from '../../shared/utils/formatters';
+import { formatCurrency as formatCurrencyUtil, formatNumber as formatNumberUtil, formatDateOnly, formatDate as formatDateUtil } from '../../shared/utils/formatters';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -20,6 +21,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
 
   loading = signal<boolean>(true);
@@ -59,6 +61,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   gerenciarMenuItems: PanelMenuItem[] = [
     { id: 'editar', label: 'Editar Produto', icon: 'edit' },
     { id: 'precificacao', label: 'Precificação', icon: 'attach_money' },
+
     { id: 'distribuir', label: 'Distribuir', icon: 'people' }
   ];
 
@@ -263,7 +266,13 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   // Usar funções do formatters compartilhado diretamente no template
   formatCurrency = formatCurrencyUtil;
   formatNumber = formatNumberUtil;
-  formatDate = formatDateOnly;
+  formatDate(date: string | Date): string {
+    return formatDateOnly(date);
+  }
+
+  formatDateTime(date: string | Date): string {
+    return formatDateUtil(date);
+  }
 
   formatTaxaDolar(value: number): string {
     // Formata taxa do dólar com ponto ao invés de vírgula
@@ -406,6 +415,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
   onGerenciarMenuItemSelected(itemId: string): void {
     this.selectedGerenciarItem.set(itemId);
+  }
+
+  navegarParaHistoricoDistribuicao(): void {
+    this.router.navigate(['/admin'], { queryParams: { tab: 'historico-distribuicao' } });
   }
 
   // Métodos de Edição

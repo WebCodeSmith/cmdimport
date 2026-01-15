@@ -6,17 +6,15 @@
         <h3 class="text-lg font-semibold text-slate-900">Estoque dos Usuários</h3>
         <p class="text-sm text-slate-600 mt-0.5">Visualize o estoque de cada vendedor</p>
       </div>
-      <button
-        (click)="exportarParaExcel()"
-        [disabled]="exportando()"
-        class="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium shadow-sm"
-      >
+      <button (click)="exportarParaExcel()" [disabled]="exportando()"
+        class="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium shadow-sm">
         @if (exportando()) {
-          <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+        <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
         } @else {
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
         }
         <span>{{ exportando() ? 'Exportando...' : 'Exportar Excel' }}</span>
       </button>
@@ -24,440 +22,419 @@
   </div>
 
   @if (loading()) {
-    <div class="flex items-center justify-center py-12">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
-        <p class="text-slate-600">Carregando estoque dos usuários...</p>
-      </div>
+  <div class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto mb-4"></div>
+      <p class="text-slate-600">Carregando estoque dos usuários...</p>
     </div>
+  </div>
   } @else {
-    <!-- Filtros - Estilo Bitrix24 -->
-    <div class="bg-white border border-slate-200/60 rounded-lg p-4 mb-5 shadow-sm">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1.5">
-            Buscar por usuário
-          </label>
-          <input
-            type="text"
-            [value]="filtroUsuario()"
-            (input)="filtroUsuario.set($any($event.target).value)"
-            placeholder="Nome ou email..."
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-          />
-        </div>
-        
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1.5">
-            IMEI / Código
-          </label>
-          <input
-            type="text"
-            [value]="filtroImeiCodigo()"
-            (input)="filtroImeiCodigo.set($any($event.target).value)"
-            placeholder="IMEI ou código..."
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-          />
-        </div>
-        
-        <div class="flex items-end">
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              [checked]="mostrarEstoquesZerados()"
-              (change)="mostrarEstoquesZerados.set($any($event.target).checked)"
-              class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-            />
-            <span class="ml-2 text-sm text-slate-700">
-              Mostrar estoques zerados
-            </span>
-          </label>
-        </div>
-        
-        <div class="flex items-end">
-          <button
-            (click)="limparFiltros()"
-            class="w-full px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors font-medium"
-          >
-            Limpar
-          </button>
-        </div>
+  <!-- Filtros - Estilo Bitrix24 -->
+  <div class="bg-white border border-slate-200/60 rounded-lg p-4 mb-5 shadow-sm">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
+          Buscar por usuário
+        </label>
+        <input type="text" [value]="filtroUsuario()" (input)="filtroUsuario.set($any($event.target).value)"
+          placeholder="Nome ou email..."
+          class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">
+          IMEI / Código
+        </label>
+        <input type="text" [value]="filtroImeiCodigo()" (input)="filtroImeiCodigo.set($any($event.target).value)"
+          placeholder="IMEI ou código..."
+          class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400" />
+      </div>
+
+      <div class="flex items-end">
+        <label class="flex items-center">
+          <input type="checkbox" [checked]="mostrarEstoquesZerados()"
+            (change)="mostrarEstoquesZerados.set($any($event.target).checked)"
+            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded" />
+          <span class="ml-2 text-sm text-slate-700">
+            Mostrar estoques zerados
+          </span>
+        </label>
+      </div>
+
+      <div class="flex items-end">
+        <button (click)="limparFiltros()"
+          class="w-full px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors font-medium">
+          Limpar
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Resumo Geral - Estilo Bitrix24 -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-      <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
-        <div class="flex items-center">
-          <div class="p-2.5 bg-indigo-100 rounded-md">
-            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-            </svg>
-          </div>
-          <div class="ml-3.5">
-            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Usuários</p>
-            <p class="text-xl font-semibold text-slate-900 mt-1">{{ resumoGeral().totalUsuarios }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
-        <div class="flex items-center">
-          <div class="p-2.5 bg-green-100 rounded-md">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-          </div>
-          <div class="ml-3.5">
-            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Valor Total do Estoque</p>
-            <p class="text-xl font-semibold text-slate-900 mt-1">{{ formatCurrency(resumoGeral().valorTotal) }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
-        <div class="flex items-center">
-          <div class="p-2.5 bg-purple-100 rounded-md">
-            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div class="ml-3.5">
-            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Unidades</p>
-            <p class="text-xl font-semibold text-slate-900 mt-1">{{ resumoGeral().totalUnidades }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabela de Usuários - Estilo Bitrix24 -->
-    @if (usuariosFiltrados().length === 0) {
-      <div class="text-center py-16 bg-white border border-slate-200/60 rounded-lg">
-        <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+  <!-- Resumo Geral - Estilo Bitrix24 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+    <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
+      <div class="flex items-center">
+        <div class="p-2.5 bg-indigo-100 rounded-md">
+          <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
           </svg>
         </div>
-        <h3 class="text-base font-medium text-slate-900 mb-1.5">Nenhum usuário encontrado</h3>
-        <p class="text-sm text-slate-600">Tente ajustar os filtros de busca</p>
+        <div class="ml-3.5">
+          <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Usuários</p>
+          <p class="text-xl font-semibold text-slate-900 mt-1">{{ resumoGeral().totalUsuarios }}</p>
+        </div>
       </div>
-    } @else {
+    </div>
+
+    <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
+      <div class="flex items-center">
+        <div class="p-2.5 bg-green-100 rounded-md">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          </svg>
+        </div>
+        <div class="ml-3.5">
+          <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Valor Total do Estoque</p>
+          <p class="text-xl font-semibold text-slate-900 mt-1">{{ formatCurrency(resumoGeral().valorTotal) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm">
+      <div class="flex items-center">
+        <div class="p-2.5 bg-purple-100 rounded-md">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <div class="ml-3.5">
+          <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Unidades</p>
+          <p class="text-xl font-semibold text-slate-900 mt-1">{{ resumoGeral().totalUnidades }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Usuários - Estilo Bitrix24 -->
+  @if (usuariosFiltrados().length === 0) {
+  <div class="text-center py-16 bg-white border border-slate-200/60 rounded-lg">
+    <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+      </svg>
+    </div>
+    <h3 class="text-base font-medium text-slate-900 mb-1.5">Nenhum usuário encontrado</h3>
+    <p class="text-sm text-slate-600">Tente ajustar os filtros de busca</p>
+  </div>
+  } @else {
+  <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-slate-50/80 border-b border-slate-200/60">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Usuário</th>
+            <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Total
+              Produtos</th>
+            <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Unidades
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Valor Total
+            </th>
+            <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200/60">
+          @for (usuario of usuariosFiltrados(); track usuario.id) {
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-4 py-3">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-md flex items-center justify-center flex-shrink-0">
+                  <span class="text-white text-sm font-semibold">
+                    {{ usuario.nome.charAt(0).toUpperCase() }}
+                  </span>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-slate-900">{{ usuario.nome }}</div>
+                  <div class="text-xs text-slate-500">{{ usuario.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <div class="text-sm font-medium text-slate-900">{{ usuario.totalProdutos }}</div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <div class="text-sm text-slate-700">{{ usuario.totalQuantidade }}</div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-right">
+              <div class="text-sm font-semibold text-green-600">{{
+                formatCurrency(calcularValorTotalUsuario(usuario.produtos)) }}</div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <button (click)="abrirModalProdutosUsuario(usuario)"
+                class="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+                title="Ver produtos">
+                <span class="material-icons text-[18px]">visibility</span>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Panel Modal - Produtos do Usuário -->
+  <app-panel-modal [isOpen]="modalProdutosUsuario()" [title]="'Produtos do Usuário'"
+    [subtitle]="usuarioSelecionado() ? usuarioSelecionado()!.nome + ' (' + usuarioSelecionado()!.email + ')' : ''"
+    [showSidebar]="false" [maxWidth]="'max-w-6xl'" [height]="'h-[98vh]'" (close)="fecharModalProdutosUsuario()">
+
+    @if (usuarioSelecionado()) {
+    <div class="p-6">
+      @if (usuarioSelecionado()!.produtos.length === 0) {
+      <div class="text-center py-12 text-slate-500">
+        <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <p class="text-base font-medium text-slate-900 mb-1">Nenhum produto em estoque</p>
+        <p class="text-sm text-slate-600">Este usuário não possui produtos cadastrados</p>
+      </div>
+      } @else {
+      <!-- Resumo -->
+      <div class="mb-5 p-4 bg-slate-50/50 border border-slate-200/60 rounded-md">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Produtos</p>
+            <p class="text-lg font-semibold text-slate-900 mt-1">{{ usuarioSelecionado()!.totalProdutos }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Unidades</p>
+            <p class="text-lg font-semibold text-slate-900 mt-1">{{ usuarioSelecionado()!.totalQuantidade }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Valor Total</p>
+            <p class="text-lg font-semibold text-green-600 mt-1">{{
+              formatCurrency(calcularValorTotalUsuario(usuarioSelecionado()!.produtos)) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Produtos -->
       <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead class="bg-slate-50/80 border-b border-slate-200/60">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Usuário</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Total Produtos</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Unidades</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Valor Total</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Ações</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Produto
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Qtd</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Status
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Preço
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Atacado
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Varejo
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Ações
+                </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-slate-200/60">
-              @for (usuario of usuariosFiltrados(); track usuario.id) {
+              @for (produto of usuarioSelecionado()!.produtos; track produto.id) {
               <tr class="hover:bg-slate-50/50 transition-colors">
                 <td class="px-4 py-3">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span class="text-white text-sm font-semibold">
-                        {{ usuario.nome.charAt(0).toUpperCase() }}
-                      </span>
-                    </div>
-                    <div>
-                      <div class="text-sm font-medium text-slate-900">{{ usuario.nome }}</div>
-                      <div class="text-xs text-slate-500">{{ usuario.email }}</div>
-                    </div>
-                  </div>
+                  <div class="text-sm font-medium text-slate-900">{{ produto.nome }}</div>
+                  @if (produto.cor) {
+                  <div class="text-xs text-slate-500 mt-0.5">Cor: {{ produto.cor }}</div>
+                  }
+                  @if (produto.descricao) {
+                  <div class="text-xs text-slate-500 mt-0.5">{{ produto.descricao }}</div>
+                  }
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-center">
-                  <div class="text-sm font-medium text-slate-900">{{ usuario.totalProdutos }}</div>
+                  <span class="text-sm font-medium text-slate-900">{{ produto.quantidade }}</span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-center">
-                  <div class="text-sm text-slate-700">{{ usuario.totalQuantidade }}</div>
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium {{ getStatusClass(produto.quantidade) }}">
+                    {{ getStatus(produto.quantidade) }}
+                  </span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-right">
-                  <div class="text-sm font-semibold text-green-600">{{ formatCurrency(calcularValorTotalUsuario(usuario.produtos)) }}</div>
+                  <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(produto.preco) }}</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-right">
+                  <span class="text-sm text-slate-700">{{ produto.valorAtacado ? formatCurrency(produto.valorAtacado) :
+                    '-' }}</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-right">
+                  <span class="text-sm text-slate-700">{{ produto.valorVarejo ? formatCurrency(produto.valorVarejo) :
+                    '-' }}</span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-center">
-                  <button
-                    (click)="abrirModalProdutosUsuario(usuario)"
-                    class="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
-                    title="Ver produtos"
-                  >
-                    <span class="material-icons text-[18px]">visibility</span>
-                  </button>
+                  <div class="flex items-center justify-center gap-1.5">
+                    @if (produto.quantidade > 0) {
+                    <button (click)="abrirModalRedistribuicao(produto, usuarioSelecionado()!)"
+                      class="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
+                      title="Redistribuir">
+                      <span class="material-icons text-[18px]">swap_horiz</span>
+                    </button>
+                    }
+                    <button (click)="abrirModalDeletar(produto.id, produto.nome, usuarioSelecionado()!.nome)"
+                      class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                      title="Deletar">
+                      <span class="material-icons text-[18px]">delete</span>
+                    </button>
+                  </div>
                 </td>
               </tr>
               }
-          </tbody>
-        </table>
-      </div>
-    </div>
-    }
-
-    <!-- Panel Modal - Produtos do Usuário -->
-    <app-panel-modal
-      [isOpen]="modalProdutosUsuario()"
-      [title]="'Produtos do Usuário'"
-      [subtitle]="usuarioSelecionado() ? usuarioSelecionado()!.nome + ' (' + usuarioSelecionado()!.email + ')' : ''"
-      [showSidebar]="false"
-      [maxWidth]="'max-w-6xl'"
-      [height]="'h-[90vh]'"
-      (close)="fecharModalProdutosUsuario()">
-      
-      @if (usuarioSelecionado()) {
-      <div class="p-6">
-        @if (usuarioSelecionado()!.produtos.length === 0) {
-        <div class="text-center py-12 text-slate-500">
-          <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <p class="text-base font-medium text-slate-900 mb-1">Nenhum produto em estoque</p>
-          <p class="text-sm text-slate-600">Este usuário não possui produtos cadastrados</p>
+            </tbody>
+          </table>
         </div>
-        } @else {
-        <!-- Resumo -->
-        <div class="mb-5 p-4 bg-slate-50/50 border border-slate-200/60 rounded-md">
-          <div class="grid grid-cols-3 gap-4">
-            <div>
-              <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Produtos</p>
-              <p class="text-lg font-semibold text-slate-900 mt-1">{{ usuarioSelecionado()!.totalProdutos }}</p>
-            </div>
-            <div>
-              <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Total de Unidades</p>
-              <p class="text-lg font-semibold text-slate-900 mt-1">{{ usuarioSelecionado()!.totalQuantidade }}</p>
-            </div>
-            <div>
-              <p class="text-xs font-medium text-slate-600 uppercase tracking-wide">Valor Total</p>
-              <p class="text-lg font-semibold text-green-600 mt-1">{{ formatCurrency(calcularValorTotalUsuario(usuarioSelecionado()!.produtos)) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabela de Produtos -->
-        <div class="bg-white border border-slate-200/60 rounded-lg shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-slate-50/80 border-b border-slate-200/60">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Produto</th>
-                  <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Qtd</th>
-                  <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Preço</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Atacado</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Varejo</th>
-                  <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-slate-200/60">
-                @for (produto of usuarioSelecionado()!.produtos; track produto.id) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-3">
-                    <div class="text-sm font-medium text-slate-900">{{ produto.nome }}</div>
-                    @if (produto.cor) {
-                    <div class="text-xs text-slate-500 mt-0.5">Cor: {{ produto.cor }}</div>
-                    }
-                    @if (produto.descricao) {
-                    <div class="text-xs text-slate-500 mt-0.5">{{ produto.descricao }}</div>
-                    }
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-center">
-                    <span class="text-sm font-medium text-slate-900">{{ produto.quantidade }}</span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-center">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium {{ getStatusClass(produto.quantidade) }}">
-                      {{ getStatus(produto.quantidade) }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-right">
-                    <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(produto.preco) }}</span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-right">
-                    <span class="text-sm text-slate-700">{{ produto.valorAtacado ? formatCurrency(produto.valorAtacado) : '-' }}</span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-right">
-                    <span class="text-sm text-slate-700">{{ produto.valorVarejo ? formatCurrency(produto.valorVarejo) : '-' }}</span>
-                  </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-center">
-                    <div class="flex items-center justify-center gap-1.5">
-                      @if (produto.quantidade > 0) {
-                      <button
-                        (click)="abrirModalRedistribuicao(produto, usuarioSelecionado()!)"
-                        class="p-1.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors"
-                        title="Redistribuir"
-                      >
-                        <span class="material-icons text-[18px]">swap_horiz</span>
-                      </button>
-                      }
-                      <button
-                        (click)="abrirModalDeletar(produto.id, produto.nome, usuarioSelecionado()!.nome)"
-                        class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                        title="Deletar"
-                      >
-                        <span class="material-icons text-[18px]">delete</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-        }
       </div>
       }
-    </app-panel-modal>
-
-    <!-- Modal de Confirmação de Deleção - Aparece por cima do panel-modal -->
-    @if (modalDeletar()) {
-      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70]">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-          <div class="p-6">
-            <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
-            <p class="text-slate-600 mb-6">
-              Tem certeza que deseja deletar o estoque de <strong>{{ estoqueParaDeletar()?.produtoNome }}</strong> 
-              do usuário <strong>{{ estoqueParaDeletar()?.usuarioNome }}</strong>?
-            </p>
-            <div class="flex items-center justify-end space-x-3">
-              <button
-                (click)="fecharModalDeletar()"
-                [disabled]="deletando()"
-                class="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                (click)="confirmarDeletarEstoque()"
-                [disabled]="deletando()"
-                class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                @if (deletando()) {
-                  <span class="flex items-center">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Deletando...
-                  </span>
-                } @else {
-                  Deletar
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
     }
+  </app-panel-modal>
 
-    <!-- Modal de Redistribuição - Aparece por cima do panel-modal -->
-    @if (modalRedistribuicao() && produtoRedistribuir() && usuarioOrigem()) {
-      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70]">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-          <!-- Header -->
-          <div class="flex items-center justify-between p-6 border-b border-slate-200">
-            <div>
-              <h3 class="text-xl font-bold text-slate-900">Redistribuir Produto</h3>
-              <p class="text-sm text-slate-600">Transferir produto entre vendedores</p>
-            </div>
-            <button
-              (click)="fecharModalRedistribuicao()"
-              class="text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  <!-- Modal de Confirmação de Deleção - Aparece por cima do panel-modal -->
+  @if (modalDeletar()) {
+  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70]">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+        <p class="text-slate-600 mb-6">
+          Tem certeza que deseja deletar o estoque de <strong>{{ estoqueParaDeletar()?.produtoNome }}</strong>
+          do usuário <strong>{{ estoqueParaDeletar()?.usuarioNome }}</strong>?
+        </p>
+        <div class="flex items-center justify-end space-x-3">
+          <button (click)="fecharModalDeletar()" [disabled]="deletando()"
+            class="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors">
+            Cancelar
+          </button>
+          <button (click)="confirmarDeletarEstoque()" [disabled]="deletando()"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            @if (deletando()) {
+            <span class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
               </svg>
-            </button>
-          </div>
-
-          <!-- Conteúdo -->
-          <div class="p-6 space-y-6">
-            <!-- Informações do Produto -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-              <h4 class="text-lg font-semibold text-slate-900 mb-2">{{ produtoRedistribuir()!.nome }}</h4>
-              <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span class="text-slate-700 font-medium">De:</span>
-                  <span class="ml-2 font-semibold text-slate-900">{{ usuarioOrigem()!.nome }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-700 font-medium">Quantidade disponível:</span>
-                  <span class="ml-2 font-semibold text-slate-900">{{ produtoRedistribuir()!.quantidade }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Formulário -->
-            <form [formGroup]="formularioRedistribuicao" (ngSubmit)="salvarRedistribuicao()" class="space-y-4">
-              <div>
-                <label class="block text-sm font-semibold text-slate-800 mb-2">
-                  Para qual vendedor? *
-                </label>
-                <select
-                  formControlName="usuarioDestinoId"
-                  class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-medium"
-                  required
-                >
-                  <option value="">Selecione um vendedor</option>
-                  @for (usuario of usuariosDisponiveis(); track usuario.id) {
-                    <option [value]="usuario.id">
-                      {{ usuario.nome }} {{ usuario.isAdmin ? '(Admin)' : '' }} ({{ usuario.email }})
-                    </option>
-                  }
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-slate-800 mb-2">
-                  Quantidade a transferir *
-                </label>
-                <input
-                  type="number"
-                  formControlName="quantidade"
-                  [max]="produtoRedistribuir()!.quantidade"
-                  min="1"
-                  class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-medium"
-                  placeholder="Quantidade"
-                  required
-                />
-                <p class="text-xs text-slate-600 mt-1 font-medium">
-                  Máximo: {{ produtoRedistribuir()!.quantidade }} unidades
-                </p>
-              </div>
-            </form>
-          </div>
-
-          <!-- Footer -->
-          <div class="flex items-center justify-end space-x-3 p-6 border-t border-slate-200">
-            <button
-              (click)="fecharModalRedistribuicao()"
-              [disabled]="salvandoRedistribuicao()"
-              class="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              (click)="salvarRedistribuicao()"
-              [disabled]="salvandoRedistribuicao() || formularioRedistribuicao.invalid"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              @if (salvandoRedistribuicao()) {
-                <span class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Redistribuindo...
-                </span>
-              } @else {
-                🔄 Redistribuir
-              }
-            </button>
-          </div>
+              Deletando...
+            </span>
+            } @else {
+            Deletar
+            }
+          </button>
         </div>
       </div>
-    }
+    </div>
+  </div>
+  }
+
+  <!-- Modal de Redistribuição - Aparece por cima do panel-modal -->
+  @if (modalRedistribuicao() && produtoRedistribuir() && usuarioOrigem()) {
+  <div class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70]">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Redistribuir Produto</h3>
+          <p class="text-sm text-slate-600">Transferir produto entre vendedores</p>
+        </div>
+        <button (click)="fecharModalRedistribuicao()" class="text-slate-400 hover:text-slate-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Conteúdo -->
+      <div class="p-6 space-y-6">
+        <!-- Informações do Produto -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+          <h4 class="text-lg font-semibold text-slate-900 mb-2">{{ produtoRedistribuir()!.nome }}</h4>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-slate-700 font-medium">De:</span>
+              <span class="ml-2 font-semibold text-slate-900">{{ usuarioOrigem()!.nome }}</span>
+            </div>
+            <div>
+              <span class="text-slate-700 font-medium">Quantidade disponível:</span>
+              <span class="ml-2 font-semibold text-slate-900">{{ produtoRedistribuir()!.quantidade }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulário -->
+        <form [formGroup]="formularioRedistribuicao" (ngSubmit)="salvarRedistribuicao()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-800 mb-2">
+              Para qual vendedor? *
+            </label>
+            <select formControlName="usuarioDestinoId"
+              class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-medium"
+              required>
+              <option value="">Selecione um vendedor</option>
+              @for (usuario of usuariosDisponiveis(); track usuario.id) {
+              <option [value]="usuario.id">
+                {{ usuario.nome }} {{ usuario.isAdmin ? '(Admin)' : '' }} ({{ usuario.email }})
+              </option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-800 mb-2">
+              Quantidade a transferir *
+            </label>
+            <input type="number" formControlName="quantidade" [max]="produtoRedistribuir()!.quantidade" min="1"
+              class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-900 font-medium"
+              placeholder="Quantidade" required />
+            <p class="text-xs text-slate-600 mt-1 font-medium">
+              Máximo: {{ produtoRedistribuir()!.quantidade }} unidades
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end space-x-3 p-6 border-t border-slate-200">
+        <button (click)="fecharModalRedistribuicao()" [disabled]="salvandoRedistribuicao()"
+          class="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors">
+          Cancelar
+        </button>
+        <button (click)="salvarRedistribuicao()"
+          [disabled]="salvandoRedistribuicao() || formularioRedistribuicao.invalid"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          @if (salvandoRedistribuicao()) {
+          <span class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            Redistribuindo...
+          </span>
+          } @else {
+          🔄 Redistribuir
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+  }
   }
 </div>
-

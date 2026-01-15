@@ -48,6 +48,9 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	protected := api.Group("")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		// Histórico de Distribuição Global
+		protected.GET("/admin/historico-distribuicao", productHandler.ListarHistoricoDistribuicaoGlobal)
+
 		// Produtos
 		produtos := protected.Group("/admin/produtos")
 		{
@@ -57,6 +60,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 			produtos.PUT("/:id", productHandler.Atualizar)
 			produtos.PUT("/:id/precificacao", productHandler.AtualizarPrecificacao)
 			produtos.DELETE("/:id", productHandler.Deletar)
+
 		}
 
 		// Estoque

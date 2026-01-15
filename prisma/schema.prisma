@@ -25,6 +25,7 @@ model Usuario {
   // Relacionamentos
   historicoVendas   HistoricoVenda[]
   estoque          Estoque[]
+  historicoDistribuicao HistoricoDistribuicao[]
 }
 
 model Estoque {
@@ -74,6 +75,7 @@ model ProdutoComprado {
   
   // Relacionamento com estoque
   estoque     Estoque[]
+  historicoDistribuicao HistoricoDistribuicao[]
 }
 
 model HistoricoVenda {
@@ -135,6 +137,19 @@ model Despesa {
   data        DateTime @db.Date
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model HistoricoDistribuicao {
+  id                Int      @id @default(autoincrement())
+  produtoCompradoId Int
+  produtoComprado   ProdutoComprado @relation(fields: [produtoCompradoId], references: [id])
+  usuarioId         Int
+  usuario           Usuario  @relation(fields: [usuarioId], references: [id])
+  quantidade        Int
+  data              DateTime @default(now())
+  
+  @@index([produtoCompradoId])
+  @@index([usuarioId])
 }
 
 model CategoriaProduto {

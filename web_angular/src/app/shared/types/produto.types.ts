@@ -85,3 +85,14 @@ export interface CriarCategoriaProdutoRequest {
   icone?: string;
   cor?: string;
 }
+
+export interface HistoricoDistribuicao {
+  id: number;
+  atendenteNome: string;
+  produtoNome?: string;
+  produtoCor?: string;
+  produtoImei?: string;
+  produtoCodigoBarras?: string;
+  quantidade: number;
+  data: string;
+}
