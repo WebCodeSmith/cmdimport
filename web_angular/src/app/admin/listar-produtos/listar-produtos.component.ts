@@ -8,6 +8,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { ProdutoComprado, CategoriaProduto } from '../../shared/types/produto.types';
 import { PanelModalComponent, PanelMenuItem } from '../../shared/components/panel-modal/panel-modal.component';
 import { formatCurrency as formatCurrencyUtil, formatNumber as formatNumberUtil, formatDateOnly } from '../../shared/utils/formatters';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-listar-produtos',
@@ -49,6 +50,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
   deletando = signal<boolean>(false);
   atendentes = signal<any[]>([]);
   categorias = signal<CategoriaProduto[]>([]); // Categorias de produtos
+  exportando = signal<boolean>(false);
 
   // Panel Modal (Gerenciar Produto)
   modalGerenciar = signal<boolean>(false);
@@ -840,6 +842,92 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Erro ao carregar categorias:', error);
+    }
+  }
+
+  // Exportar para Excel
+  async exportarExcel(): Promise<void> {
+    try {
+      this.exportando.set(true);
+
+      // Preparar parâmetros com filtros atuais
+      const formValue = this.filtrosForm.value;
+      const params: any = {
+        pagina: 1,
+        limite: 100000 // Buscar todos os produtos
+      };
+
+      // Aplicar filtros
+      if (formValue.busca) {
+        params.busca = formValue.busca;
+      }
+      if (formValue.dataInicio) {
+        params.dataInicio = formValue.dataInicio;
+      }
+      if (formValue.dataFim) {
+        params.dataFim = formValue.dataFim;
+      }
+      if (formValue.categoriaId) {
+        params.categoriaId = formValue.categoriaId;
+      }
+      if (formValue.ocultarEstoqueZerado) {
+        params.ocultarEstoqueZerado = 'true';
+      }
+
+      // Buscar produtos
+      const response = await firstValueFrom(
+        this.apiService.get<ProdutoComprado[]>('/admin/produtos', params)
+      );
+
+      if (!response.success || !response.data) {
+        this.toastService.error('Erro ao exportar produtos');
+        return;
+      }
+
+      // Preparar dados para exportação
+      const dadosExport = response.data.map(produto => {
+        const estoqueTotal = produto.estoque?.reduce((total, e) => total + (e.ativo ? e.quantidade : 0), 0) || 0;
+
+        return {
+          'ID': produto.id,
+          'Nome': produto.nome,
+          'Descrição': produto.descricao || '',
+          'Cor': produto.cor || '',
+          'IMEI': produto.imei || '',
+          'Código de Barras': produto.codigoBarras || '',
+          'Custo em Dólar': produto.custoDolar,
+          'Taxa do Dólar': produto.taxaDolar,
+          'Preço (R$)': produto.preco,
+          'Quantidade Total': estoqueTotal,
+          'Fornecedor': produto.fornecedor || '',
+          'Data de Compra': formatDateOnly(produto.dataCompra),
+          'Valor Atacado': produto.valorAtacado || '',
+          'Valor Varejo': produto.valorVarejo || '',
+          'Valor Revenda Especial': produto.valorRevendaEspecial || '',
+          'Valor Parcelado 10x': produto.valorParcelado10x || '',
+          'Categoria': produto.categoria?.nome || '',
+          'Data de Cadastro': formatDateOnly(produto.createdAt)
+        };
+      });
+
+      // Criar workbook e worksheet
+      const ws = XLSX.utils.json_to_sheet(dadosExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Produtos Comprados');
+
+      // Gerar nome do arquivo
+      const dataAtual = new Date().toISOString().split('T')[0];
+      const nomeArquivo = `produtos-comprados-${dataAtual}.xlsx`;
+
+      // Salvar arquivo
+      XLSX.writeFile(wb, nomeArquivo);
+
+      this.toastService.success('Produtos exportados com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      this.toastService.error('Erro ao exportar produtos');
+    } finally {
+      this.exportando.set(false);
     }
   }
 }
