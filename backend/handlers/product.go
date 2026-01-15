@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -100,7 +99,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Formatar resposta
 	produtosFormatados := make([]map[string]interface{}, len(produtos))
 	for i, produto := range produtos {
