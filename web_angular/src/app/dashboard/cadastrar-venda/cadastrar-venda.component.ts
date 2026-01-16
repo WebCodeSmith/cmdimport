@@ -110,7 +110,7 @@ export class CadastrarVendaComponent implements OnInit {
           codigoBarras: item.codigoBarras,
           cor: item.cor,
           descricao: item.descricao
-        })).filter(p => p.quantidade > 0);
+        })).filter(p => p.quantidade > 0).sort((a, b) => a.nome.localeCompare(b.nome));
         this.produtos.set(produtosFormatados);
       }
     } catch (error) {
