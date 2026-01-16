@@ -110,7 +110,7 @@ export class CadastrarVendaComponent implements OnInit {
           codigoBarras: item.codigoBarras,
           cor: item.cor,
           descricao: item.descricao
-        }));
+        })).filter(p => p.quantidade > 0);
         this.produtos.set(produtosFormatados);
       }
     } catch (error) {
@@ -134,7 +134,7 @@ export class CadastrarVendaComponent implements OnInit {
   }
 
   adicionarProduto(): void {
-    this.produtosFormArray.push(
+    this.produtosFormArray.insert(0,
       this.fb.group({
         produto: ['', [Validators.required]],
         quantidade: ['', [Validators.required, Validators.min(1)]],
