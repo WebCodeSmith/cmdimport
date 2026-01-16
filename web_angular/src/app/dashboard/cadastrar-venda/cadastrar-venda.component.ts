@@ -8,10 +8,12 @@ import { ToastService } from '../../core/services/toast.service';
 import { Produto } from '../../shared/types/produto.types';
 import { formatCurrency } from '../../shared/utils/formatters';
 
+import { ProdutoSearchSelectorComponent } from '../../shared/components/produto-search-selector/produto-search-selector.component';
+
 @Component({
   selector: 'app-cadastrar-venda',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ProdutoSearchSelectorComponent],
   templateUrl: './cadastrar-venda.component.html'
 })
 export class CadastrarVendaComponent implements OnInit {
@@ -103,7 +105,11 @@ export class CadastrarVendaComponent implements OnInit {
           quantidade: item.quantidade || 0,
           valorAtacado: item.valorAtacado ?? null,
           valorVarejo: item.valorVarejo ?? null,
-          valorRevendaEspecial: item.valorRevendaEspecial ?? null
+          valorRevendaEspecial: item.valorRevendaEspecial ?? null,
+          imei: item.imei,
+          codigoBarras: item.codigoBarras,
+          cor: item.cor,
+          descricao: item.descricao
         }));
         this.produtos.set(produtosFormatados);
       }
@@ -151,7 +157,7 @@ export class CadastrarVendaComponent implements OnInit {
 
   calcularPreco(produto: Produto): number {
     const tipo = this.tipoCliente();
-    
+
     switch (tipo) {
       case 'lojista':
         return produto.valorAtacado ?? produto.preco;
@@ -186,7 +192,7 @@ export class CadastrarVendaComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const numbers = input.value.replace(/\D/g, '');
     let formatted = '';
-    
+
     if (numbers.length <= 10) {
       formatted = numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
     } else if (numbers.length <= 11) {
@@ -194,7 +200,7 @@ export class CadastrarVendaComponent implements OnInit {
     } else {
       formatted = numbers.slice(0, 11).replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
     }
-    
+
     this.vendaForm.patchValue({ telefone: formatted }, { emitEvent: false });
   }
 
@@ -275,10 +281,10 @@ export class CadastrarVendaComponent implements OnInit {
         const produto = this.getProdutoSelecionado(index);
         const quantidade = control.get('quantidade')?.value;
         if (!produto || !quantidade) return null;
-        
+
         const usarPrecoPersonalizado = control.get('usarPrecoPersonalizado')?.value || false;
         const precoPersonalizado = control.get('precoPersonalizado')?.value;
-        
+
         return {
           produto: String(control.get('produto')?.value),
           nome: produto.nome,
@@ -303,7 +309,7 @@ export class CadastrarVendaComponent implements OnInit {
 
     try {
       const formValue = this.vendaForm.value;
-      
+
       // Preparar payload conforme esperado pelo backend
       const venda: any = {
         clienteNome: formValue.clienteNome,
@@ -314,33 +320,33 @@ export class CadastrarVendaComponent implements OnInit {
         usuarioId: user.id,
         tipoCliente: this.tipoCliente() || null
       };
-      
+
       // Campos opcionais - só adicionar se tiverem valor
       if (formValue.observacoes && formValue.observacoes.trim()) {
         venda.observacoes = formValue.observacoes.trim();
       }
-      
+
       if (formValue.valorPix) {
         const valor = parseFloat(String(formValue.valorPix).replace(/[^\d,]/g, '').replace(',', '.'));
         if (!isNaN(valor) && valor > 0) {
           venda.valorPix = valor;
         }
       }
-      
+
       if (formValue.valorCartao) {
         const valor = parseFloat(String(formValue.valorCartao).replace(/[^\d,]/g, '').replace(',', '.'));
         if (!isNaN(valor) && valor > 0) {
           venda.valorCartao = valor;
         }
       }
-      
+
       if (formValue.valorDinheiro) {
         const valor = parseFloat(String(formValue.valorDinheiro).replace(/[^\d,]/g, '').replace(',', '.'));
         if (!isNaN(valor) && valor > 0) {
           venda.valorDinheiro = valor;
         }
       }
-      
+
       if (formValue.fotoProduto && formValue.fotoProduto.trim()) {
         venda.fotoProduto = formValue.fotoProduto.trim();
       }
@@ -352,7 +358,7 @@ export class CadastrarVendaComponent implements OnInit {
       if (response?.success) {
         const valorTotal = this.formatCurrency(this.valorTotal());
         const mensagem = `Venda cadastrada com sucesso!\nCliente: ${formValue.clienteNome}\nValor Total: ${valorTotal}`;
-        
+
         // Toast de sucesso com duração maior (8 segundos)
         this.toastService.success(mensagem, { duration: 8000 });
 
@@ -369,7 +375,7 @@ export class CadastrarVendaComponent implements OnInit {
       }
     } catch (error: any) {
       console.error('Erro ao cadastrar venda:', error);
-      
+
       // Extrair mensagem de erro do backend
       let errorMessage = 'Erro de conexão. Tente novamente.';
       if (error?.message) {
@@ -377,7 +383,7 @@ export class CadastrarVendaComponent implements OnInit {
       } else if (error?.error?.message) {
         errorMessage = error.error.message;
       }
-      
+
       this.toastService.error(errorMessage);
     } finally {
       this.loading.set(false);

@@ -12,21 +12,17 @@
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-2">Tipo de Cliente</label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            type="button"
-            (click)="tipoCliente.set('lojista')"
-            [class.border-indigo-500]="tipoCliente() === 'lojista'"
-            [class.bg-indigo-50]="tipoCliente() === 'lojista'"
-            [class.text-indigo-700]="tipoCliente() === 'lojista'"
-            [class.border-slate-300]="tipoCliente() !== 'lojista'"
-            [class.bg-white]="tipoCliente() !== 'lojista'"
-            [class.text-slate-700]="tipoCliente() !== 'lojista'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+          <button type="button" (click)="tipoCliente.set('lojista')"
+            [class.border-indigo-500]="tipoCliente() === 'lojista'" [class.bg-indigo-50]="tipoCliente() === 'lojista'"
+            [class.text-indigo-700]="tipoCliente() === 'lojista'" [class.border-slate-300]="tipoCliente() !== 'lojista'"
+            [class.bg-white]="tipoCliente() !== 'lojista'" [class.text-slate-700]="tipoCliente() !== 'lojista'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="tipoCliente() === 'lojista'" [class.border-slate-300]="tipoCliente() !== 'lojista'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="tipoCliente() === 'lojista'"
+                [class.border-slate-300]="tipoCliente() !== 'lojista'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (tipoCliente() === 'lojista') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -36,21 +32,19 @@
             </div>
           </button>
 
-          <button
-            type="button"
-            (click)="tipoCliente.set('consumidor')"
+          <button type="button" (click)="tipoCliente.set('consumidor')"
             [class.border-indigo-500]="tipoCliente() === 'consumidor'"
             [class.bg-indigo-50]="tipoCliente() === 'consumidor'"
             [class.text-indigo-700]="tipoCliente() === 'consumidor'"
-            [class.border-slate-300]="tipoCliente() !== 'consumidor'"
-            [class.bg-white]="tipoCliente() !== 'consumidor'"
+            [class.border-slate-300]="tipoCliente() !== 'consumidor'" [class.bg-white]="tipoCliente() !== 'consumidor'"
             [class.text-slate-700]="tipoCliente() !== 'consumidor'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="tipoCliente() === 'consumidor'" [class.border-slate-300]="tipoCliente() !== 'consumidor'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="tipoCliente() === 'consumidor'"
+                [class.border-slate-300]="tipoCliente() !== 'consumidor'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (tipoCliente() === 'consumidor') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -60,21 +54,20 @@
             </div>
           </button>
 
-          <button
-            type="button"
-            (click)="tipoCliente.set('revendaEspecial')"
+          <button type="button" (click)="tipoCliente.set('revendaEspecial')"
             [class.border-indigo-500]="tipoCliente() === 'revendaEspecial'"
             [class.bg-indigo-50]="tipoCliente() === 'revendaEspecial'"
             [class.text-indigo-700]="tipoCliente() === 'revendaEspecial'"
             [class.border-slate-300]="tipoCliente() !== 'revendaEspecial'"
             [class.bg-white]="tipoCliente() !== 'revendaEspecial'"
             [class.text-slate-700]="tipoCliente() !== 'revendaEspecial'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="tipoCliente() === 'revendaEspecial'" [class.border-slate-300]="tipoCliente() !== 'revendaEspecial'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="tipoCliente() === 'revendaEspecial'"
+                [class.border-slate-300]="tipoCliente() !== 'revendaEspecial'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (tipoCliente() === 'revendaEspecial') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -92,28 +85,18 @@
           <label class="block text-xs font-medium text-slate-600 mb-1.5">
             Nome do Cliente *
           </label>
-          <input
-            type="text"
-            formControlName="clienteNome"
-            required
+          <input type="text" formControlName="clienteNome" required
             class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-            placeholder="Nome completo do cliente"
-          />
+            placeholder="Nome completo do cliente" />
         </div>
 
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1.5">
             Telefone *
           </label>
-          <input
-            type="tel"
-            formControlName="telefone"
-            (input)="onPhoneInput($event)"
-            required
+          <input type="tel" formControlName="telefone" (input)="onPhoneInput($event)" required
             class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-            placeholder="(11) 99999-9999"
-            maxlength="15"
-          />
+            placeholder="(11) 99999-9999" maxlength="15" />
         </div>
       </div>
 
@@ -121,24 +104,17 @@
         <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Endereço *
         </label>
-        <input
-          type="text"
-          formControlName="endereco"
-          required
+        <input type="text" formControlName="endereco" required
           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-          placeholder="Endereço completo"
-        />
+          placeholder="Endereço completo" />
       </div>
 
       <!-- Produtos -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-medium text-slate-600">Produtos da Venda</label>
-          <button
-            type="button"
-            (click)="adicionarProduto()"
-            class="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center gap-2 shadow-sm"
-          >
+          <button type="button" (click)="adicionarProduto()"
+            class="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center gap-2 shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
@@ -147,101 +123,77 @@
         </div>
 
         @for (produtoControl of produtosControls; track $index) {
-          <div class="bg-slate-50 border border-slate-200 rounded-md p-4">
-            <div class="flex items-center justify-between mb-3">
-              <h4 class="text-xs font-medium text-slate-600">Produto {{ produtosControls.length - $index }}</h4>
-              @if (produtosControls.length > 1) {
-                <button
-                  type="button"
-                  (click)="removerProduto($index)"
-                  class="text-red-600 hover:text-red-800 transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
+        <div class="bg-slate-50 border border-slate-200 rounded-md p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-medium text-slate-600">Produto {{ produtosControls.length - $index }}</h4>
+            @if (produtosControls.length > 1) {
+            <button type="button" (click)="removerProduto($index)"
+              class="text-red-600 hover:text-red-800 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            }
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                Produto *
+              </label>
+              <app-produto-search-selector [produtos]="produtos()"
+                [formControl]="getProdutoFormControl($index, 'produto')"
+                (produtoSelecionado)="onProdutoSelecionado($index, $event.id)"></app-produto-search-selector>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                Quantidade *
+              </label>
+              <input type="number" [formControl]="getProdutoFormControl($index, 'quantidade')" min="1" required
+                class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
+                placeholder="Quantidade" />
+            </div>
+          </div>
+
+          @if (getProdutoSelecionado($index)) {
+          <div class="mt-4 space-y-3">
+            <!-- Preço Personalizado -->
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <div class="flex items-center space-x-2 mb-3">
+                <input type="checkbox" [id]="'usar-preco-personalizado-' + $index"
+                  [formControl]="getProdutoFormControl($index, 'usarPrecoPersonalizado')"
+                  class="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500 focus:ring-2" />
+                <label [for]="'usar-preco-personalizado-' + $index" class="text-xs font-medium text-slate-700">
+                  Definir preço personalizado para este produto
+                </label>
+              </div>
+
+              @if (getProdutoControl($index).get('usarPrecoPersonalizado')?.value) {
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                  Preço Unitário Personalizado *
+                </label>
+                <input type="text" [formControl]="getProdutoFormControl($index, 'precoPersonalizado')"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-900 placeholder-slate-400"
+                  placeholder="R$ 0,00" />
+              </div>
               }
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                  Produto *
-                </label>
-                <select
-                  [formControl]="getProdutoFormControl($index, 'produto')"
-                  (change)="onProdutoSelecionado($index, getProdutoControl($index).get('produto')?.value)"
-                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"
-                >
-                  <option value="">Selecione um produto</option>
-                  @for (produto of produtos(); track produto.id) {
-                    @if (produto.quantidade > 0) {
-                      <option [value]="produto.id">
-                        {{ produto.nome }} - Estoque: {{ produto.quantidade }} - {{ formatCurrency(calcularPreco(produto)) }}
-                      </option>
-                    }
-                  }
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                  Quantidade *
-                </label>
-                <input
-                  type="number"
-                  [formControl]="getProdutoFormControl($index, 'quantidade')"
-                  min="1"
-                  required
-                  class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400"
-                  placeholder="Quantidade"
-                />
+            <!-- Resumo do Produto -->
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div class="text-xs text-blue-900">
+                <span class="font-medium">{{ getProdutoSelecionado($index)?.nome }}</span> -
+                Quantidade: {{ getProdutoControl($index).get('quantidade')?.value || 0 }} -
+                Preço unitário: {{ formatCurrency(getPrecoUnitario($index)) }} -
+                <span class="font-semibold">Subtotal: {{ formatCurrency(getSubtotal($index)) }}</span>
               </div>
             </div>
-
-            @if (getProdutoSelecionado($index)) {
-              <div class="mt-4 space-y-3">
-                <!-- Preço Personalizado -->
-                <div class="p-3 bg-amber-50 border border-amber-200 rounded-md">
-                  <div class="flex items-center space-x-2 mb-3">
-                    <input
-                      type="checkbox"
-                      [id]="'usar-preco-personalizado-' + $index"
-                      [formControl]="getProdutoFormControl($index, 'usarPrecoPersonalizado')"
-                      class="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500 focus:ring-2"
-                    />
-                    <label [for]="'usar-preco-personalizado-' + $index" class="text-xs font-medium text-slate-700">
-                      Definir preço personalizado para este produto
-                    </label>
-                  </div>
-
-                  @if (getProdutoControl($index).get('usarPrecoPersonalizado')?.value) {
-                    <div>
-                      <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                        Preço Unitário Personalizado *
-                      </label>
-                      <input
-                        type="text"
-                        [formControl]="getProdutoFormControl($index, 'precoPersonalizado')"
-                        class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-900 placeholder-slate-400"
-                        placeholder="R$ 0,00"
-                      />
-                    </div>
-                  }
-                </div>
-
-                <!-- Resumo do Produto -->
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <div class="text-xs text-blue-900">
-                    <span class="font-medium">{{ getProdutoSelecionado($index)?.nome }}</span> - 
-                    Quantidade: {{ getProdutoControl($index).get('quantidade')?.value || 0 }} - 
-                    Preço unitário: {{ formatCurrency(getPrecoUnitario($index)) }} - 
-                    <span class="font-semibold">Subtotal: {{ formatCurrency(getSubtotal($index)) }}</span>
-                  </div>
-                </div>
-              </div>
-            }
           </div>
+          }
+        </div>
         }
       </div>
 
@@ -254,21 +206,20 @@
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          <button
-            type="button"
-            (click)="vendaForm.patchValue({ formaPagamento: 'pix' })"
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'pix' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix'"
             [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'pix'"
             [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'pix'"
             [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'pix'"
             [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'pix'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix'" [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'pix'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix'"
+                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'pix'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (vendaForm.get('formaPagamento')?.value === 'pix') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -278,21 +229,20 @@
             </div>
           </button>
 
-          <button
-            type="button"
-            (click)="vendaForm.patchValue({ formaPagamento: 'cartao' })"
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'cartao' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'cartao'"
             [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'cartao'"
             [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
             [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
             [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao'" [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'cartao'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao'"
+                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (vendaForm.get('formaPagamento')?.value === 'cartao') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -302,21 +252,20 @@
             </div>
           </button>
 
-          <button
-            type="button"
-            (click)="vendaForm.patchValue({ formaPagamento: 'dinheiro' })"
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'dinheiro' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
             [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
             [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
             [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
             [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'dinheiro'" [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
+                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (vendaForm.get('formaPagamento')?.value === 'dinheiro') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -326,21 +275,20 @@
             </div>
           </button>
 
-          <button
-            type="button"
-            (click)="vendaForm.patchValue({ formaPagamento: 'crediario' })"
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'crediario' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'crediario'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'crediario'"
             [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'crediario'"
             [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
             [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
             [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400"
-          >
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
             <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'crediario'" [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'crediario'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
+              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'crediario'"
+                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
+                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                 @if (vendaForm.get('formaPagamento')?.value === 'crediario') {
-                  <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 }
               </div>
               <div>
@@ -353,54 +301,43 @@
 
         <!-- Formas Mistas -->
         <div class="border-t border-slate-200/60 pt-3 mt-3">
-          <button
-            type="button"
-            (click)="mostrarFormasMistas.set(!mostrarFormasMistas())"
-            class="w-full flex items-center justify-center space-x-2 p-2 rounded-md border border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 text-slate-600 hover:text-indigo-700 text-sm"
-          >
+          <button type="button" (click)="mostrarFormasMistas.set(!mostrarFormasMistas())"
+            class="w-full flex items-center justify-center space-x-2 p-2 rounded-md border border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 text-slate-600 hover:text-indigo-700 text-sm">
             <span class="font-medium">
               {{ mostrarFormasMistas() ? 'Ocultar' : 'Mais' }} Formas de Pagamento
             </span>
-            <svg [class.rotate-180]="mostrarFormasMistas()" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg [class.rotate-180]="mostrarFormasMistas()" class="w-4 h-4 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           @if (mostrarFormasMistas()) {
-            <div class="mt-3 space-y-2">
-              <h5 class="text-xs font-medium text-slate-600 mb-2">Formas Mistas</h5>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  (click)="vendaForm.patchValue({ formaPagamento: 'pix_cartao' })"
-                  [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix_cartao'"
-                  [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix_cartao'"
-                  class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400"
-                >
-                  <div class="font-medium">PIX + Cartão</div>
-                </button>
+          <div class="mt-3 space-y-2">
+            <h5 class="text-xs font-medium text-slate-600 mb-2">Formas Mistas</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'pix_cartao' })"
+                [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix_cartao'"
+                [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix_cartao'"
+                class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400">
+                <div class="font-medium">PIX + Cartão</div>
+              </button>
 
-                <button
-                  type="button"
-                  (click)="vendaForm.patchValue({ formaPagamento: 'pix_dinheiro' })"
-                  [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix_dinheiro'"
-                  [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix_dinheiro'"
-                  class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400"
-                >
-                  <div class="font-medium">PIX + Dinheiro</div>
-                </button>
+              <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'pix_dinheiro' })"
+                [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix_dinheiro'"
+                [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix_dinheiro'"
+                class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400">
+                <div class="font-medium">PIX + Dinheiro</div>
+              </button>
 
-                <button
-                  type="button"
-                  (click)="vendaForm.patchValue({ formaPagamento: 'cartao_dinheiro' })"
-                  [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao_dinheiro'"
-                  [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'cartao_dinheiro'"
-                  class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400"
-                >
-                  <div class="font-medium">Cartão + Dinheiro</div>
-                </button>
-              </div>
+              <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'cartao_dinheiro' })"
+                [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao_dinheiro'"
+                [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'cartao_dinheiro'"
+                class="p-2 rounded-md border-2 transition-all duration-200 text-center text-sm hover:border-indigo-400">
+                <div class="font-medium">Cartão + Dinheiro</div>
+              </button>
             </div>
+          </div>
           }
         </div>
       </div>
@@ -408,57 +345,40 @@
       <!-- Upload de Foto -->
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-2">Foto do Produto</label>
-      
-      <div class="space-y-4">
-        <div class="relative">
-          <input
-            type="file"
-            id="foto-produto"
-            accept=".png,.jpg,.jpeg"
-            (change)="handleFotoChange($event)"
-            [disabled]="uploadingFoto()"
-            class="hidden"
-          />
-          
-          <label
-            for="foto-produto"
-            [class.border-slate-300]="uploadingFoto()"
-            [class.bg-slate-50]="uploadingFoto()"
-            [class.cursor-not-allowed]="uploadingFoto()"
-            [class.border-indigo-400]="!uploadingFoto()"
-            [class.hover:bg-indigo-50]="!uploadingFoto()"
-            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer transition-colors"
-          >
-            @if (uploadingFoto()) {
+
+        <div class="space-y-4">
+          <div class="relative">
+            <input type="file" id="foto-produto" accept=".png,.jpg,.jpeg" (change)="handleFotoChange($event)"
+              [disabled]="uploadingFoto()" class="hidden" />
+
+            <label for="foto-produto" [class.border-slate-300]="uploadingFoto()" [class.bg-slate-50]="uploadingFoto()"
+              [class.cursor-not-allowed]="uploadingFoto()" [class.border-indigo-400]="!uploadingFoto()"
+              [class.hover:bg-indigo-50]="!uploadingFoto()"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer transition-colors">
+              @if (uploadingFoto()) {
               <div class="flex flex-col items-center space-y-2">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600"></div>
                 <span class="text-sm text-slate-600">Enviando...</span>
               </div>
-            } @else {
+              } @else {
               <div class="flex flex-col items-center space-y-2">
                 <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 <span class="text-sm text-slate-600">Clique para anexar foto</span>
                 <span class="text-xs text-slate-500">PNG, JPG (máx. 5MB)</span>
               </div>
-            }
-          </label>
-        </div>
+              }
+            </label>
+          </div>
 
-        @if (fotoPreview()) {
+          @if (fotoPreview()) {
           <div class="relative">
             <div class="relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
-              <img
-                [src]="fotoPreview()!"
-                alt="Preview da foto"
-                class="w-full h-full object-cover"
-              />
-              <button
-                type="button"
-                (click)="removerFoto()"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-              >
+              <img [src]="fotoPreview()!" alt="Preview da foto" class="w-full h-full object-cover" />
+              <button type="button" (click)="removerFoto()"
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -466,8 +386,8 @@
             </div>
             <p class="text-xs text-slate-500 mt-2 text-center">Foto anexada com sucesso</p>
           </div>
-        }
-      </div>
+          }
+        </div>
       </div>
 
       <!-- Observações -->
@@ -475,32 +395,25 @@
         <label class="block text-xs font-medium text-slate-600 mb-1.5">
           Observações
         </label>
-        <textarea
-          formControlName="observacoes"
-          rows="3"
+        <textarea formControlName="observacoes" rows="3"
           class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 placeholder-slate-400 resize-none"
-          placeholder="Observações adicionais (opcional)"
-        ></textarea>
+          placeholder="Observações adicionais (opcional)"></textarea>
       </div>
 
       <!-- Botão Submit - Estilo Bitrix24 -->
       <div class="pt-4 border-t border-slate-200/60">
-        <button
-          type="submit"
-          [disabled]="loading() || vendaForm.invalid"
-          class="w-full flex justify-center items-center py-2.5 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" [disabled]="loading() || vendaForm.invalid"
+          class="w-full flex justify-center items-center py-2.5 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
           @if (loading()) {
-            <span class="flex items-center">
-              <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-              Cadastrando...
-            </span>
+          <span class="flex items-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+            Cadastrando...
+          </span>
           } @else {
-            Cadastrar Venda
+          Cadastrar Venda
           }
         </button>
       </div>
     </form>
   </div>
 </div>
-

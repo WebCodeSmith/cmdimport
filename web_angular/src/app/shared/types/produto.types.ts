@@ -6,6 +6,10 @@ export interface Produto {
   valorAtacado?: number | null;
   valorVarejo?: number | null;
   valorRevendaEspecial?: number | null;
+  imei?: string;
+  codigoBarras?: string;
+  cor?: string;
+  descricao?: string;
 }
 
 export interface ProdutoComprado {
