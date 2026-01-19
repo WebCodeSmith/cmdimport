@@ -9,12 +9,12 @@ import { formatCurrency, formatDateOnly } from '../../shared/utils/formatters';
 import { PanelModalComponent, PanelMenuItem } from '../../shared/components/panel-modal/panel-modal.component';
 
 @Component({
-  selector: 'app-precificacao',
+  selector: 'app-controle-gastos',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, PanelModalComponent],
-  templateUrl: './precificacao.component.html'
+  templateUrl: './controle-gastos.component.html'
 })
-export class PrecificacaoComponent implements OnInit {
+export class ControleGastosComponent implements OnInit {
   private apiService = inject(ApiService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
@@ -23,7 +23,7 @@ export class PrecificacaoComponent implements OnInit {
   categorias = signal<CategoriaDespesa[]>([]);
   despesas = signal<Despesa[]>([]);
   categoriaSelecionada = signal<number | null>(null);
-  semanaSelecionada = signal<number | null>(null); // null = todas as semanas
+  semanaSelecionada = signal<number | null>(null);
 
   // Calculadora de Custos
   abaAtiva = signal<'despesas' | 'calculadora'>('despesas');

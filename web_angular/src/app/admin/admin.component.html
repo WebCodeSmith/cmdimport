@@ -34,6 +34,16 @@
           class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent">
           Listar Produtos
         </button>
+        <button (click)="setActiveTab('precificacao-produtos')"
+          [class.bg-white]="activeTab() === 'precificacao-produtos'"
+          [class.text-indigo-700]="activeTab() === 'precificacao-produtos'"
+          [class.font-medium]="activeTab() === 'precificacao-produtos'"
+          [class.text-slate-600]="activeTab() !== 'precificacao-produtos'"
+          [class.border-b-2]="activeTab() === 'precificacao-produtos'"
+          [class.border-indigo-600]="activeTab() === 'precificacao-produtos'"
+          class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent">
+          Precificação
+        </button>
         <button (click)="setActiveTab('estoque-usuarios')" [class.bg-white]="activeTab() === 'estoque-usuarios'"
           [class.text-indigo-700]="activeTab() === 'estoque-usuarios'"
           [class.font-medium]="activeTab() === 'estoque-usuarios'"
@@ -43,12 +53,14 @@
           class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent">
           Estoque de Usuários
         </button>
-        <button (click)="setActiveTab('precificacao')" [class.bg-white]="activeTab() === 'precificacao'"
-          [class.text-indigo-700]="activeTab() === 'precificacao'" [class.font-medium]="activeTab() === 'precificacao'"
-          [class.text-slate-600]="activeTab() !== 'precificacao'" [class.border-b-2]="activeTab() === 'precificacao'"
-          [class.border-indigo-600]="activeTab() === 'precificacao'"
+        <button (click)="setActiveTab('controle-gastos')" [class.bg-white]="activeTab() === 'controle-gastos'"
+          [class.text-indigo-700]="activeTab() === 'controle-gastos'"
+          [class.font-medium]="activeTab() === 'controle-gastos'"
+          [class.text-slate-600]="activeTab() !== 'controle-gastos'"
+          [class.border-b-2]="activeTab() === 'controle-gastos'"
+          [class.border-indigo-600]="activeTab() === 'controle-gastos'"
           class="flex-1 min-w-[150px] px-5 py-3.5 text-sm hover:bg-white/50 transition-all border-b-2 border-transparent">
-          Precificação
+          Controle de Gastos
         </button>
       </div>
 
@@ -70,12 +82,16 @@
         <app-estoque-usuarios />
         }
 
-        @if (activeTab() === 'precificacao') {
-        <app-precificacao />
+        @if (activeTab() === 'controle-gastos') {
+        <app-controle-gastos />
         }
 
         @if (activeTab() === 'historico-distribuicao') {
         <app-historico-distribuicao />
+        }
+
+        @if (activeTab() === 'precificacao-produtos') {
+        <app-precificacao-produtos />
         }
       </div>
     </div>
