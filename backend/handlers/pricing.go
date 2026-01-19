@@ -32,11 +32,29 @@ func (h *PricingHandler) ListarCombos(c *gin.Context) {
 	}
 
 	var produtosEstoque []ProdutoAgrupado
-	// Esta query busca nomes distintos e soma quantidades, conta variações e calcula totais de todo o estoque
-	if err := h.DB.Model(&models.ProdutoComprado{}).
-		Select("nome as nome_produto, SUM(quantidade) as total_quantidade, COUNT(*) as variacoes, AVG(preco) as preco_medio, SUM(preco * quantidade) as valor_total_estoque").
-		Group("nome").
-		Scan(&produtosEstoque).Error; err != nil {
+	// Esta query busca nomes distintos e soma quantidades de todo o estoque (principal + distribuído)
+	// Usamos uma subquery com UNION ALL para pegar o estoque de ProdutoComprado e o estoque de Estoque
+	query := `
+		SELECT 
+			t.nome as nome_produto, 
+			SUM(t.quantidade) as total_quantidade, 
+			COUNT(*) as variacoes, 
+			AVG(t.preco) as preco_medio, 
+			SUM(t.preco * t.quantidade) as valor_total_estoque
+		FROM (
+			-- Estoque principal (não distribuído)
+			SELECT nome, quantidade, preco FROM ProdutoComprado WHERE quantidade > 0
+			UNION ALL
+			-- Estoque distribuído para usuários
+			SELECT pc.nome, e.quantidade, pc.preco 
+			FROM Estoque e 
+			JOIN ProdutoComprado pc ON e.produtoCompradoId = pc.id 
+			WHERE e.quantidade > 0 AND e.ativo = true
+		) as t
+		GROUP BY t.nome
+	`
+
+	if err := h.DB.Raw(query).Scan(&produtosEstoque).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Erro ao buscar produtos do estoque",
