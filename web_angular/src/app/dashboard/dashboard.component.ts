@@ -9,11 +9,12 @@ import { DashboardStats, VendaRecente, VendaPorDia, ProdutoMaisVendido } from '.
 import { CadastrarVendaComponent } from './cadastrar-venda/cadastrar-venda.component';
 import { HistoricoVendasComponent } from './historico-vendas/historico-vendas.component';
 import { EstoqueComponent } from './estoque/estoque.component';
+import { ConsultaPrecoComponent } from './consulta-preco/consulta-preco.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, MainLayoutComponent, CadastrarVendaComponent, HistoricoVendasComponent, EstoqueComponent],
+  imports: [CommonModule, MainLayoutComponent, CadastrarVendaComponent, HistoricoVendasComponent, EstoqueComponent, ConsultaPrecoComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
@@ -39,7 +40,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarDados();
-    
+
     // Verificar tab da query string
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
@@ -148,7 +149,7 @@ export class DashboardComponent implements OnInit {
         // Vendas por dia (últimos 7 dias) - sempre em ordem: Dom, Seg, Ter, Qua, Qui, Sex, Sáb
         const vendasPorDiaMap = new Map<string, { vendas: number; receita: number; diaSemana: string; ordem: number }>();
         const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        
+
         // Inicializar mapa com os últimos 7 dias
         for (let i = 6; i >= 0; i--) {
           const data = new Date(hoje);
@@ -156,7 +157,7 @@ export class DashboardComponent implements OnInit {
           const dataStr = data.toISOString().split('T')[0];
           const diaSemana = dias[data.getDay()];
           const ordem = data.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
-          
+
           vendasPorDiaMap.set(dataStr, { vendas: 0, receita: 0, diaSemana, ordem });
         }
 
@@ -181,7 +182,7 @@ export class DashboardComponent implements OnInit {
           data.setDate(data.getDate() - i);
           const dataStr = data.toISOString().split('T')[0];
           const dados = vendasPorDiaMap.get(dataStr);
-          
+
           if (dados) {
             vendasPorDiaArray.push({
               dia: dados.diaSemana,
@@ -200,7 +201,7 @@ export class DashboardComponent implements OnInit {
             const nome = item.produtoNome || item.nome || 'Produto';
             const quantidade = item.quantidade || 1;
             const preco = item.preco || item.valorUnitario || 0;
-            
+
             if (produtosMap.has(nome)) {
               const atual = produtosMap.get(nome)!;
               produtosMap.set(nome, {

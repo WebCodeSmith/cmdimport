@@ -201,3 +201,98 @@ func (h *PricingHandler) Atualizar(c *gin.Context) {
 		"message": "Precificação salva com sucesso",
 	})
 }
+
+// Consultar busca precificação por termo (Nome, IMEI ou Código de Barras)
+// Consultar busca precificação por termo (Nome, IMEI ou Código de Barras)
+func (h *PricingHandler) Consultar(c *gin.Context) {
+	termo := c.Query("termo")
+	if termo == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Termo de busca é obrigatório",
+		})
+		return
+	}
+
+	// Set de nomes únicos encontrados
+	nomesEncontrados := make(map[string]bool)
+
+	// 1. Buscar nomes na tabela ProdutoComprado (por Nome, IMEI ou Código de Barras)
+	var nomesProdutoComprado []string
+	if err := h.DB.Model(&models.ProdutoComprado{}).
+		Where("nome LIKE ? OR imei = ? OR codigoBarras = ?", "%"+termo+"%", termo, termo).
+		Distinct("nome").
+		Pluck("nome", &nomesProdutoComprado).Error; err == nil {
+		for _, nome := range nomesProdutoComprado {
+			nomesEncontrados[nome] = true
+		}
+	}
+
+	// 2. Buscar nomes na tabela Precificacao (por Nome)
+	var nomesPrecificacao []string
+	if err := h.DB.Model(&models.Precificacao{}).
+		Where("nomeProduto LIKE ?", "%"+termo+"%").
+		Distinct("nomeProduto").
+		Pluck("nomeProduto", &nomesPrecificacao).Error; err == nil {
+		for _, nome := range nomesPrecificacao {
+			nomesEncontrados[nome] = true
+		}
+	}
+
+	// Se não achou nada
+	if len(nomesEncontrados) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"data":    []models.Precificacao{},
+		})
+		return
+	}
+
+	// Converter map para slice de nomes
+	var listaNomes []string
+	for nome := range nomesEncontrados {
+		listaNomes = append(listaNomes, nome)
+	}
+
+	// 3. Buscar as precificações existentes para esses nomes
+	var precificacoesExistentes []models.Precificacao
+	if err := h.DB.Where("nomeProduto IN ?", listaNomes).Find(&precificacoesExistentes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Erro ao buscar precificações",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Criar mapa de precificações para acesso rápido
+	mapPrecificacao := make(map[string]models.Precificacao)
+	for _, p := range precificacoesExistentes {
+		mapPrecificacao[p.NomeProduto] = p
+	}
+
+	// 4. Montar resultado final (garantindo que todos os nomes encontrados apareçam)
+	var resultado []models.Precificacao
+
+	for _, nome := range listaNomes {
+		if p, ok := mapPrecificacao[nome]; ok {
+			resultado = append(resultado, p)
+		} else {
+			// Se não tem precificação, cria objeto zerado apenas para visualização
+			resultado = append(resultado, models.Precificacao{
+				NomeProduto:      nome,
+				ValorDinheiroPix: 0,
+				ValorDebito:      0,
+				ValorCartaoVista: 0,
+				ValorCredito5x:   0,
+				ValorCredito10x:  0,
+				ValorCredito12x:  0,
+			})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    resultado,
+	})
+}

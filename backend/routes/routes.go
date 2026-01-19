@@ -161,6 +161,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config) {
 		adminPrecificacao := protected.Group("/admin/precificacao")
 		{
 			adminPrecificacao.GET("", pricingHandler.ListarCombos)
+			adminPrecificacao.GET("/consultar", pricingHandler.Consultar)
 			adminPrecificacao.POST("", pricingHandler.Atualizar)
 		}
 	}

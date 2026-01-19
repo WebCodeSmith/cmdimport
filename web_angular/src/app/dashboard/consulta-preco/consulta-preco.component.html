@@ -1,0 +1,90 @@
+<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 h-full flex flex-col">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <span class="material-icons text-indigo-600">price_check</span>
+            Consulta Preço
+        </h2>
+    </div>
+
+    <!-- Busca -->
+    <div class="relative mb-6">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-icons text-slate-400">search</span>
+        </div>
+        <input type="text" [(ngModel)]="termoBusca" (keydown)="onKeyDown($event)"
+            class="block w-full pl-10 pr-12 py-3 border-slate-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400 font-medium"
+            placeholder="Nome, IMEI ou Código de Barras...">
+        <button (click)="buscar()" [disabled]="loading()"
+            class="absolute inset-y-1 right-1 px-3 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+            @if (loading()) {
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            } @else {
+            Buscar
+            }
+        </button>
+    </div>
+
+    <!-- Resultados -->
+    <div class="flex-1 overflow-y-auto min-h-[200px] space-y-4 pr-1">
+        @if (buscou() && resultados().length === 0 && !loading()) {
+        <div class="h-full flex flex-col items-center justify-center text-center py-8">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                <span class="material-icons text-slate-400 text-2xl">content_paste_search</span>
+            </div>
+            <p class="text-slate-600 font-medium">Nenhum produto encontrado</p>
+            <p class="text-xs text-slate-500 mt-1">Tente buscar por outro termo</p>
+        </div>
+        } @else if (!buscou() && !loading()) {
+        <div class="h-full flex flex-col items-center justify-center text-center py-8 opacity-60">
+            <span class="material-icons text-4xl text-slate-300 mb-2">qr_code_scanner</span>
+            <p class="text-sm text-slate-500">Digite para consultar preços</p>
+        </div>
+        }
+
+        @for (item of resultados(); track item.nomeProduto) {
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 hover:border-indigo-200 transition-colors">
+            <h3 class="font-bold text-slate-900 text-base mb-3 border-b border-slate-200 pb-2">{{ item.nomeProduto }}
+            </h3>
+
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <!-- Pix -->
+                <div class="bg-white p-2 rounded border border-emerald-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Dinheiro / Pix</span>
+                    <span class="font-bold text-emerald-600 text-base">{{ formatCurrency(item.valorDinheiroPix)
+                        }}</span>
+                </div>
+
+                <!-- Débito -->
+                <div class="bg-white p-2 rounded border border-slate-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Débito</span>
+                    <span class="font-bold text-slate-800 text-base">{{ formatCurrency(item.valorDebito) }}</span>
+                </div>
+
+                <!-- Vista -->
+                <div class="bg-white p-2 rounded border border-slate-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Crédito Vista</span>
+                    <span class="font-bold text-slate-800 text-base">{{ formatCurrency(item.valorCartaoVista) }}</span>
+                </div>
+
+                <!-- 12x -->
+                <div class="bg-white p-2 rounded border border-slate-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">12x Sem Juros</span>
+                    <span class="font-bold text-slate-800 text-base">{{ formatCurrency(item.valorCredito12x) }}</span>
+                </div>
+            </div>
+
+            <!-- Mais Opções (Dropdown/Expandable could be better but sticking to simple grid for now) -->
+            <div class="grid grid-cols-2 gap-3 text-sm mt-3 pt-3 border-t border-slate-200/50">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-500">5x</span>
+                    <span class="font-semibold text-slate-700">{{ formatCurrency(item.valorCredito5x) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-500">10x</span>
+                    <span class="font-semibold text-slate-700">{{ formatCurrency(item.valorCredito10x) }}</span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
