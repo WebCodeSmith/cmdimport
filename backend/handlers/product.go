@@ -85,8 +85,7 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 	var produtos []models.ProdutoComprado
 	if err := query.Select("id", "nome", "descricao", "cor", "imei", "codigoBarras", 
 		"custoDolar", "taxaDolar", "preco", "quantidade", "quantidadeBackup", 
-		"fornecedor", "dataCompra", "createdAt", "updatedAt", 
-		"valorCusto", "valorAtacado", "valorVarejo", "valorRevendaEspecial", "valorParcelado10x").
+		"fornecedor", "dataCompra", "createdAt", "updatedAt").
 		Preload("Estoque", "ativo = ?", true).
 		Preload("Estoque.Usuario").
 		Order("dataCompra DESC").
@@ -127,10 +126,6 @@ func (h *ProductHandler) Listar(c *gin.Context) {
 			"fornecedor":        produto.Fornecedor,
 			"dataCompra":        produto.DataCompra.Format(time.RFC3339),
 			"createdAt":         produto.CreatedAt.Format(time.RFC3339),
-			"valorAtacado":       produto.ValorAtacado,
-			"valorVarejo":        produto.ValorVarejo,
-			"valorRevendaEspecial": produto.ValorRevendaEspecial,
-			"valorParcelado10x":  produto.ValorParcelado10x,
 			"estoque":           estoqueFormatado,
 		}
 	}
@@ -517,72 +512,16 @@ func (h *ProductHandler) Atualizar(c *gin.Context) {
 			"fornecedor":        produto.Fornecedor,
 			"dataCompra":        produto.DataCompra.Format(time.RFC3339),
 			"createdAt":         produto.CreatedAt.Format(time.RFC3339),
-			"valorAtacado":      produto.ValorAtacado,
-			"valorVarejo":       produto.ValorVarejo,
-			"valorParcelado10x": produto.ValorParcelado10x,
 			"estoque":           produto.Estoque,
 		},
 	})
 }
 
+// AtualizarPrecificacao removido pois agora é centralizado
 func (h *ProductHandler) AtualizarPrecificacao(c *gin.Context) {
-	id := c.Param("id")
-	
-	var req struct {
-		ValorCusto       *float64 `json:"valorCusto"`
-		ValorAtacado     *float64 `json:"valorAtacado"`
-		ValorVarejo      *float64 `json:"valorVarejo"`
-		ValorRevendaEspecial *float64 `json:"valorRevendaEspecial"`
-		ValorParcelado10x *float64 `json:"valorParcelado10x"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Dados inválidos",
-		})
-		return
-	}
-
-	var produto models.ProdutoComprado
-	if err := h.DB.First(&produto, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "Produto não encontrado",
-		})
-		return
-	}
-
-	// Atualizar precificação
-	updates := make(map[string]interface{})
-	if req.ValorCusto != nil {
-		updates["valorCusto"] = *req.ValorCusto
-	}
-	if req.ValorAtacado != nil {
-		updates["valorAtacado"] = *req.ValorAtacado
-	}
-	if req.ValorVarejo != nil {
-		updates["valorVarejo"] = *req.ValorVarejo
-	}
-	if req.ValorRevendaEspecial != nil {
-		updates["valorRevendaEspecial"] = *req.ValorRevendaEspecial
-	}
-	if req.ValorParcelado10x != nil {
-		updates["valorParcelado10x"] = *req.ValorParcelado10x
-	}
-
-	if err := h.DB.Model(&produto).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Erro ao atualizar precificação",
-		})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Precificação atualizada com sucesso",
-		"data":    produto,
+		"message": "Funcionalidade movida para Precificação Centralizada",
 	})
 }
 

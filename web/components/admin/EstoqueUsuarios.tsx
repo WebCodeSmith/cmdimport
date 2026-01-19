@@ -62,7 +62,7 @@ export default function EstoqueUsuarios() {
   const exportarParaExcel = async () => {
     try {
       setExportando(true)
-      
+
       // Função para formatar números com vírgula (formato brasileiro) - apenas número, sem R$
       const formatarNumero = (valor: number | null | undefined): string | number => {
         if (valor === null || valor === undefined) return ''
@@ -72,7 +72,7 @@ export default function EstoqueUsuarios() {
 
       // Preparar dados para Excel - uma linha por produto de cada usuário
       const linhasExcel: Array<Record<string, string | number>> = []
-      
+
       usuariosFiltrados.forEach((usuario) => {
         usuario.produtos.forEach((produto) => {
           // Determinar status
@@ -92,8 +92,7 @@ export default function EstoqueUsuarios() {
             'Quantidade': produto.quantidade,
             'Status': status,
             'Preço': formatarNumero(produto.preco),
-            'Atacado': produto.valorAtacado ? formatarNumero(produto.valorAtacado) : '',
-            'Varejo': produto.valorVarejo ? formatarNumero(produto.valorVarejo) : '',
+
             'Cor': produto.cor || '',
             'IMEI': produto.imei || '',
             'Código de Barras': produto.codigoBarras || '',
@@ -105,10 +104,10 @@ export default function EstoqueUsuarios() {
       // Criar arquivo Excel (XLSX) com ajuste automático de colunas
       const workbook = XLSX.utils.book_new()
       const worksheet = XLSX.utils.json_to_sheet(linhasExcel.length > 0 ? linhasExcel : [{}])
-      
+
       // Obter headers das chaves dos dados
       const headers = linhasExcel.length > 0 ? Object.keys(linhasExcel[0]) : []
-      
+
       // Ajustar largura das colunas automaticamente
       const colWidths = headers.map((header: string) => {
         const maxLength = Math.max(
@@ -120,15 +119,15 @@ export default function EstoqueUsuarios() {
         )
         return { wch: Math.min(Math.max(maxLength + 2, 10), 50) } // Mínimo 10, máximo 50
       })
-      
+
       worksheet['!cols'] = colWidths
-      
+
       // Adicionar worksheet ao workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Estoque Usuários')
-      
+
       // Gerar arquivo Excel
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-      
+
       // Download do arquivo
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
       const link = document.createElement('a')
@@ -162,12 +161,12 @@ export default function EstoqueUsuarios() {
 
     setProdutoRedistribuir(produto)
     setUsuarioOrigem(usuario)
-    
+
     // Carregar lista de usuários disponíveis (excluindo o usuário origem)
     try {
       const { authApi } = await import('@/lib/api')
       const response = await authApi.listarUsuarios()
-      
+
       if (response.success && response.data) {
         // Filtrar usuários, excluindo o usuário origem
         const usuariosFiltrados = (response.data as any[]).filter((u: UsuarioEstoque) => u.id !== usuario.id)
@@ -176,7 +175,7 @@ export default function EstoqueUsuarios() {
     } catch (error) {
       console.error('Erro ao carregar usuários:', error)
     }
-    
+
     setFormularioRedistribuicao({
       usuarioDestinoId: '',
       quantidade: ''
@@ -250,12 +249,12 @@ export default function EstoqueUsuarios() {
 
       if (response.success) {
         showToast(`Estoque deletado com sucesso! ${estoqueParaDeletar.produtoNome} - ${estoqueParaDeletar.usuarioNome}`, 'success')
-        
+
         // Atualizar estado local sem recarregar a página - apenas remover o item
         setEstoqueUsuarios(prev => {
           return prev.map(usuario => {
             const produtosAtualizados = usuario.produtos.filter(produto => produto.id !== estoqueParaDeletar.id)
-            
+
             // Se o usuário não tem mais produtos após deletar, manter o usuário mas com lista vazia
             return {
               ...usuario,
@@ -265,7 +264,7 @@ export default function EstoqueUsuarios() {
             }
           })
         })
-        
+
         fecharModalDeletar()
       } else {
         showToast('Erro ao deletar estoque: ' + response.message, 'error')
@@ -282,16 +281,16 @@ export default function EstoqueUsuarios() {
     // Filtro por nome/email
     const passaFiltroTexto = usuario.nome.toLowerCase().includes(filtroUsuario.toLowerCase()) ||
       usuario.email.toLowerCase().includes(filtroUsuario.toLowerCase())
-    
+
     if (!passaFiltroTexto) {
       return null
     }
-    
+
     // Filtrar produtos baseado na opção de mostrar estoques zerados e busca por IMEI/código
-    let produtosFiltrados = mostrarEstoquesZerados 
-      ? usuario.produtos 
+    let produtosFiltrados = mostrarEstoquesZerados
+      ? usuario.produtos
       : usuario.produtos.filter(produto => produto.quantidade > 0)
-    
+
     // Aplicar filtro por IMEI/código de barras se especificado
     if (filtroImeiCodigo) {
       produtosFiltrados = produtosFiltrados.filter(produto => {
@@ -300,12 +299,12 @@ export default function EstoqueUsuarios() {
         return correspondeImei || correspondeCodigoBarras
       })
     }
-    
+
     // Se não há produtos após o filtro, não mostrar o usuário
     if (produtosFiltrados.length === 0 && !mostrarEstoquesZerados) {
       return null
     }
-    
+
     return {
       ...usuario,
       produtos: produtosFiltrados,
@@ -376,7 +375,7 @@ export default function EstoqueUsuarios() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Buscar por IMEI ou código de barras
@@ -389,7 +388,7 @@ export default function EstoqueUsuarios() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
             />
           </div>
-          
+
           <div className="flex items-end">
             <label className="flex items-center">
               <input
@@ -403,7 +402,7 @@ export default function EstoqueUsuarios() {
               </span>
             </label>
           </div>
-          
+
           <div className="flex items-end">
             <button
               onClick={() => {
@@ -530,8 +529,7 @@ export default function EstoqueUsuarios() {
                         <th className="text-center py-3 px-2 font-medium text-gray-700">Qtd</th>
                         <th className="text-center py-3 px-2 font-medium text-gray-700">Status</th>
                         <th className="text-right py-3 px-2 font-medium text-gray-700">Preço</th>
-                        <th className="text-right py-3 px-2 font-medium text-gray-700">Atacado</th>
-                        <th className="text-right py-3 px-2 font-medium text-gray-700">Varejo</th>
+
                         <th className="text-center py-3 px-2 font-medium text-gray-700">Cor</th>
                         <th className="text-center py-3 px-2 font-medium text-gray-700">IMEI</th>
                         <th className="text-center py-3 px-2 font-medium text-gray-700">Código de Barras</th>
@@ -550,40 +548,30 @@ export default function EstoqueUsuarios() {
                               <span className="font-bold text-gray-900 text-lg">{produto.quantidade}</span>
                             </td>
                             <td className="py-3 px-2 text-center">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                produto.quantidade === 0 
-                                  ? 'bg-red-100 text-red-800' 
-                                  : produto.quantidade <= 2 
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-green-100 text-green-800'
-                              }`}>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${produto.quantidade === 0
+                                  ? 'bg-red-100 text-red-800'
+                                  : produto.quantidade <= 2
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-green-100 text-green-800'
+                                }`}>
                                 {produto.quantidade === 0 ? 'Zerado' : produto.quantidade <= 2 ? 'Crítico' : 'Em estoque'}
                               </span>
                             </td>
                             <td className="py-3 px-2 text-right">
                               <span className="font-bold text-gray-900 text-lg">{formatCurrency(produto.preco)}</span>
                             </td>
-                            <td className="py-3 px-2 text-right">
-                              <span className="font-semibold text-gray-800 text-base">
-                                {produto.valorAtacado ? formatCurrency(produto.valorAtacado) : '-'}
+
+                            <td className="py-3 px-2 text-center">
+                              <span className="font-semibold text-gray-800 text-base">{produto.cor || '-'}</span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="font-semibold text-gray-800 font-mono text-sm">{produto.imei || '-'}</span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="font-semibold text-gray-800 font-mono text-sm">
+                                {produto.codigoBarras ? produto.codigoBarras : '-'}
                               </span>
                             </td>
-                            <td className="py-3 px-2 text-right">
-                              <span className="font-semibold text-gray-800 text-base">
-                                {produto.valorVarejo ? formatCurrency(produto.valorVarejo) : '-'}
-                              </span>
-                            </td>
-                          <td className="py-3 px-2 text-center">
-                            <span className="font-semibold text-gray-800 text-base">{produto.cor || '-'}</span>
-                          </td>
-                          <td className="py-3 px-2 text-center">
-                            <span className="font-semibold text-gray-800 font-mono text-sm">{produto.imei || '-'}</span>
-                          </td>
-                          <td className="py-3 px-2 text-center">
-                            <span className="font-semibold text-gray-800 font-mono text-sm">
-                              {produto.codigoBarras ? produto.codigoBarras : '-'}
-                            </span>
-                          </td>
                             <td className="py-3 px-2 text-center">
                               {produto.descricao ? (
                                 <button
@@ -591,9 +579,8 @@ export default function EstoqueUsuarios() {
                                   className="p-1 text-indigo-600 hover:text-indigo-800 transition-colors"
                                   title="Ver descrição"
                                 >
-                                  <svg className={`w-4 h-4 transition-transform duration-200 ${
-                                    produtoExpandido === produto.id ? 'rotate-180' : ''
-                                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className={`w-4 h-4 transition-transform duration-200 ${produtoExpandido === produto.id ? 'rotate-180' : ''
+                                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                   </svg>
                                 </button>
@@ -725,7 +712,7 @@ export default function EstoqueUsuarios() {
                   </label>
                   <select
                     value={formularioRedistribuicao.usuarioDestinoId}
-                    onChange={(e) => setFormularioRedistribuicao({...formularioRedistribuicao, usuarioDestinoId: e.target.value})}
+                    onChange={(e) => setFormularioRedistribuicao({ ...formularioRedistribuicao, usuarioDestinoId: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                     required
                   >
@@ -747,7 +734,7 @@ export default function EstoqueUsuarios() {
                     min="1"
                     max={produtoRedistribuir.quantidade}
                     value={formularioRedistribuicao.quantidade}
-                    onChange={(e) => setFormularioRedistribuicao({...formularioRedistribuicao, quantidade: e.target.value})}
+                    onChange={(e) => setFormularioRedistribuicao({ ...formularioRedistribuicao, quantidade: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                     placeholder="Quantidade"
                     required

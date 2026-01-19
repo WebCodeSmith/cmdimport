@@ -62,13 +62,6 @@ model ProdutoComprado {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  // Campos de precificação
-  valorCusto        Decimal? @db.Decimal(10, 2)
-  valorAtacado      Decimal? @db.Decimal(10, 2)
-  valorVarejo       Decimal? @db.Decimal(10, 2)
-  valorRevendaEspecial Decimal? @db.Decimal(10, 2)
-  valorParcelado10x Decimal? @db.Decimal(10, 2)
-  
   // Relacionamento com categoria
   categoriaId Int?
   categoria   CategoriaProduto? @relation(fields: [categoriaId], references: [id])
@@ -76,6 +69,19 @@ model ProdutoComprado {
   // Relacionamento com estoque
   estoque     Estoque[]
   historicoDistribuicao HistoricoDistribuicao[]
+}
+
+model Precificacao {
+  id                Int      @id @default(autoincrement())
+  nomeProduto       String   @unique
+  valorDinheiroPix  Decimal  @default(0) @db.Decimal(10, 2)
+  valorDebito       Decimal  @default(0) @db.Decimal(10, 2)
+  valorCartaoVista  Decimal  @default(0) @db.Decimal(10, 2)
+  valorCredito5x    Decimal  @default(0) @db.Decimal(10, 2)
+  valorCredito10x   Decimal  @default(0) @db.Decimal(10, 2)
+  valorCredito12x   Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model HistoricoVenda {

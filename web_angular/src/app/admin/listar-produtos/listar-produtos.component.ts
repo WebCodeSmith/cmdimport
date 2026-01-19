@@ -34,20 +34,17 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
   filtrosForm: FormGroup;
   formularioEdicao: FormGroup;
-  formularioPrecificacao: FormGroup;
   formularioDistribuicao: FormGroup;
   private debounceTimeout?: any;
   private primeiraCarga = true;
 
   // Modais
   modalEdicao = signal<boolean>(false);
-  modalPrecificacao = signal<boolean>(false);
   modalDistribuicao = signal<boolean>(false);
   modalDeletar = signal<boolean>(false);
   modalDetalhes = signal<boolean>(false);
   produtoSelecionado = signal<ProdutoComprado | null>(null);
   salvandoEdicao = signal<boolean>(false);
-  salvandoPrecificacao = signal<boolean>(false);
   salvandoDistribuicao = signal<boolean>(false);
   deletando = signal<boolean>(false);
   atendentes = signal<any[]>([]);
@@ -60,7 +57,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
   gerenciarMenuItems: PanelMenuItem[] = [
     { id: 'editar', label: 'Editar Produto', icon: 'edit' },
-    { id: 'precificacao', label: 'Precificação', icon: 'attach_money' },
+
 
     { id: 'distribuir', label: 'Distribuir', icon: 'people' }
   ];
@@ -86,13 +83,6 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       quantidade: ['', [Validators.required, Validators.min(0)]],
       dataCompra: ['', Validators.required],
       categoriaId: [''] // Opcional
-    });
-
-    this.formularioPrecificacao = this.fb.group({
-      valorAtacado: [''],
-      valorVarejo: [''],
-      valorRevendaEspecial: [''],
-      valorParcelado10x: ['']
     });
 
     this.formularioDistribuicao = this.fb.group({
@@ -349,7 +339,6 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
     // Atualizar menu items com estado disabled baseado no estoque
     this.gerenciarMenuItems = [
       { id: 'editar', label: 'Editar Produto', icon: 'edit' },
-      { id: 'precificacao', label: 'Precificação', icon: 'attach_money' },
       { id: 'distribuir', label: 'Distribuir', icon: 'people', disabled: produto.quantidade <= 0 }
     ];
 
@@ -380,13 +369,7 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
       categoriaId: produto.categoriaId?.toString() || ''
     });
 
-    // Preencher formulário de precificação
-    this.formularioPrecificacao.patchValue({
-      valorAtacado: produto.valorAtacado?.toString().replace('.', ',') || '',
-      valorVarejo: produto.valorVarejo?.toString().replace('.', ',') || '',
-      valorRevendaEspecial: produto.valorRevendaEspecial?.toString().replace('.', ',') || '',
-      valorParcelado10x: produto.valorParcelado10x?.toString().replace('.', ',') || ''
-    });
+
 
     // Resetar formulário de distribuição
     const quantidadeMaxima = produto.quantidade;
@@ -410,7 +393,6 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
     this.modalGerenciar.set(false);
     this.produtoSelecionado.set(null);
     this.formularioEdicao.reset();
-    this.formularioPrecificacao.reset();
   }
 
   onGerenciarMenuItemSelected(itemId: string): void {
@@ -419,6 +401,10 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
 
   navegarParaHistoricoDistribuicao(): void {
     this.router.navigate(['/admin'], { queryParams: { tab: 'historico-distribuicao' } });
+  }
+
+  navegarParaAbaPrecificacao(): void {
+    this.router.navigate(['/admin'], { queryParams: { tab: 'precificacao-produtos' } });
   }
 
   // Métodos de Edição
@@ -557,93 +543,8 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Métodos de Precificação
-  abrirModalPrecificacao(produto: ProdutoComprado): void {
-    this.produtoSelecionado.set(produto);
-    this.formularioPrecificacao.patchValue({
-      valorAtacado: produto.valorAtacado?.toString().replace('.', ',') || '',
-      valorVarejo: produto.valorVarejo?.toString().replace('.', ',') || '',
-      valorRevendaEspecial: produto.valorRevendaEspecial?.toString().replace('.', ',') || '',
-      valorParcelado10x: produto.valorParcelado10x?.toString().replace('.', ',') || ''
-    });
-    this.modalPrecificacao.set(true);
-  }
-
-  fecharModalPrecificacao(): void {
-    this.modalPrecificacao.set(false);
-    this.produtoSelecionado.set(null);
-    this.formularioPrecificacao.reset();
-  }
-
-  parseNumber(value: string): number {
-    if (!value) return 0;
-    return parseFloat(value.replace(',', '.')) || 0;
-  }
-
   async salvarPrecificacao(): Promise<void> {
-    const produto = this.produtoSelecionado();
-    if (!produto) return;
-
-    try {
-      this.salvandoPrecificacao.set(true);
-
-      const formValue = this.formularioPrecificacao.value;
-      const dadosPrecificacao: any = {};
-
-      if (formValue.valorAtacado?.trim()) {
-        dadosPrecificacao.valorAtacado = this.parseNumber(formValue.valorAtacado);
-      }
-      if (formValue.valorVarejo?.trim()) {
-        dadosPrecificacao.valorVarejo = this.parseNumber(formValue.valorVarejo);
-      }
-      if (formValue.valorRevendaEspecial?.trim()) {
-        dadosPrecificacao.valorRevendaEspecial = this.parseNumber(formValue.valorRevendaEspecial);
-      }
-      if (formValue.valorParcelado10x?.trim()) {
-        dadosPrecificacao.valorParcelado10x = this.parseNumber(formValue.valorParcelado10x);
-      }
-
-      const response = await firstValueFrom(
-        this.apiService.put<any>(`/admin/produtos/${produto.id}/precificacao`, dadosPrecificacao)
-      );
-
-      if (response?.success) {
-        this.toastService.success('Precificação atualizada com sucesso!');
-        this.fecharModalPrecificacao();
-        this.fecharModalGerenciar();
-
-        // Buscar produto atualizado
-        try {
-          const produtoAtualizadoResponse = await firstValueFrom(
-            this.apiService.get<any>(`/admin/produtos/${produto.id}`)
-          );
-          if (produtoAtualizadoResponse?.success && produtoAtualizadoResponse.data) {
-            // Atualizar produto na lista
-            const produtosAtual = this.produtos();
-            const index = produtosAtual.findIndex(p => p.id === produto.id);
-            if (index !== -1) {
-              produtosAtual[index] = {
-                ...produtosAtual[index],
-                ...produtoAtualizadoResponse.data
-              };
-              this.produtos.set([...produtosAtual]);
-            }
-          } else {
-            this.carregarProdutos(true);
-          }
-        } catch (error) {
-          console.error('Erro ao buscar produto atualizado:', error);
-          this.carregarProdutos(true);
-        }
-      } else {
-        this.toastService.error(response?.message || 'Erro ao salvar precificação');
-      }
-    } catch (error) {
-      console.error('Erro ao salvar precificação:', error);
-      this.toastService.error('Erro de conexão. Tente novamente.');
-    } finally {
-      this.salvandoPrecificacao.set(false);
-    }
+    this.toastService.info('O gerenciamento de preços agora é feito na aba Precificação.');
   }
 
   // Métodos de Deletar
@@ -914,10 +815,6 @@ export class ListarProdutosComponent implements OnInit, OnDestroy {
           'Quantidade Total': estoqueTotal,
           'Fornecedor': produto.fornecedor || '',
           'Data de Compra': formatDateOnly(produto.dataCompra),
-          'Valor Atacado': produto.valorAtacado || '',
-          'Valor Varejo': produto.valorVarejo || '',
-          'Valor Revenda Especial': produto.valorRevendaEspecial || '',
-          'Valor Parcelado 10x': produto.valorParcelado10x || '',
           'Categoria': produto.categoria?.nome || '',
           'Data de Cadastro': formatDateOnly(produto.createdAt)
         };

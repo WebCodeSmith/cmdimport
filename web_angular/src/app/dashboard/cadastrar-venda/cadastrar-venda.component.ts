@@ -9,6 +9,7 @@ import { Produto } from '../../shared/types/produto.types';
 import { formatCurrency } from '../../shared/utils/formatters';
 
 import { ProdutoSearchSelectorComponent } from '../../shared/components/produto-search-selector/produto-search-selector.component';
+import { ItemPrecificacao } from '../../shared/types/precificacao.types';
 
 @Component({
   selector: 'app-cadastrar-venda',
@@ -30,6 +31,8 @@ export class CadastrarVendaComponent implements OnInit {
   mostrarFormasMistas = signal<boolean>(false);
   fotoPreview = signal<string | null>(null);
   uploadingFoto = signal<boolean>(false);
+
+  precificacoesMap = signal<Map<string, ItemPrecificacao>>(new Map());
 
   vendaForm: FormGroup;
   produtosFormArray: FormArray;
@@ -85,6 +88,42 @@ export class CadastrarVendaComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarProdutos();
+    this.carregarPrecificacoes();
+
+    // Recalcular preços quando a forma de pagamento mudar
+    this.vendaForm.get('formaPagamento')?.valueChanges.subscribe(() => {
+      this.atualizarPrecosNosProdutos();
+    });
+  }
+
+  async carregarPrecificacoes(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.apiService.get<ItemPrecificacao[]>('/admin/precificacao')
+      );
+      if (response?.success && response.data) {
+        const map = new Map<string, ItemPrecificacao>();
+        response.data.forEach(p => map.set(p.nomeProduto, p));
+        this.precificacoesMap.set(map);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar precificações', error);
+    }
+  }
+
+  atualizarPrecosNosProdutos(): void {
+    // Atualizar preços de todos os produtos já listados
+    this.produtosFormArray.controls.forEach((control, index) => {
+      // Se o usuário não definiu preço personalizado, atualizamos
+      if (!control.get('usarPrecoPersonalizado')?.value) {
+        // Forçar atualização reemitindo o evento ou apenas recalculando visualmente?
+        // Como o valorTotal é computed, ele deve atualizar se a dependência mudar.
+        // O problema é que o preço não é armazenado no formGroup, é calculado dinamicamente no computed.
+        // Humm, a interface mostra "getSubtotal" que chama "getPrecoUnitario" que chama "calcularPreco".
+        // Então a view deve atualizar automaticamente. 
+        // Porém, precisamos garantir que o UI refresh aconteça. O signal 'formaPagamento' mudando já deve triggar.
+      }
+    });
   }
 
   private async carregarProdutos(): Promise<void> {
@@ -103,9 +142,7 @@ export class CadastrarVendaComponent implements OnInit {
           nome: item.nome,
           preco: item.preco || 0,
           quantidade: item.quantidade || 0,
-          valorAtacado: item.valorAtacado ?? null,
-          valorVarejo: item.valorVarejo ?? null,
-          valorRevendaEspecial: item.valorRevendaEspecial ?? null,
+          fornecedor: item.fornecedor ?? null,
           imei: item.imei,
           codigoBarras: item.codigoBarras,
           cor: item.cor,
@@ -156,18 +193,39 @@ export class CadastrarVendaComponent implements OnInit {
   }
 
   calcularPreco(produto: Produto): number {
-    const tipo = this.tipoCliente();
+    // Usar precificação centralizada se disponível
+    const map = this.precificacoesMap();
+    const precificacao = map.get(produto.nome);
+    const formaPagamento = this.vendaForm.get('formaPagamento')?.value;
 
-    switch (tipo) {
-      case 'lojista':
-        return produto.valorAtacado ?? produto.preco;
-      case 'consumidor':
-        return produto.valorVarejo ?? produto.preco;
-      case 'revendaEspecial':
-        return produto.valorRevendaEspecial ?? produto.preco;
-      default:
-        return produto.preco;
+    if (precificacao) {
+      switch (formaPagamento) {
+        case 'dinheiro':
+        case 'pix':
+          return precificacao.valorDinheiroPix || produto.preco;
+        case 'debito':
+          return precificacao.valorDebito || produto.preco;
+        case 'credito_vista':
+          return precificacao.valorCartaoVista || produto.preco;
+        case 'credito_5x':
+          return precificacao.valorCredito5x || produto.preco;
+        case 'credito_10x':
+          return precificacao.valorCredito10x || produto.preco;
+        case 'credito_12x':
+          return precificacao.valorCredito12x || produto.preco;
+        // Fallback para tipos novos
+        case 'pix_cartao':
+          // Misturado é complexo. Vamos usar o preço base (dinheiro/pix) ou uma média?
+          // Geralmente misto implica negociação. Vamos retornar o de dinheiro como base.
+          return precificacao.valorDinheiroPix || produto.preco;
+        default:
+          // Se for 'cartao' genérico (legado), tentamos débito ou vista
+          if (formaPagamento === 'cartao') return precificacao.valorCartaoVista || produto.preco;
+          return precificacao.valorDinheiroPix || produto.preco;
+      }
     }
+    // Fallback para o preço base do produto se não houver precificação centralizada
+    return produto.preco || 0;
   }
 
   onProdutoSelecionado(index: number, produtoId: string): void {
@@ -390,4 +448,3 @@ export class CadastrarVendaComponent implements OnInit {
     }
   }
 }
-

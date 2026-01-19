@@ -3,9 +3,6 @@ export interface Produto {
   nome: string
   preco: number
   quantidade: number
-  valorAtacado?: number | null
-  valorVarejo?: number | null
-  valorRevendaEspecial?: number | null
 }
 
 export interface ProdutoComprado {
@@ -23,10 +20,6 @@ export interface ProdutoComprado {
   fornecedor?: string
   dataCompra: string
   createdAt: string
-  valorAtacado?: number
-  valorVarejo?: number
-  valorRevendaEspecial?: number
-  valorParcelado10x?: number
   estoque: Array<{
     id: number
     quantidade: number

@@ -122,8 +122,24 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 	var valorTotal float64
 	produtosComPrecos := make([]map[string]interface{}, 0)
 
+	// Buscar precificações para os produtos vendidos
+	nomesProdutos := make([]string, 0)
+	for _, p := range produtosEstoque {
+		nomesProdutos = append(nomesProdutos, p.Estoque.ProdutoComprado.Nome)
+	}
+
+	var precificacoes []models.Precificacao
+	h.DB.Where("nomeProduto IN ?", nomesProdutos).Find(&precificacoes)
+
+	precificacaoMap := make(map[string]models.Precificacao)
+	for _, p := range precificacoes {
+		precificacaoMap[p.NomeProduto] = p
+	}
+
 	for i, produtoReq := range req.Produtos {
 		var precoUnitario float64
+		itemEstoque := produtosEstoque[i]
+		nomeProduto := itemEstoque.Estoque.ProdutoComprado.Nome
 
 		if produtoReq.UsarPrecoPersonalizado && produtoReq.PrecoPersonalizado != nil {
 			// Parse do preço personalizado (remover formatação)
@@ -132,10 +148,35 @@ func (h *SaleHandler) Cadastrar(c *gin.Context) {
 			var err error
 			precoUnitario, err = utils.ParseFloatBR(precoStr)
 			if err != nil {
-				precoUnitario = produtosEstoque[i].Estoque.ProdutoComprado.Preco
+				precoUnitario = itemEstoque.Estoque.ProdutoComprado.Preco
 			}
 		} else {
-			precoUnitario = produtosEstoque[i].Estoque.ProdutoComprado.Preco
+			// Usar precificação centralizada
+			if prec, exists := precificacaoMap[nomeProduto]; exists {
+				switch req.FormaPagamento {
+				case "pix", "dinheiro":
+					precoUnitario = prec.ValorDinheiroPix
+				case "debito":
+					precoUnitario = prec.ValorDebito
+				case "credito_vista":
+					precoUnitario = prec.ValorCartaoVista
+				case "credito_5x":
+					precoUnitario = prec.ValorCredito5x
+				case "credito_10x":
+					precoUnitario = prec.ValorCredito10x
+				case "credito_12x":
+					precoUnitario = prec.ValorCredito12x
+				default:
+					precoUnitario = itemEstoque.Estoque.ProdutoComprado.Preco
+				}
+				
+				// Se o preço na precificação for 0, usa o preco do produto como fallback
+				if precoUnitario == 0 {
+					precoUnitario = itemEstoque.Estoque.ProdutoComprado.Preco
+				}
+			} else {
+				precoUnitario = itemEstoque.Estoque.ProdutoComprado.Preco
+			}
 		}
 
 		quantidade, _ := strconv.Atoi(produtoReq.Quantidade)

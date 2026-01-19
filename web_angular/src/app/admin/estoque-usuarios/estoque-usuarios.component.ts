@@ -28,7 +28,7 @@ export class EstoqueUsuariosComponent implements OnInit {
   produtoExpandido = signal<number | null>(null);
   modalProdutosUsuario = signal<boolean>(false);
   usuarioSelecionado = signal<EstoqueUsuario | null>(null);
-  
+
   // Modal de redistribuição
   modalRedistribuicao = signal<boolean>(false);
   produtoRedistribuir = signal<ProdutoEstoqueCompleto | null>(null);
@@ -36,7 +36,7 @@ export class EstoqueUsuariosComponent implements OnInit {
   usuariosDisponiveis = signal<UsuarioEstoque[]>([]);
   salvandoRedistribuicao = signal<boolean>(false);
   formularioRedistribuicao: FormGroup;
-  
+
   // Modal de deletar
   modalDeletar = signal<boolean>(false);
   estoqueParaDeletar = signal<{ id: number; produtoNome: string; usuarioNome: string } | null>(null);
@@ -82,19 +82,19 @@ export class EstoqueUsuariosComponent implements OnInit {
     return usuarios
       .map(usuario => {
         // Filtro por nome/email
-        const passaFiltroTexto = 
+        const passaFiltroTexto =
           usuario.nome.toLowerCase().includes(filtroUsuario) ||
           usuario.email.toLowerCase().includes(filtroUsuario);
-        
+
         if (!passaFiltroTexto) {
           return null;
         }
-        
+
         // Filtrar produtos
-        let produtosFiltrados = mostrarZerados 
-          ? usuario.produtos 
+        let produtosFiltrados = mostrarZerados
+          ? usuario.produtos
           : usuario.produtos.filter(produto => produto.quantidade > 0);
-        
+
         // Aplicar filtro por IMEI/código de barras
         if (filtroImeiCodigo) {
           produtosFiltrados = produtosFiltrados.filter(produto => {
@@ -103,12 +103,12 @@ export class EstoqueUsuariosComponent implements OnInit {
             return correspondeImei || correspondeCodigoBarras;
           });
         }
-        
+
         // Se não há produtos após o filtro, não mostrar o usuário
         if (produtosFiltrados.length === 0 && !mostrarZerados) {
           return null;
         }
-        
+
         return {
           ...usuario,
           produtos: produtosFiltrados,
@@ -159,13 +159,13 @@ export class EstoqueUsuariosComponent implements OnInit {
       email: usuario.email,
       isAdmin: usuario.isAdmin
     });
-    
+
     // Carregar lista de usuários disponíveis
     try {
       const response = await firstValueFrom(
         this.apiService.get<UsuarioEstoque[]>('/admin/usuarios')
       );
-      
+
       if (response?.success && response.data) {
         const usuariosFiltrados = response.data.filter(u => u.id !== usuario.id);
         this.usuariosDisponiveis.set(usuariosFiltrados);
@@ -173,7 +173,7 @@ export class EstoqueUsuariosComponent implements OnInit {
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
     }
-    
+
     this.formularioRedistribuicao.reset();
     this.modalRedistribuicao.set(true);
   }
@@ -189,7 +189,7 @@ export class EstoqueUsuariosComponent implements OnInit {
   async salvarRedistribuicao(): Promise<void> {
     const produto = this.produtoRedistribuir();
     const usuarioOrigem = this.usuarioOrigem();
-    
+
     if (!produto || !usuarioOrigem || this.formularioRedistribuicao.invalid) {
       this.toastService.error('Por favor, preencha todos os campos obrigatórios.');
       this.formularioRedistribuicao.markAllAsTouched();
@@ -199,7 +199,7 @@ export class EstoqueUsuariosComponent implements OnInit {
     try {
       this.salvandoRedistribuicao.set(true);
       const formValue = this.formularioRedistribuicao.value;
-      
+
       const response = await firstValueFrom(
         this.apiService.post<any>('/admin/redistribuir', {
           produtoId: produto.id,
@@ -211,7 +211,7 @@ export class EstoqueUsuariosComponent implements OnInit {
 
       if (response?.success) {
         await this.carregarEstoqueUsuarios();
-        
+
         // Atualizar o usuário selecionado no modal se estiver aberto
         const usuarioAtual = this.usuarioSelecionado();
         if (usuarioAtual) {
@@ -221,7 +221,7 @@ export class EstoqueUsuariosComponent implements OnInit {
             this.usuarioSelecionado.set(usuarioAtualizado);
           }
         }
-        
+
         this.fecharModalRedistribuicao();
         this.toastService.success(
           `Produto redistribuído com sucesso! ${produto.nome} - Quantidade: ${formValue.quantidade}`
@@ -261,7 +261,7 @@ export class EstoqueUsuariosComponent implements OnInit {
         this.toastService.success(
           `Estoque deletado com sucesso! ${estoque.produtoNome} - ${estoque.usuarioNome}`
         );
-        
+
         // Atualizar estado local
         this.estoqueUsuarios.update(prev => {
           return prev.map(usuario => {
@@ -274,7 +274,7 @@ export class EstoqueUsuariosComponent implements OnInit {
             };
           });
         });
-        
+
         // Atualizar o usuário selecionado no modal se estiver aberto
         const usuarioAtual = this.usuarioSelecionado();
         if (usuarioAtual) {
@@ -284,7 +284,7 @@ export class EstoqueUsuariosComponent implements OnInit {
             this.usuarioSelecionado.set(usuarioAtualizado);
           }
         }
-        
+
         this.fecharModalDeletar();
       } else {
         this.toastService.error('Erro ao deletar estoque: ' + (response?.message || 'Erro desconhecido'));
@@ -300,12 +300,12 @@ export class EstoqueUsuariosComponent implements OnInit {
   async exportarParaExcel(): Promise<void> {
     try {
       this.exportando.set(true);
-      
+
       // Importar XLSX dinamicamente
       const XLSX = await import('xlsx');
-      
+
       const linhasExcel: Array<Record<string, string | number>> = [];
-      
+
       this.usuariosFiltrados().forEach((usuario) => {
         usuario.produtos.forEach((produto) => {
           let status = '';
@@ -324,8 +324,6 @@ export class EstoqueUsuariosComponent implements OnInit {
             'Quantidade': produto.quantidade,
             'Status': status,
             'Preço': produto.preco,
-            'Atacado': produto.valorAtacado || '',
-            'Varejo': produto.valorVarejo || '',
             'Cor': produto.cor || '',
             'IMEI': produto.imei || '',
             'Código de Barras': produto.codigoBarras || '',
@@ -336,7 +334,7 @@ export class EstoqueUsuariosComponent implements OnInit {
 
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(linhasExcel.length > 0 ? linhasExcel : [{}]);
-      
+
       // Ajustar largura das colunas
       const headers = linhasExcel.length > 0 ? Object.keys(linhasExcel[0]) : [];
       const colWidths = headers.map((header: string) => {
@@ -349,15 +347,15 @@ export class EstoqueUsuariosComponent implements OnInit {
         );
         return { wch: Math.min(Math.max(maxLength + 2, 10), 50) };
       });
-      
+
       worksheet['!cols'] = colWidths;
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Estoque Usuários');
-      
+
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
-      
+
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);

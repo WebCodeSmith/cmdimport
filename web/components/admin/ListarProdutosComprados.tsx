@@ -243,10 +243,8 @@ export default function ListarProdutosComprados({ onAbrirPrecificacao, onEditarP
         'Preço': formatarNumero(produto.preco),
         'Quantidade': produto.quantidade,
         'Quantidade Backup': produto.quantidadeBackup || produto.quantidade,
-        'Data Compra': formatDateOnly(produto.dataCompra),
-        'Valor Atacado': produto.valorAtacado ? formatarNumero(produto.valorAtacado) : '',
-        'Valor Varejo': produto.valorVarejo ? formatarNumero(produto.valorVarejo) : '',
-        'Valor Parcelado 10x': produto.valorParcelado10x ? formatarNumero(produto.valorParcelado10x) : ''
+        'Data Compra': formatDateOnly(produto.dataCompra)
+
       }))
 
       // Criar arquivo Excel (XLSX) com ajuste automático de colunas

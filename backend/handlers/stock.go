@@ -81,21 +81,7 @@ func (h *StockHandler) Listar(c *gin.Context) {
 		if item.ProdutoComprado.CodigoBarras != nil {
 			itemMap["codigoBarras"] = *item.ProdutoComprado.CodigoBarras
 		}
-		if item.ProdutoComprado.ValorAtacado != nil {
-			itemMap["valorAtacado"] = *item.ProdutoComprado.ValorAtacado
-		} else {
-			itemMap["valorAtacado"] = nil
-		}
-		if item.ProdutoComprado.ValorVarejo != nil {
-			itemMap["valorVarejo"] = *item.ProdutoComprado.ValorVarejo
-		} else {
-			itemMap["valorVarejo"] = nil
-		}
-		if item.ProdutoComprado.ValorRevendaEspecial != nil {
-			itemMap["valorRevendaEspecial"] = *item.ProdutoComprado.ValorRevendaEspecial
-		} else {
-			itemMap["valorRevendaEspecial"] = nil
-		}
+
 		if item.Usuario != nil {
 			itemMap["usuario"] = map[string]interface{}{
 				"id":    item.Usuario.ID,
@@ -166,12 +152,6 @@ func (h *StockHandler) BuscarPorCodigoBarras(c *gin.Context) {
 			"preco":      item.ProdutoComprado.Preco,
 		}
 
-		if item.ProdutoComprado.ValorAtacado != nil {
-			itemMap["valorAtacado"] = *item.ProdutoComprado.ValorAtacado
-		}
-		if item.ProdutoComprado.ValorVarejo != nil {
-			itemMap["valorVarejo"] = *item.ProdutoComprado.ValorVarejo
-		}
 		if item.ProdutoComprado.Cor != nil {
 			itemMap["cor"] = *item.ProdutoComprado.Cor
 		}
@@ -245,12 +225,6 @@ func (h *StockHandler) BuscarPorIMEI(c *gin.Context) {
 			"preco":      item.ProdutoComprado.Preco,
 		}
 
-		if item.ProdutoComprado.ValorAtacado != nil {
-			itemMap["valorAtacado"] = *item.ProdutoComprado.ValorAtacado
-		}
-		if item.ProdutoComprado.ValorVarejo != nil {
-			itemMap["valorVarejo"] = *item.ProdutoComprado.ValorVarejo
-		}
 		if item.ProdutoComprado.Cor != nil {
 			itemMap["cor"] = *item.ProdutoComprado.Cor
 		}
@@ -304,15 +278,6 @@ func (h *StockHandler) ListarEstoqueUsuarios(c *gin.Context) {
 				"preco":             item.ProdutoComprado.Preco,
 			}
 
-			if item.ProdutoComprado.ValorAtacado != nil {
-				produtoMap["valorAtacado"] = *item.ProdutoComprado.ValorAtacado
-			}
-			if item.ProdutoComprado.ValorVarejo != nil {
-				produtoMap["valorVarejo"] = *item.ProdutoComprado.ValorVarejo
-			}
-			if item.ProdutoComprado.ValorRevendaEspecial != nil {
-				produtoMap["valorRevendaEspecial"] = *item.ProdutoComprado.ValorRevendaEspecial
-			}
 			if item.ProdutoComprado.Cor != nil {
 				produtoMap["cor"] = *item.ProdutoComprado.Cor
 			}

@@ -82,24 +82,22 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
 
   // Carregar produtos do estoque
   useEffect(() => {
-  const carregarProdutos = async () => {
-    try {
-      const { stockApi } = await import('@/lib/api')
-      const response = await stockApi.listar(usuarioId)
-      
-      if (response.success && response.data) {
-        const produtosFormatados = (response.data as any[]).map((item: Record<string, unknown>) => ({
+    const carregarProdutos = async () => {
+      try {
+        const { stockApi } = await import('@/lib/api')
+        const response = await stockApi.listar(usuarioId)
+
+        if (response.success && response.data) {
+          const produtosFormatados = (response.data as any[]).map((item: Record<string, unknown>) => ({
             id: (item.id as number).toString(), // Usar o ID real do estoque
             nome: item.nome as string,
             preco: item.preco as number,
             quantidade: item.quantidade as number, // Incluir quantidade
-            valorAtacado: item.valorAtacado as number | null,
-            valorVarejo: item.valorVarejo as number | null,
-            valorRevendaEspecial: item.valorRevendaEspecial as number | null,
             cor: item.cor as string | undefined,
             imei: item.imei as string | undefined,
             codigoBarras: item.codigoBarras as string | undefined
           }))
+
           setProdutos(produtosFormatados)
         }
       } catch (error) {
@@ -114,34 +112,20 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
   // Atualizar preço quando o tipo de cliente mudar
   const handleTipoClienteChange = (tipo: 'lojista' | 'consumidor' | 'revendaEspecial') => {
     setTipoCliente(tipo)
-    
+
     // Atualizar preços de todos os produtos já selecionados
     setProdutosVenda(prevProdutos => {
       return prevProdutos.map(produtoVenda => {
         if (!produtoVenda.produto) return produtoVenda
-        
+
         const produtoSelecionado = produtos.find(p => p.id === produtoVenda.produto)
         if (!produtoSelecionado) return produtoVenda
-        
-        // Calcular novo preço baseado no tipo de cliente
-        let novoPreco: number | null = null
-        if (tipo === 'lojista') {
-          novoPreco = produtoSelecionado.valorAtacado ?? null
-        } else if (tipo === 'consumidor') {
-          novoPreco = produtoSelecionado.valorVarejo ?? null
-        } else if (tipo === 'revendaEspecial') {
-          novoPreco = produtoSelecionado.valorRevendaEspecial ?? null
-        }
-        
-        // Se não tiver precificação, usar preço base (custo)
-        if (!novoPreco) {
-          novoPreco = produtoSelecionado.preco
-        }
-        
+
         return {
           ...produtoVenda,
-          preco: novoPreco
+          preco: produtoSelecionado.preco
         }
+
       })
     })
   }
@@ -201,11 +185,11 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
+
     try {
       // Validar se pelo menos um produto foi selecionado
       const produtosValidos = produtosVenda.filter(p => p.produto && p.quantidade && parseInt(p.quantidade) > 0)
-      
+
       if (produtosValidos.length === 0) {
         showToast('Selecione pelo menos um produto para a venda', 'error')
         setLoading(false)
@@ -214,7 +198,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
 
       // Calcular valor total
       const valorTotal = calcularValorTotal()
-      
+
       // Mapear produtos para o formato esperado pelo backend
       const produtosFormatados = produtosValidos.map(p => ({
         produto: p.produto, // ID do estoque
@@ -223,7 +207,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
         usarPrecoPersonalizado: p.usarPrecoPersonalizado || false,
         precoPersonalizado: p.usarPrecoPersonalizado && p.precoPersonalizado ? p.precoPersonalizado : undefined
       }))
-      
+
       // Criar uma única venda com múltiplos produtos
       const venda = {
         clienteNome: formData.clienteNome,
@@ -242,14 +226,14 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
       // Enviar venda
       const { saleApi } = await import('@/lib/api')
       const result = await saleApi.cadastrar(venda)
-      
+
       if (result.success) {
         const nomesProdutos = produtosValidos.map(p => p.nome).join(', ')
         showToast(
           `Venda cadastrada com sucesso! Cliente: ${formData.clienteNome} - Produtos: ${nomesProdutos} - Valor Total: R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           'success'
         )
-        
+
         // Limpar formulário
         setFormData({
           clienteNome: '',
@@ -300,16 +284,14 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
             <button
               type="button"
               onClick={() => handleTipoClienteChange('lojista')}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                tipoCliente === 'lojista'
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${tipoCliente === 'lojista'
+                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  tipoCliente === 'lojista' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${tipoCliente === 'lojista' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
+                  }`}>
                   {tipoCliente === 'lojista' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -320,20 +302,18 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 </div>
               </div>
             </button>
-            
+
             <button
               type="button"
               onClick={() => handleTipoClienteChange('consumidor')}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                tipoCliente === 'consumidor'
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${tipoCliente === 'consumidor'
+                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  tipoCliente === 'consumidor' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${tipoCliente === 'consumidor' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
+                  }`}>
                   {tipoCliente === 'consumidor' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -348,16 +328,14 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
             <button
               type="button"
               onClick={() => handleTipoClienteChange('revendaEspecial')}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                tipoCliente === 'revendaEspecial'
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${tipoCliente === 'revendaEspecial'
+                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  tipoCliente === 'revendaEspecial' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${tipoCliente === 'revendaEspecial' ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
+                  }`}>
                   {tipoCliente === 'revendaEspecial' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -380,7 +358,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
               type="text"
               required
               value={formData.clienteNome}
-              onChange={(e) => setFormData({...formData, clienteNome: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, clienteNome: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
               placeholder="Nome completo do cliente"
             />
@@ -410,7 +388,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
             type="text"
             required
             value={formData.endereco}
-            onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500"
             placeholder="Endereço completo"
           />
@@ -461,19 +439,9 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                     onSelect={(produtoId) => {
                       const produtoSelecionado = produtos.find(p => p.id === produtoId)
                       if (produtoSelecionado) {
-                        // Usar preço específico se disponível, senão usar preço base
-                        let preco: number | null = null
-                        if (tipoCliente === 'lojista') {
-                          preco = produtoSelecionado.valorAtacado ?? null
-                        } else if (tipoCliente === 'consumidor') {
-                          preco = produtoSelecionado.valorVarejo ?? null
-                        } else if (tipoCliente === 'revendaEspecial') {
-                          preco = produtoSelecionado.valorRevendaEspecial ?? null
-                        }
-                        if (!preco) {
-                          preco = produtoSelecionado.preco // Usar preço base como fallback
-                        }
-                        
+                        const preco = produtoSelecionado.preco
+
+
                         // Atualizar tudo de uma vez
                         const novosProdutos = [...produtosVenda]
                         novosProdutos[index] = {
@@ -522,7 +490,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                         ✏️ Definir preço personalizado para este produto
                       </label>
                     </div>
-                    
+
                     {produto.usarPrecoPersonalizado && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -555,14 +523,14 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                   {/* Resumo do produto */}
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="text-sm text-blue-800">
-                      <span className="font-medium">{produto.nome}</span> - 
-                      Quantidade: {produto.quantidade} - 
-                      Preço unitário: R$ {(produto.usarPrecoPersonalizado && produto.precoPersonalizado 
+                      <span className="font-medium">{produto.nome}</span> -
+                      Quantidade: {produto.quantidade} -
+                      Preço unitário: R$ {(produto.usarPrecoPersonalizado && produto.precoPersonalizado
                         ? parseFloat(produto.precoPersonalizado.replace(/[^\d,]/g, '').replace(',', '.')) || 0
                         : produto.preco
-                      ).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - 
+                      ).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} -
                       <span className="font-semibold">Subtotal: R$ {(
-                        (produto.usarPrecoPersonalizado && produto.precoPersonalizado 
+                        (produto.usarPrecoPersonalizado && produto.precoPersonalizado
                           ? parseFloat(produto.precoPersonalizado.replace(/[^\d,]/g, '').replace(',', '.')) || 0
                           : produto.preco
                         ) * parseInt(produto.quantidade || '0')
@@ -590,17 +558,15 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <button
               type="button"
-              onClick={() => setFormData({...formData, formaPagamento: 'pix'})}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                formData.formaPagamento === 'pix'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              onClick={() => setFormData({ ...formData, formaPagamento: 'pix' })}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${formData.formaPagamento === 'pix'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  formData.formaPagamento === 'pix' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${formData.formaPagamento === 'pix' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                  }`}>
                   {formData.formaPagamento === 'pix' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -611,20 +577,18 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 </div>
               </div>
             </button>
-            
+
             <button
               type="button"
-              onClick={() => setFormData({...formData, formaPagamento: 'cartao'})}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                formData.formaPagamento === 'cartao'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              onClick={() => setFormData({ ...formData, formaPagamento: 'cartao' })}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${formData.formaPagamento === 'cartao'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  formData.formaPagamento === 'cartao' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${formData.formaPagamento === 'cartao' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                  }`}>
                   {formData.formaPagamento === 'cartao' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -635,20 +599,18 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 </div>
               </div>
             </button>
-            
+
             <button
               type="button"
-              onClick={() => setFormData({...formData, formaPagamento: 'dinheiro'})}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                formData.formaPagamento === 'dinheiro'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              onClick={() => setFormData({ ...formData, formaPagamento: 'dinheiro' })}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${formData.formaPagamento === 'dinheiro'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  formData.formaPagamento === 'dinheiro' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${formData.formaPagamento === 'dinheiro' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                  }`}>
                   {formData.formaPagamento === 'dinheiro' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -659,20 +621,18 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 </div>
               </div>
             </button>
-            
+
             <button
               type="button"
-              onClick={() => setFormData({...formData, formaPagamento: 'crediario'})}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                formData.formaPagamento === 'crediario'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-              }`}
+              onClick={() => setFormData({ ...formData, formaPagamento: 'crediario' })}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 ${formData.formaPagamento === 'crediario'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  formData.formaPagamento === 'crediario' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                }`}>
+                <div className={`w-4 h-4 rounded-full border-2 ${formData.formaPagamento === 'crediario' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                  }`}>
                   {formData.formaPagamento === 'crediario' && (
                     <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
                   )}
@@ -695,9 +655,8 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
               <span className="font-medium">
                 {mostrarFormasMistas ? 'Ocultar' : 'Mais'} Formas de Pagamento
               </span>
-              <div className={`transform transition-transform duration-200 ${
-                mostrarFormasMistas ? 'rotate-180' : ''
-              }`}>
+              <div className={`transform transition-transform duration-200 ${mostrarFormasMistas ? 'rotate-180' : ''
+                }`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -711,40 +670,37 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     type="button"
-                    onClick={() => setFormData({...formData, formaPagamento: 'pix_cartao'})}
-                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                      formData.formaPagamento === 'pix_cartao'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                    }`}
+                    onClick={() => setFormData({ ...formData, formaPagamento: 'pix_cartao' })}
+                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${formData.formaPagamento === 'pix_cartao'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                      }`}
                   >
                     <div className="text-center">
                       <div className="font-medium">PIX + Cartão</div>
                     </div>
                   </button>
-                  
+
                   <button
                     type="button"
-                    onClick={() => setFormData({...formData, formaPagamento: 'pix_dinheiro'})}
-                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                      formData.formaPagamento === 'pix_dinheiro'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                    }`}
+                    onClick={() => setFormData({ ...formData, formaPagamento: 'pix_dinheiro' })}
+                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${formData.formaPagamento === 'pix_dinheiro'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                      }`}
                   >
                     <div className="text-center">
                       <div className="font-medium">PIX + Dinheiro</div>
                     </div>
                   </button>
-                  
+
                   <button
                     type="button"
-                    onClick={() => setFormData({...formData, formaPagamento: 'cartao_dinheiro'})}
-                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                      formData.formaPagamento === 'cartao_dinheiro'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                    }`}
+                    onClick={() => setFormData({ ...formData, formaPagamento: 'cartao_dinheiro' })}
+                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${formData.formaPagamento === 'cartao_dinheiro'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                      }`}
                   >
                     <div className="text-center">
                       <div className="font-medium">Cartão + Dinheiro</div>
@@ -759,7 +715,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
         {/* Upload de Foto */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
           <h4 className="text-lg font-semibold text-gray-900 mb-4">📸 Foto do Produto</h4>
-          
+
           <div className="space-y-4">
             {/* Área de upload */}
             <div className="relative">
@@ -771,14 +727,13 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
                 disabled={uploadingFoto}
                 className="hidden"
               />
-              
+
               <label
                 htmlFor="foto-produto"
-                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-                  uploadingFoto
-                    ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
-                    : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50'
-                }`}
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploadingFoto
+                  ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
+                  : 'border-purple-300 hover:border-purple-400 hover:bg-purple-50'
+                  }`}
               >
                 {uploadingFoto ? (
                   <div className="flex flex-col items-center space-y-2">
@@ -835,7 +790,7 @@ export default function CadastrarVendaSection({ usuarioId }: CadastrarVendaSecti
           </label>
           <textarea
             value={formData.observacoes}
-            onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 resize-none"
             placeholder="Observações adicionais (opcional)"

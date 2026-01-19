@@ -206,96 +206,72 @@
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <!-- Dinheiro e Pix -->
           <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'pix' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'pix'"
-            [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'pix'"
-            [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'pix'"
-            [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'pix'"
-            [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'pix'"
             class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
-            <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'pix'"
-                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'pix'"
-                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
-                @if (vendaForm.get('formaPagamento')?.value === 'pix') {
-                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                }
-              </div>
-              <div>
-                <div class="font-medium text-sm">PIX</div>
-                <div class="text-xs opacity-75">Pagamento instantâneo</div>
-              </div>
-            </div>
-          </button>
-
-          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'cartao' })"
-            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao'"
-            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'cartao'"
-            [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'cartao'"
-            [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
-            [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
-            [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
-            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
-            <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'cartao'"
-                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'cartao'"
-                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
-                @if (vendaForm.get('formaPagamento')?.value === 'cartao') {
-                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                }
-              </div>
-              <div>
-                <div class="font-medium text-sm">Cartão</div>
-                <div class="text-xs opacity-75">Débito ou crédito</div>
-              </div>
-            </div>
+            <div class="font-medium text-sm">PIX</div>
+            <div class="text-xs opacity-75">Instantâneo</div>
           </button>
 
           <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'dinheiro' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
-            [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
-            [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
-            [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
-            [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
             class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
-            <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'dinheiro'"
-                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'dinheiro'"
-                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
-                @if (vendaForm.get('formaPagamento')?.value === 'dinheiro') {
-                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                }
-              </div>
-              <div>
-                <div class="font-medium text-sm">Dinheiro</div>
-                <div class="text-xs opacity-75">Pagamento à vista</div>
-              </div>
-            </div>
+            <div class="font-medium text-sm">Dinheiro</div>
+            <div class="text-xs opacity-75">À vista</div>
           </button>
 
+          <!-- Débito -->
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'debito' })"
+            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'debito'"
+            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'debito'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
+            <div class="font-medium text-sm">Débito</div>
+            <div class="text-xs opacity-75">Cartão</div>
+          </button>
+
+          <!-- Crédito -->
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'credito_vista' })"
+            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'credito_vista'"
+            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'credito_vista'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
+            <div class="font-medium text-sm">Créd. Vista</div>
+            <div class="text-xs opacity-75">1x</div>
+          </button>
+
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'credito_5x' })"
+            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'credito_5x'"
+            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'credito_5x'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
+            <div class="font-medium text-sm">Créd. 5x</div>
+            <div class="text-xs opacity-75">Parcelado</div>
+          </button>
+
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'credito_10x' })"
+            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'credito_10x'"
+            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'credito_10x'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
+            <div class="font-medium text-sm">Créd. 10x</div>
+            <div class="text-xs opacity-75">Parcelado</div>
+          </button>
+
+          <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'credito_12x' })"
+            [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'credito_12x'"
+            [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'credito_12x'"
+            class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
+            <div class="font-medium text-sm">Créd. 12x</div>
+            <div class="text-xs opacity-75">Parcelado</div>
+          </button>
+
+          <!-- Crediário -->
           <button type="button" (click)="vendaForm.patchValue({ formaPagamento: 'crediario' })"
             [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'crediario'"
             [class.bg-indigo-50]="vendaForm.get('formaPagamento')?.value === 'crediario'"
-            [class.text-indigo-700]="vendaForm.get('formaPagamento')?.value === 'crediario'"
-            [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
-            [class.bg-white]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
-            [class.text-slate-700]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
             class="p-3 rounded-md border-2 transition-all duration-200 text-left hover:border-indigo-400">
-            <div class="flex items-center space-x-2">
-              <div [class.border-indigo-500]="vendaForm.get('formaPagamento')?.value === 'crediario'"
-                [class.border-slate-300]="vendaForm.get('formaPagamento')?.value !== 'crediario'"
-                class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
-                @if (vendaForm.get('formaPagamento')?.value === 'crediario') {
-                <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                }
-              </div>
-              <div>
-                <div class="font-medium text-sm">Crediário</div>
-                <div class="text-xs opacity-75">Pagamento pendente</div>
-              </div>
-            </div>
+            <div class="font-medium text-sm">Crediário</div>
+            <div class="text-xs opacity-75">Pendente</div>
           </button>
         </div>
 

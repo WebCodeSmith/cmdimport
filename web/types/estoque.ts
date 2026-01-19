@@ -21,8 +21,6 @@ export interface ProdutoEstoque {
   nome: string
   quantidade: number
   preco: number
-  valorAtacado?: number
-  valorVarejo?: number
   cor?: string
   imei?: string
   codigoBarras?: string
@@ -35,8 +33,6 @@ export interface ProdutoEstoqueCompleto {
   nome: string
   quantidade: number
   preco: number
-  valorAtacado?: number
-  valorVarejo?: number
   cor?: string
   imei?: string
   codigoBarras?: string

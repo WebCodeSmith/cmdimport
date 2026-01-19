@@ -5,30 +5,20 @@ import { Produto, ProdutoComEstoque } from '@/types/produto'
 import BarcodeScanner from './BarcodeScanner'
 import { ProductDropdownProps } from '@/types/components'
 
-export default function ProductDropdown({ 
-  produtos, 
-  selectedProduct, 
-  onSelect, 
+export default function ProductDropdown({
+  produtos,
+  selectedProduct,
+  onSelect,
   placeholder = "Selecione um produto",
   usuarioId,
   tipoCliente = 'lojista'
 }: ProductDropdownProps) {
-  
+
   // Função para calcular o preço baseado no tipo de cliente
   const calcularPreco = (produto: ProdutoComEstoque): number => {
-    let preco: number | null = null
-    
-    if (tipoCliente === 'lojista') {
-      preco = produto.valorAtacado ?? null
-    } else if (tipoCliente === 'consumidor') {
-      preco = produto.valorVarejo ?? null
-    } else if (tipoCliente === 'revendaEspecial') {
-      preco = produto.valorRevendaEspecial ?? null
-    }
-    
-    // Se não tiver precificação, usar preço base (custo)
-    return preco ?? produto.preco
+    return produto.preco
   }
+
   const [showDropdown, setShowDropdown] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [buscaManual, setBuscaManual] = useState('')
@@ -60,7 +50,7 @@ export default function ProductDropdown({
         imei: (p as any).imei,
         codigoBarras: (p as any).codigoBarras
       })) as ProdutoComEstoque[]
-      
+
       setProdutosEncontrados(produtosParaModal)
       setCodigoEscaneado(produtoSelecionado.nome)
       setShowProductSelectionModal(true)
@@ -94,7 +84,7 @@ export default function ProductDropdown({
       </div>
     `
     document.body.appendChild(notification)
-    
+
     setTimeout(() => {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification)
@@ -107,7 +97,7 @@ export default function ProductDropdown({
 
     try {
       const { stockApi } = await import('@/lib/api')
-      
+
       // Primeiro tentar buscar por IMEI
       const responseImei = await stockApi.buscarPorIMEI(code, usuarioId)
       if (responseImei.success && responseImei.data && responseImei.data.length > 0) {
@@ -129,17 +119,17 @@ export default function ProductDropdown({
 
   const handleBarcodeScan = async (code: string) => {
     const produtosEncontrados = await buscarProdutoPorCodigo(code)
-    
+
     if (produtosEncontrados && produtosEncontrados.length > 0) {
       // Filtrar apenas produtos com estoque > 0
       const produtosComEstoque = produtosEncontrados.filter(p => p.quantidade > 0)
-      
+
       if (produtosComEstoque.length === 0) {
         mostrarNotificacaoErro(code)
         setShowScanner(false)
         return
       }
-      
+
       // Se encontrou apenas um produto com estoque, selecionar automaticamente
       if (produtosComEstoque.length === 1) {
         onSelect(produtosComEstoque[0].id.toString())
@@ -174,18 +164,18 @@ export default function ProductDropdown({
     if (!buscaManual.trim()) return
 
     const produtosEncontrados = await buscarProdutoPorCodigo(buscaManual.trim())
-    
+
     if (produtosEncontrados && produtosEncontrados.length > 0) {
       // Filtrar apenas produtos com estoque > 0
       const produtosComEstoque = produtosEncontrados.filter(p => p.quantidade > 0)
-      
+
       if (produtosComEstoque.length === 0) {
         mostrarNotificacaoErro(buscaManual.trim())
         setBuscaManual('')
         setMostrarBuscaManual(false)
         return
       }
-      
+
       // Se encontrou apenas um produto com estoque, selecionar automaticamente
       if (produtosComEstoque.length === 1) {
         onSelect(produtosComEstoque[0].id.toString())
@@ -231,11 +221,11 @@ export default function ProductDropdown({
               (() => {
                 const produto = getSelectedProduct()
                 if (!produto) return placeholder
-                
+
                 if (produto.quantidade === 0) {
                   return produto.nome + ' - ZERADO NO ESTOQUE'
                 }
-                
+
                 let detalhes = `Qtd: ${produto.quantidade}`
                 if (produto.imei) {
                   detalhes += ` | IMEI: ${produto.imei}`
@@ -243,21 +233,21 @@ export default function ProductDropdown({
                 if (produto.cor) {
                   detalhes += ` | Cor: ${produto.cor}`
                 }
-                
+
                 return produto.nome + ' - ' + detalhes
               })()
             ) : placeholder}
           </span>
-          <svg 
-            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        
+
         <button
           type="button"
           onClick={() => setShowScanner(true)}
@@ -268,7 +258,7 @@ export default function ProductDropdown({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
           </svg>
         </button>
-        
+
         <button
           type="button"
           onClick={() => setMostrarBuscaManual(!mostrarBuscaManual)}
@@ -280,11 +270,11 @@ export default function ProductDropdown({
           </svg>
         </button>
       </div>
-      
+
       {showDropdown && (() => {
         // Filtrar produtos com estoque e agrupar por nome
         const produtosComEstoque = produtos.filter((produto) => produto.quantidade > 0)
-        
+
         // Agrupar por nome (normalizado para comparação)
         const produtosPorNome = new Map<string, typeof produtosComEstoque>()
         produtosComEstoque.forEach(produto => {
@@ -387,7 +377,7 @@ export default function ProductDropdown({
           </div>
         </div>
       )}
-      
+
       <BarcodeScanner
         isOpen={showScanner}
         onScan={handleBarcodeScan}
@@ -396,11 +386,11 @@ export default function ProductDropdown({
 
       {/* Modal de Seleção de Produto */}
       {showProductSelectionModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[10000]"
           onClick={handleCancelProductSelection}
         >
-          <div 
+          <div
             className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -452,9 +442,9 @@ export default function ProductDropdown({
                     </div>
                     <div className="text-right ml-4">
                       <p className="font-semibold text-indigo-600">
-                        R$ {calcularPreco(produto).toLocaleString('pt-BR', { 
-                          minimumFractionDigits: 2, 
-                          maximumFractionDigits: 2 
+                        R$ {calcularPreco(produto).toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
                         })}
                       </p>
                     </div>

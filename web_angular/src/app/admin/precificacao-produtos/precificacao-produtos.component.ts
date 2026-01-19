@@ -1,22 +1,35 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
-import { EstoqueUsuario, ProdutoEstoqueCompleto } from '../../shared/types/estoque.types';
 import { formatCurrency } from '../../shared/utils/formatters';
+import { PanelModalComponent } from '../../shared/components/panel-modal/panel-modal.component';
 
-interface ProdutoAgrupado {
-    nome: string;
+
+interface ItemPrecificacao {
+    id: number | null;
+    nomeProduto: string;
     totalQuantidade: number;
+    variacoes: number;
     precoMedio: number;
-    produtos: ProdutoEstoqueCompleto[];
+    valorTotalEstoque: number;
+    valorDinheiroPix: number;
+    valorDebito: number;
+    valorCartaoVista: number;
+    valorCredito5x: number;
+    valorCredito10x: number;
+    valorCredito12x: number;
+    updatedAt: string | null;
 }
+
 
 @Component({
     selector: 'app-precificacao-produtos',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule, PanelModalComponent],
+
     templateUrl: './precificacao-produtos.component.html'
 })
 export class PrecificacaoProdutosComponent implements OnInit {
@@ -24,67 +37,113 @@ export class PrecificacaoProdutosComponent implements OnInit {
     private toastService = inject(ToastService);
 
     loading = signal<boolean>(true);
-    estoqueUsuarios = signal<EstoqueUsuario[]>([]);
+    itensPrecificacao = signal<ItemPrecificacao[]>([]);
+    filtroNome = signal<string>('');
+
+    // Modal state
+    isModalOpen = signal<boolean>(false);
+    selectedItem = signal<ItemPrecificacao | null>(null);
+    modalMode = signal<'final' | 'revenda'>('final');
 
     ngOnInit(): void {
-        this.carregarEstoqueGlobal();
+        this.carregarDados();
     }
 
-    async carregarEstoqueGlobal(): Promise<void> {
+    async carregarDados(): Promise<void> {
         try {
             this.loading.set(true);
             const response = await firstValueFrom(
-                this.apiService.get<EstoqueUsuario[]>('/admin/estoque-usuarios')
+                this.apiService.get<ItemPrecificacao[]>('/admin/precificacao')
             );
 
             if (response?.success && response.data) {
-                this.estoqueUsuarios.set(response.data);
+                this.itensPrecificacao.set(response.data);
             } else {
-                this.toastService.error('Erro ao carregar estoque global');
+                this.toastService.error('Erro ao carregar precificações');
             }
         } catch (error) {
-            console.error('Erro ao carregar estoque:', error);
+            console.error('Erro ao carregar precificação:', error);
             this.toastService.error('Erro de conexão');
         } finally {
             this.loading.set(false);
         }
     }
 
-    produtosAgrupados = computed(() => {
-        const usuarios = this.estoqueUsuarios();
-        const map = new Map<string, ProdutoAgrupado>();
+    itensFiltrados = computed(() => {
+        const itens = this.itensPrecificacao().filter(i => i.totalQuantidade > 0);
+        const filtro = this.filtroNome().toLowerCase();
 
-        usuarios.forEach(usuario => {
-            usuario.produtos.forEach(produto => {
-                // Ignorar produtos zerados? O usuário não especificou, mas "em estoque" sugere > 0.
-                // Vou assumir que devemos mostrar tudo que veio do backend, mas o endpoint pode já filtrar.
-                // O endpoint original não filtra zerados por padrão nas rotas de admin, mas vamos conferir o retorno.
-                // No front de 'estoque-usuarios' tem filtro local.
-                // Vou filtrar zerados para não poluir.
-                if (produto.quantidade <= 0) return;
+        if (!filtro) return itens;
 
-                if (!map.has(produto.nome)) {
-                    map.set(produto.nome, {
-                        nome: produto.nome,
-                        totalQuantidade: 0,
-                        precoMedio: 0,
-                        produtos: []
-                    });
-                }
-
-                const grupo = map.get(produto.nome)!;
-                grupo.totalQuantidade += produto.quantidade;
-                grupo.produtos.push(produto);
-            });
-        });
-
-        // Calcular preço médio e retornar lista ordenada
-        return Array.from(map.values()).map(grupo => {
-            const somaPrecos = grupo.produtos.reduce((acc, p) => acc + (p.preco * p.quantidade), 0);
-            grupo.precoMedio = somaPrecos / grupo.totalQuantidade;
-            return grupo;
-        }).sort((a, b) => a.nome.localeCompare(b.nome));
+        return itens.filter(item =>
+            item.nomeProduto.toLowerCase().includes(filtro)
+        );
     });
+
+    abrirModal(item: ItemPrecificacao): void {
+        // Criar uma cópia para não editar o estado original antes de salvar
+        this.selectedItem.set({ ...item });
+        this.modalMode.set('final');
+        this.isModalOpen.set(true);
+    }
+
+    fecharModal(): void {
+        this.isModalOpen.set(false);
+        this.selectedItem.set(null);
+    }
+
+    setModalMode(mode: 'final' | 'revenda'): void {
+        this.modalMode.set(mode);
+    }
+
+
+    async salvarPreco(): Promise<void> {
+        const item = this.selectedItem();
+        if (!item) return;
+
+        try {
+            // Pequena validação
+            if (item.valorDinheiroPix < 0) {
+                this.toastService.error('O valor não pode ser negativo');
+                return;
+            }
+
+            const response = await firstValueFrom(
+                this.apiService.post<any>('/admin/precificacao', {
+                    nomeProduto: item.nomeProduto,
+                    valorDinheiroPix: Number(item.valorDinheiroPix),
+                    valorDebito: Number(item.valorDebito),
+                    valorCartaoVista: Number(item.valorCartaoVista),
+                    valorCredito5x: Number(item.valorCredito5x),
+                    valorCredito10x: Number(item.valorCredito10x),
+                    valorCredito12x: Number(item.valorCredito12x)
+                })
+            );
+
+            if (response?.success) {
+                this.toastService.success(`Preços salvos para: ${item.nomeProduto}`);
+                this.fecharModal();
+                this.carregarDados(); // Recarregar para garantir sincronia
+            } else {
+                this.toastService.error('Erro ao salvar preços');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar:', error);
+            this.toastService.error('Erro de conexão ao salvar');
+        }
+    }
+
+
+    // Atalho para preencher outros campos baseado no PIX (regra de negócio opcional, mas útil)
+    aplicarSugestao(item: ItemPrecificacao): void {
+        const base = Number(item.valorDinheiroPix);
+        if (base > 0 && item.valorCartaoVista === 0) {
+            // Exemplo de regra simples: +5% débito, +10% crédito... 
+            // O usuário não pediu regra automática, então vou deixar manual por enquanto
+            // mas preparei o método caso ele peça.
+            // item.valorCartaoVista = base * 1.10;
+        }
+    }
 
     formatCurrency(val: number): string {
         return formatCurrency(val);

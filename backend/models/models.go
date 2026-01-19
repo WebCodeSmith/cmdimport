@@ -38,11 +38,6 @@ type ProdutoComprado struct {
 	QuantidadeBackup  int            `gorm:"default:0;column:quantidadeBackup" json:"quantidadeBackup"`
 	Fornecedor        *string        `json:"fornecedor"`
 	DataCompra        time.Time      `gorm:"type:datetime;column:dataCompra" json:"dataCompra"`
-	ValorCusto        *float64       `gorm:"type:decimal(10,2);column:valorCusto" json:"valorCusto"`
-	ValorAtacado      *float64       `gorm:"type:decimal(10,2);column:valorAtacado" json:"valorAtacado"`
-	ValorVarejo       *float64       `gorm:"type:decimal(10,2);column:valorVarejo" json:"valorVarejo"`
-	ValorRevendaEspecial *float64    `gorm:"type:decimal(10,2);column:valorRevendaEspecial" json:"valorRevendaEspecial"`
-	ValorParcelado10x *float64       `gorm:"type:decimal(10,2);column:valorParcelado10x" json:"valorParcelado10x"`
 	CategoriaID       *int           `gorm:"column:categoriaId" json:"categoriaId"`
 	Categoria         *CategoriaProduto `gorm:"foreignKey:CategoriaID" json:"categoria,omitempty"`
 	CreatedAt         time.Time      `gorm:"column:createdAt" json:"createdAt"`
@@ -175,5 +170,24 @@ type HistoricoDistribuicao struct {
 // TableName especifica o nome da tabela no banco
 func (HistoricoDistribuicao) TableName() string {
 	return "HistoricoDistribuicao"
+}
+
+// Precificacao representa a tabela de precificação unificada
+type Precificacao struct {
+	ID                int       `gorm:"primaryKey" json:"id"`
+	NomeProduto       string    `gorm:"type:varchar(255);uniqueIndex;not null;column:nomeProduto" json:"nomeProduto"`
+	ValorDinheiroPix  float64   `gorm:"type:decimal(10,2);default:0;column:valorDinheiroPix" json:"valorDinheiroPix"`
+	ValorDebito       float64   `gorm:"type:decimal(10,2);default:0;column:valorDebito" json:"valorDebito"`
+	ValorCartaoVista  float64   `gorm:"type:decimal(10,2);default:0;column:valorCartaoVista" json:"valorCartaoVista"`
+	ValorCredito5x    float64   `gorm:"type:decimal(10,2);default:0;column:valorCredito5x" json:"valorCredito5x"`
+	ValorCredito10x   float64   `gorm:"type:decimal(10,2);default:0;column:valorCredito10x" json:"valorCredito10x"`
+	ValorCredito12x   float64   `gorm:"type:decimal(10,2);default:0;column:valorCredito12x" json:"valorCredito12x"`
+	CreatedAt         time.Time `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt         time.Time `gorm:"column:updatedAt" json:"updatedAt"`
+}
+
+// TableName especifica o nome da tabela no banco
+func (Precificacao) TableName() string {
+	return "Precificacao"
 }
 

@@ -269,14 +269,6 @@
                 <td class="px-4 py-3 whitespace-nowrap text-right">
                   <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(produto.preco) }}</span>
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap text-right">
-                  <span class="text-sm text-slate-700">{{ produto.valorAtacado ? formatCurrency(produto.valorAtacado) :
-                    '-' }}</span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-right">
-                  <span class="text-sm text-slate-700">{{ produto.valorVarejo ? formatCurrency(produto.valorVarejo) :
-                    '-' }}</span>
-                </td>
                 <td class="px-4 py-3 whitespace-nowrap text-center">
                   <div class="flex items-center justify-center gap-1.5">
                     @if (produto.quantidade > 0) {
