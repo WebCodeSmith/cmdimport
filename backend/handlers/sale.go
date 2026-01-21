@@ -1029,10 +1029,11 @@ func (h *SaleHandler) AtualizarVenda(c *gin.Context) {
 	}
 
 	var req struct {
-		ClienteNome string  `json:"clienteNome" binding:"required"`
-		Telefone    string  `json:"telefone" binding:"required"`
-		Endereco    string  `json:"endereco"`
-		Observacoes *string `json:"observacoes"`
+		ClienteNome    string  `json:"clienteNome" binding:"required"`
+		Telefone       string  `json:"telefone" binding:"required"`
+		Endereco       string  `json:"endereco"`
+		Observacoes    *string `json:"observacoes"`
+		FormaPagamento *string `json:"formaPagamento"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -1060,15 +1061,22 @@ func (h *SaleHandler) AtualizarVenda(c *gin.Context) {
 		return
 	}
 
+	// Preparar campos para atualização
+	updates := map[string]interface{}{
+		"clienteNome": req.ClienteNome,
+		"telefone":    req.Telefone,
+		"endereco":    req.Endereco,
+		"observacoes": req.Observacoes,
+	}
+
+	if req.FormaPagamento != nil {
+		updates["formaPagamento"] = *req.FormaPagamento
+	}
+
 	// Atualizar todos os registros da venda com o mesmo VendaID
 	result := h.DB.Model(&models.HistoricoVenda{}).
 		Where("vendaId = ?", *primeiroRegistro.VendaID).
-		Updates(map[string]interface{}{
-			"clienteNome": req.ClienteNome,
-			"telefone":    req.Telefone,
-			"endereco":    req.Endereco,
-			"observacoes": req.Observacoes,
-		})
+		Updates(updates)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

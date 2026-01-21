@@ -452,6 +452,19 @@
             <textarea formControlName="observacoes" rows="3"
               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900"></textarea>
           </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-600 mb-1">Forma de Pagamento</label>
+            <select formControlName="formaPagamento"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 bg-white">
+              <option value="pix">Pix</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="debito">Débito</option>
+              <option value="credito_vista">Crédito à Vista</option>
+              <option value="credito_5x">Crédito 5x</option>
+              <option value="credito_10x">Crédito 10x</option>
+              <option value="credito_12x">Crédito 12x (Sem Juros)</option>
+            </select>
+          </div>
         </form>
         } @else {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

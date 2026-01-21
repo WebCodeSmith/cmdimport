@@ -88,7 +88,8 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
       clienteNome: ['', Validators.required],
       telefone: ['', Validators.required],
       endereco: [''],
-      observacoes: ['']
+      observacoes: [''],
+      formaPagamento: ['']
     });
 
     this.produtoEditandoForm = this.fb.group({
@@ -357,7 +358,8 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
         clienteNome: venda.clienteNome,
         telefone: venda.telefone,
         endereco: venda.endereco,
-        observacoes: venda.observacoes || ''
+        observacoes: venda.observacoes || '',
+        formaPagamento: venda.formaPagamento
       });
       this.modoEdicao.set(true);
     }
@@ -396,7 +398,8 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
         clienteNome: formValue.clienteNome,
         telefone: formValue.telefone,
         endereco: formValue.endereco,
-        observacoes: formValue.observacoes
+        observacoes: formValue.observacoes,
+        formaPagamento: formValue.formaPagamento
       };
 
       this.vendaSelecionada.set(vendaAtualizada);
