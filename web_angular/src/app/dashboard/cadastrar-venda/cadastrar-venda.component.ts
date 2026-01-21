@@ -37,29 +37,8 @@ export class CadastrarVendaComponent implements OnInit {
   vendaForm: FormGroup;
   produtosFormArray: FormArray;
 
-  // Valor total computado (otimizado)
-  valorTotal = computed(() => {
-    let total = 0;
-    this.produtosFormArray.controls.forEach((control, index) => {
-      const produto = this.getProdutoSelecionado(index);
-      if (produto) {
-        const quantidade = parseInt(control.get('quantidade')?.value || '0');
-        const usarPrecoPersonalizado = control.get('usarPrecoPersonalizado')?.value;
-        const precoPersonalizado = control.get('precoPersonalizado')?.value;
-
-        let preco: number;
-        if (usarPrecoPersonalizado && precoPersonalizado) {
-          const precoStr = precoPersonalizado.replace(/[^\d,]/g, '').replace(',', '.');
-          preco = parseFloat(precoStr) || 0;
-        } else {
-          preco = this.calcularPreco(produto);
-        }
-
-        total += preco * quantidade;
-      }
-    });
-    return total;
-  });
+  // Valor total reativo
+  valorTotal = signal<number>(0);
 
   constructor() {
     this.vendaForm = this.fb.group({
@@ -90,9 +69,9 @@ export class CadastrarVendaComponent implements OnInit {
     this.carregarProdutos();
     this.carregarPrecificacoes();
 
-    // Recalcular preços quando a forma de pagamento mudar
-    this.vendaForm.get('formaPagamento')?.valueChanges.subscribe(() => {
-      this.atualizarPrecosNosProdutos();
+    // Recalcular total sempre que o formulário mudar
+    this.vendaForm.valueChanges.subscribe(() => {
+      this.recalcularTotal();
     });
   }
 
@@ -105,25 +84,34 @@ export class CadastrarVendaComponent implements OnInit {
         const map = new Map<string, ItemPrecificacao>();
         response.data.forEach(p => map.set(p.nomeProduto, p));
         this.precificacoesMap.set(map);
+        this.recalcularTotal(); // Recalcular após carregar preços
       }
     } catch (error) {
       console.error('Erro ao carregar precificações', error);
     }
   }
 
-  atualizarPrecosNosProdutos(): void {
-    // Atualizar preços de todos os produtos já listados
+  recalcularTotal(): void {
+    let total = 0;
     this.produtosFormArray.controls.forEach((control, index) => {
-      // Se o usuário não definiu preço personalizado, atualizamos
-      if (!control.get('usarPrecoPersonalizado')?.value) {
-        // Forçar atualização reemitindo o evento ou apenas recalculando visualmente?
-        // Como o valorTotal é computed, ele deve atualizar se a dependência mudar.
-        // O problema é que o preço não é armazenado no formGroup, é calculado dinamicamente no computed.
-        // Humm, a interface mostra "getSubtotal" que chama "getPrecoUnitario" que chama "calcularPreco".
-        // Então a view deve atualizar automaticamente. 
-        // Porém, precisamos garantir que o UI refresh aconteça. O signal 'formaPagamento' mudando já deve triggar.
+      const produto = this.getProdutoSelecionado(index);
+      if (produto) {
+        const quantidade = parseInt(control.get('quantidade')?.value || '0');
+        const usarPrecoPersonalizado = control.get('usarPrecoPersonalizado')?.value;
+        const precoPersonalizado = control.get('precoPersonalizado')?.value;
+
+        let preco: number;
+        if (usarPrecoPersonalizado && precoPersonalizado) {
+          const precoStr = String(precoPersonalizado).replace(/[^\d,]/g, '').replace(',', '.');
+          preco = parseFloat(precoStr) || 0;
+        } else {
+          preco = this.calcularPreco(produto);
+        }
+
+        total += preco * quantidade;
       }
     });
+    this.valorTotal.set(total);
   }
 
   private async carregarProdutos(): Promise<void> {
