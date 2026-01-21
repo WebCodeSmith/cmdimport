@@ -29,7 +29,7 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
   dropdownOpen = signal<boolean>(false);
   mobileMenuOpen = signal<boolean>(false);
   openDropdown = signal<string | null>(null);
-  
+
   private clickListener?: (event: MouseEvent) => void;
 
   navItems: NavItem[] = [
@@ -54,7 +54,8 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
         { name: 'Histórico de Vendas', href: '/admin?tab=historico' },
         { name: 'Cadastrar Produto', href: '/admin?tab=cadastrar-produto' },
         { name: 'Listar Produtos', href: '/admin?tab=listar-produtos' },
-        { name: 'Estoque de Usuários', href: '/admin?tab=estoque-usuarios' }
+        { name: 'Estoque de Usuários', href: '/admin?tab=estoque-usuarios' },
+        { name: 'Controle de Gastos', href: '/admin?tab=controle-gastos' }
       ]
     }
   ];
