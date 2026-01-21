@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -23,6 +23,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   loading = signal<boolean>(true);
+  loadingTabela = signal<boolean>(false); // Novo signal para loading local
   vendas = signal<HistoricoVenda[]>([]);
   abaAtiva = signal<'historico' | 'resumo'>('historico');
   paginaAtual = signal<number>(1);
@@ -106,7 +107,11 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
     // Configurar busca de produtos
     this.buscaProdutoControl.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
       .subscribe(termo => {
         this.filtrarProdutos(termo || '');
       });
@@ -117,7 +122,11 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
     // Recarregar quando filtros mudarem
     this.filtrosForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        debounceTime(600),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+        takeUntil(this.destroy$)
+      )
       .subscribe(() => {
         this.paginaAtual.set(1);
         this.carregarDados();
@@ -144,7 +153,7 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
 
   async carregarHistorico(): Promise<void> {
     try {
-      this.loading.set(true);
+      this.loadingTabela.set(true);
 
       const formValue = this.filtrosForm.value;
       const params: any = {
@@ -183,7 +192,8 @@ export class HistoricoVendasAdminComponent implements OnInit, OnDestroy {
       console.error('Erro ao carregar histórico:', error);
       this.toastService.error('Erro ao carregar histórico de vendas');
     } finally {
-      this.loading.set(false);
+      this.loading.set(false); // Garantir que o loading inicial suma
+      this.loadingTabela.set(false);
     }
   }
 
