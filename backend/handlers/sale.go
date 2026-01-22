@@ -355,13 +355,8 @@ func (h *SaleHandler) Historico(c *gin.Context) {
 		}
 
 		if _, exists := vendasAgrupadas[vendaID]; !exists {
-			// Pegar o valor total diretamente do registro da venda
 			// Cada registro de HistoricoVenda já armazena o ValorTotal COMPLETO da venda
-			valorTotal = venda.ValorTotal
-		} else {
-				// Se não encontrou, usar o valor da venda atual
-				valorTotal = venda.ValorTotal
-			}
+			valorTotal := venda.ValorTotal
 
 			vendaMap := map[string]interface{}{
 				"vendaId":        vendaID,
@@ -372,7 +367,7 @@ func (h *SaleHandler) Historico(c *gin.Context) {
 				"vendedorNome":   venda.VendedorNome,
 				"vendedorEmail":  venda.VendedorEmail,
 				"createdAt":      venda.CreatedAt.Format(time.RFC3339),
-				"fotoProduto":     venda.FotoProduto,
+				"fotoProduto":    venda.FotoProduto,
 				"formaPagamento": venda.FormaPagamento,
 				"valorPix":       venda.ValorPix,
 				"valorCartao":    venda.ValorCartao,
@@ -399,9 +394,9 @@ func (h *SaleHandler) Historico(c *gin.Context) {
 
 		if venda.Estoque.ProdutoComprado.IMEI != nil {
 			produtoMap["produtoDetalhes"] = map[string]interface{}{
-				"imei":       venda.Estoque.ProdutoComprado.IMEI,
-				"cor":        venda.Estoque.ProdutoComprado.Cor,
-				"descricao":  venda.Estoque.ProdutoComprado.Descricao,
+				"imei":      venda.Estoque.ProdutoComprado.IMEI,
+				"cor":       venda.Estoque.ProdutoComprado.Cor,
+				"descricao": venda.Estoque.ProdutoComprado.Descricao,
 			}
 		}
 
