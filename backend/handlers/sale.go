@@ -355,17 +355,10 @@ func (h *SaleHandler) Historico(c *gin.Context) {
 		}
 
 		if _, exists := vendasAgrupadas[vendaID]; !exists {
-			// Calcular valor total somando todos os produtos da venda
-			var valorTotal float64
-			var primeiraVenda models.HistoricoVenda
-			if err := h.DB.Where("vendaId = ?", vendaID).Order("createdAt DESC").First(&primeiraVenda).Error; err == nil {
-				// Somar todos os valores da venda
-				var todasVendas []models.HistoricoVenda
-				h.DB.Where("vendaId = ?", vendaID).Find(&todasVendas)
-				for _, v := range todasVendas {
-					valorTotal += v.ValorTotal
-				}
-			} else {
+			// Pegar o valor total diretamente do registro da venda
+			// Cada registro de HistoricoVenda já armazena o ValorTotal COMPLETO da venda
+			valorTotal = venda.ValorTotal
+		} else {
 				// Se não encontrou, usar o valor da venda atual
 				valorTotal = venda.ValorTotal
 			}
