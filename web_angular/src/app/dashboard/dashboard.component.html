@@ -6,6 +6,12 @@
         <h1 class="text-3xl font-bold text-slate-900">Visão Geral</h1>
         <p class="text-sm text-slate-600 mt-2">Acompanhe suas vendas e receitas</p>
       </div>
+
+      <button (click)="abrirCalculadora()"
+        class="flex items-center space-x-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm transition-all duration-200">
+        <span class="material-icons text-[20px]">calculate</span>
+        <span class="font-semibold">Calculadora</span>
+      </button>
     </div>
 
     <!-- Cards de Estatísticas -->
@@ -229,4 +235,13 @@
     <app-historico-vendas />
     }
   </div>
+
+  <!-- Modal da Calculadora -->
+  <app-panel-modal [isOpen]="modalCalculadora()" [title]="'Calculadora de Formação de Preço'"
+    [subtitle]="'Sugestão de preços e cálculo de margem'" [showSidebar]="false" maxWidth="max-w-4xl" height="h-auto"
+    (close)="fecharCalculadora()">
+    <div class="p-6">
+      <app-calculadora-preco />
+    </div>
+  </app-panel-modal>
 </app-main-layout>

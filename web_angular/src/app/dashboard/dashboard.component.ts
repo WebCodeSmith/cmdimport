@@ -10,11 +10,13 @@ import { CadastrarVendaComponent } from './cadastrar-venda/cadastrar-venda.compo
 import { HistoricoVendasComponent } from './historico-vendas/historico-vendas.component';
 import { EstoqueComponent } from './estoque/estoque.component';
 import { ConsultaPrecoComponent } from './consulta-preco/consulta-preco.component';
+import { CalculadoraPrecoComponent } from '../shared/components/calculadora-preco/calculadora-preco.component';
+import { PanelModalComponent } from '../shared/components/panel-modal/panel-modal.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, MainLayoutComponent, CadastrarVendaComponent, HistoricoVendasComponent, EstoqueComponent, ConsultaPrecoComponent],
+  imports: [CommonModule, MainLayoutComponent, CadastrarVendaComponent, HistoricoVendasComponent, EstoqueComponent, ConsultaPrecoComponent, CalculadoraPrecoComponent, PanelModalComponent],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
@@ -35,6 +37,7 @@ export class DashboardComponent implements OnInit {
   vendasRecentes = signal<VendaRecente[]>([]);
   vendasPorDia = signal<VendaPorDia[]>([]);
   produtosMaisVendidos = signal<ProdutoMaisVendido[]>([]);
+  modalCalculadora = signal<boolean>(false);
 
   activeTab = signal<'dashboard' | 'estoque' | 'cadastrar' | 'historico'>('dashboard');
 
@@ -229,6 +232,14 @@ export class DashboardComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  fecharCalculadora(): void {
+    this.modalCalculadora.set(false);
+  }
+
+  abrirCalculadora(): void {
+    this.modalCalculadora.set(true);
   }
 
   setActiveTab(tab: 'dashboard' | 'estoque' | 'cadastrar' | 'historico'): void {

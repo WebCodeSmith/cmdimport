@@ -1,0 +1,101 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-orange-50 rounded-2xl border border-orange-200">
+    <!-- Sessão 1: Formação de Preço Sugerido -->
+    <div class="space-y-6">
+        <div class="flex items-center space-x-2 pb-2 border-b border-orange-200">
+            <span class="material-icons text-orange-600">trending_up</span>
+            <h3 class="text-lg font-bold text-slate-800">Formação de Preço</h3>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="label-accent">Preço do Produto (Custo)</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-400 font-medium">R$</span>
+                    <input type="text" [ngModel]="precoProdutoBaseStr()"
+                        (input)="formatarMoeda($event, precoProdutoBaseStr)" class="calc-input !pl-12"
+                        placeholder="0,00" />
+                </div>
+            </div>
+
+            <div class="p-4 bg-white/50 rounded-xl border border-orange-100 space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-600 font-medium">Custos Logística (11% + 60)</span>
+                    <span class="text-slate-900 font-bold">{{ formatCurrency(custoLogistica()) }}</span>
+                </div>
+
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-600 font-medium">Custo Total</span>
+                    <span class="text-slate-900 font-bold">{{ formatCurrency(custoTotal()) }}</span>
+                </div>
+            </div>
+
+            <div class="p-5 bg-orange-600 rounded-xl text-white shadow-lg shadow-orange-200">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-orange-100 text-xs font-semibold uppercase tracking-wider mb-1">Preço Sugerido
+                            (30%)</p>
+                        <h4 class="text-2xl font-black">{{ formatCurrency(precoSugerido()) }}</h4>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-orange-100 text-xs font-semibold uppercase tracking-wider mb-1">Margem</p>
+                        <p class="text-xl font-bold">30%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessão 2: Cálculo de Margem Manual -->
+    <div class="space-y-6">
+        <div class="flex items-center space-x-2 pb-2 border-b border-orange-200">
+            <span class="material-icons text-orange-600">calculate</span>
+            <h3 class="text-lg font-bold text-slate-800">Cálculo de Margem</h3>
+        </div>
+
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="label-accent">Preço de Venda</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 font-medium">R$</span>
+                        <input type="text" [ngModel]="precoVendaManualStr()"
+                            (input)="formatarMoeda($event, precoVendaManualStr)" class="calc-input !pl-12"
+                            placeholder="0,00" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="label-accent">Custo Total</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 font-medium">R$</span>
+                        <input type="text" [ngModel]="custoTotalManualStr()"
+                            (input)="formatarMoeda($event, custoTotalManualStr)" class="calc-input !pl-12"
+                            placeholder="0,00" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-xl transition-colors duration-300"
+                [ngClass]="margemFinal() < 0 ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-white/80 text-xs font-semibold uppercase tracking-wider mb-1">Resultado</p>
+                        <h4 class="text-2xl font-black">
+                            {{ formatCurrency(precoVendaManual() - custoTotalManual()) }}
+                        </h4>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white/80 text-xs font-semibold uppercase tracking-wider mb-1">Margem Real</p>
+                        <p class="text-xl font-bold">{{ margemFinal().toFixed(2) }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="margemFinal() <= 0"
+                class="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">
+                <span class="material-icons text-sm">warning</span>
+                <p class="text-xs font-bold">Atenção: Venda abaixo do custo ou sem margem!</p>
+            </div>
+        </div>
+    </div>
+</div>
