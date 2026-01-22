@@ -142,7 +142,7 @@ export class DashboardComponent implements OnInit {
             valorTotal: v.valorTotal || 0,
             clienteNome: v.clienteNome || v.cliente || 'Cliente',
             produtoNome: v.produtos?.[0]?.produtoNome || v.produtos?.[0]?.nome || 'Produto',
-            produtos: v.produtos?.length || v.itens?.length || 0
+            produtosCount: v.produtos?.length || 0
           }));
         this.vendasRecentes.set(recentes);
 
