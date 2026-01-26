@@ -871,13 +871,21 @@ export class ControleGastosComponent implements OnInit {
           'Categoria': this.getCategoriaNome(despesa.categoriaId),
           'Valor (R$)': despesa.valor,
           'Data': formatDateOnly(despesa.data),
-          'Descrição': despesa.descricao || '',
-          'Cadastrado em': formatDateOnly(despesa.createdAt)
+          'Descrição': despesa.descricao || ''
         };
       });
 
       // Criar workbook e worksheet
       const ws = XLSX.utils.json_to_sheet(dadosExport);
+
+      // Aplicar formatação de número para a coluna de Valor (Coluna D - index 3)
+      const range = XLSX.utils.decode_range(ws['!ref']!);
+      for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        const cell = ws[XLSX.utils.encode_cell({ r: R, c: 3 })];
+        if (cell && cell.t === 'n') {
+          cell.z = '#,##0.00';
+        }
+      }
 
       // Ajustar largura das colunas
       const wscols = [
@@ -886,8 +894,7 @@ export class ControleGastosComponent implements OnInit {
         { wch: 20 }, // Categoria
         { wch: 15 }, // Valor
         { wch: 15 }, // Data
-        { wch: 40 }, // Descrição
-        { wch: 15 }  // Cadastrado em
+        { wch: 40 }  // Descrição
       ];
       ws['!cols'] = wscols;
 
