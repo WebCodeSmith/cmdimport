@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { CategoriaDespesa, Despesa, CriarCategoriaDespesaRequest, CriarDespesaRequest } from '../../shared/types/despesa.types';
 import { formatCurrency, formatDateOnly } from '../../shared/utils/formatters';
 import { PanelModalComponent, PanelMenuItem } from '../../shared/components/panel-modal/panel-modal.component';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-controle-gastos',
@@ -24,6 +25,7 @@ export class ControleGastosComponent implements OnInit {
   despesas = signal<Despesa[]>([]);
   categoriaSelecionada = signal<number | null>(null);
   semanaSelecionada = signal<number | null>(null);
+  exportando = signal<boolean>(false);
 
   // Calculadora de Custos
   abaAtiva = signal<'despesas' | 'calculadora'>('despesas');
@@ -846,6 +848,71 @@ export class ControleGastosComponent implements OnInit {
   getCategoriaNome(categoriaId: number): string {
     const categoria = this.categorias().find(c => c.id === categoriaId);
     return categoria?.nome || 'Sem categoria';
+  }
+
+  async exportarParaExcel(): Promise<void> {
+    if (this.exportando()) return;
+
+    try {
+      this.exportando.set(true);
+
+      const despesasParaExportar = this.despesasFiltradasPorSemana();
+
+      if (despesasParaExportar.length === 0) {
+        this.toastService.warning('Não há despesas para exportar');
+        return;
+      }
+
+      // Preparar dados para exportação
+      const dadosExport = despesasParaExportar.map(despesa => {
+        return {
+          'ID': despesa.id,
+          'Nome': despesa.nome,
+          'Categoria': this.getCategoriaNome(despesa.categoriaId),
+          'Valor (R$)': despesa.valor,
+          'Data': formatDateOnly(despesa.data),
+          'Descrição': despesa.descricao || '',
+          'Cadastrado em': formatDateOnly(despesa.createdAt)
+        };
+      });
+
+      // Criar workbook e worksheet
+      const ws = XLSX.utils.json_to_sheet(dadosExport);
+
+      // Ajustar largura das colunas
+      const wscols = [
+        { wch: 10 }, // ID
+        { wch: 30 }, // Nome
+        { wch: 20 }, // Categoria
+        { wch: 15 }, // Valor
+        { wch: 15 }, // Data
+        { wch: 40 }, // Descrição
+        { wch: 15 }  // Cadastrado em
+      ];
+      ws['!cols'] = wscols;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Controle de Gastos');
+
+      // Gerar nome do arquivo
+      const dataAtual = new Date().toISOString().split('T')[0];
+      let nomeArquivo = `controle-gastos-${dataAtual}.xlsx`;
+
+      if (this.categoriaSelecionada()) {
+        const categoriaNome = this.getCategoriaNome(this.categoriaSelecionada()!);
+        nomeArquivo = `controle-gastos-${categoriaNome}-${dataAtual}.xlsx`;
+      }
+
+      // Salvar arquivo
+      XLSX.writeFile(wb, nomeArquivo);
+
+      this.toastService.success('Despesas exportadas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      this.toastService.error('Erro ao exportar despesas');
+    } finally {
+      this.exportando.set(false);
+    }
   }
 }
 

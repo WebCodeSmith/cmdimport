@@ -13,6 +13,16 @@
           <span class="material-icons text-[18px]">add</span>
           Nova Categoria
         </button>
+        <button (click)="exportarParaExcel()" [disabled]="exportando()"
+          class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors font-medium shadow-sm flex items-center gap-2 disabled:opacity-50">
+          @if (exportando()) {
+          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <span>Exportando...</span>
+          } @else {
+          <span class="material-icons text-[18px]">file_download</span>
+          <span>Exportar Excel</span>
+          }
+        </button>
         <button (click)="abrirModalNovaDespesa()"
           class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium shadow-sm flex items-center gap-2">
           <span class="material-icons text-[18px]">add</span>
