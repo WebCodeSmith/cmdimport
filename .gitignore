@@ -14,8 +14,6 @@ out/
 *.dylib
 cmdimport-backend
 
-mobile/
-
 # Arquivos de ambiente
 .env
 .env.local
@@ -88,4 +86,9 @@ coverage/
 # package-lock.json
 # pnpm-lock.yaml
 # yarn.lock
+
+# Flutter / Android / Kotlin (build e cache)
+mobile/android/.kotlin/
+mobile/build/
+*.salive
 
